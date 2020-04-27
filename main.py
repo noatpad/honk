@@ -1,5 +1,6 @@
 
-from lexer import DuckLexer
+from ply import lex, yacc
+import lexer, parser
 
 # data = "1 + 2"
 data = """
@@ -7,16 +8,21 @@ Programa hi;
 
 principal() {
   a = 1 + 2 + 3
-  si (b <= 8) entonces { lee(5); }
 }
 """
-
 # data = """
 # 1 + 2 / 3
 # """
 
-lexer = DuckLexer()
-lexer.build()
-lexer.test(data)
+ducklexer = lex.lex(module=lexer)
+ducklexer.input(data)
 
-# parser.parse(l.lex(testString))
+while True:
+  token = ducklexer.token()
+  if not token:
+    break
+  print(token)
+
+duckparser = yacc.yacc(module=parser)
+result = duckparser.parse(data)
+print(result)
