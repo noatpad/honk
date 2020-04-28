@@ -23,12 +23,13 @@ def p_var_type(p):
   pass
 
 def p_var_declare(p):
-  """var_declare : var_name ',' var_declare
-                  | var_name"""
+  """var_declare : variable ',' var_declare
+                 | variable"""
   pass
 
-def p_var_name(p):
-  """var_name : ID '[' NUMBER ']'
+def p_variable(p):
+  """variable : ID '[' expr '] '[' expr ']'
+              | ID '[' expr ']'
               | ID"""
   pass
 
@@ -63,7 +64,7 @@ def p_body(p):
   pass
 
 def p_assignment(p):
-  "assignment : ID '=' expr"
+  "assignment : variable '=' expr"
   pass
 
 def p_expr_binop(p):
