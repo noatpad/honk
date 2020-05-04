@@ -30,6 +30,7 @@ result = duckparser.parse(data)
 # print(result)
 
 for func in result.directory:
-  print(f'{func.name} -> {func.returnType}')
-  for var in func.varTable:
-    print(f'  {var.name} -> {var.vartype} = {var.value}')
+  print(f'{result.directory[func].name} -> {result.directory[func].returnType}')
+  a = result.directory[func].varTable
+  for var in result.directory[func].varTable:
+    print(f'  {a[var].name} -> {a[var].vartype} = {a[var].value}')
