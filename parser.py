@@ -65,7 +65,8 @@ def p_variable(p):
 def p_type(p):
   """type : INT
           | FLOAT
-          | CHAR"""
+          | CHAR
+          | BOOL"""
   p.currentType = p[1]
   p[0] = p[1]
 

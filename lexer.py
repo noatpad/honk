@@ -7,6 +7,7 @@ reserved = {
   'int': 'INT',
   'float': 'FLOAT',
   'char': 'CHAR',
+  'bool': 'BOOL',
   'funcion': 'FUNCION',
   'void': 'VOID',
   'regresa': 'REGRESA',
