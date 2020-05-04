@@ -2,8 +2,6 @@
 from lexer import tokens
 from funcDir import FunctionDirectory
 
-# TODO: Add semantic actions for function declarations and local variables
-
 """ State variables (accessible in `p` within each production)
 - funcDir -> Function directory
 - currentType -> Currently-used type
@@ -16,39 +14,41 @@ precedence = (
 )
 
 # Parsing productions
+# PROGRAMA
 def p_programa(p):
   "programa : PROGRAMA found_program ID found_program_name ';' vars functions PRINCIPAL '(' ')' '{' body '}'"
   p[0] = p.funcDir
 
 def p_found_program(p):
-  "found_program :"
+  "found_program : empty"
   p.funcDir = FunctionDirectory()
 
 def p_found_program_name(p):
   'found_program_name :'
   p.funcDir.addFunction(p[-1], "void")
 
+# VARS
 def p_vars(p):
   """vars : VAR found_var var_type
           | empty"""
   pass
 
 def p_found_var(p):
-  "found_var :"
+  "found_var : empty"
   p.funcDir.addVarTable()
 
 def p_var_type(p):
-  """var_type : type ':' var_declare ';' var_type
-              | type ':' var_declare ';'"""
+  """var_type : type ':' var_name ';' var_type
+              | type ':' var_name ';'"""
   pass
 
-def p_var_declare(p):
-  """var_declare : variable p_found_var_declare ',' var_declare
-                 | variable p_found_var_declare"""
+def p_var_name(p):
+  """var_name : variable p_found_var_name ',' var_name
+              | variable p_found_var_name"""
   pass
 
-def p_found_var_declare(p):
-  "p_found_var_declare :"
+def p_found_var_name(p):
+  "p_found_var_name : empty"
   var = p[-1]
   if p.funcDir.findVar(var):
     s_error(p.lineno, p.lexpos, f'Variable "{var}" already exists!"')
@@ -61,6 +61,7 @@ def p_variable(p):
               | ID"""
   p[0] = p[1]
 
+# TYPE
 def p_type(p):
   """type : INT
           | FLOAT
@@ -68,34 +69,61 @@ def p_type(p):
   p.currentType = p[1]
   p[0] = p[1]
 
+# FUNCTIONS
 def p_functions(p):
-  """functions : func
+  """functions : FUNCION func_type ID found_func_name '(' func_params ')' vars '{' body '}' found_func_end functions
                | empty"""
-  pass
-
-def p_func(p):
-  """func : FUNCION func_type ID '(' params ')' vars '{' body '}'
-          | FUNCION func_type ID '(' ')' vars '{' body '}'"""
   pass
 
 def p_func_type(p):
   """func_type : var_type
-                | VOID"""
+               | VOID"""
+  if p[1] == 'void':
+    p.currentType = 'void'
+
+def p_found_func_name(p):
+  "found_func_name : empty"
+  func = p[-1]
+  if p.funcDir.findFunction(func):
+    s_error(p.lineno, p.lexpos, f'Function "{func}" already exists!"')
+  else:
+    p.funcDir.addFunction(func, p.currentType)
+    p.funcDir.addVarTable()
+
+def p_func_params(p):
+  """func_params : func_params2
+                 | empty"""
   pass
 
-def p_params(p):
-  """params : var_type ID ',' params
-            | var_type ID"""
+def p_func_params2(p):
+  """func_params2 : var_type ID found_func_param ',' func_params2
+                  | var_type ID found_func_param"""
   pass
 
+def p_found_func_param(p):
+  "found_func_param : empty"
+  param = p[-1]
+  if p.funcDir.findVar(param):
+    s_error(p.lineno, p.lexpos, f'Multiple declaration of "{param}"!')
+  else:
+    p.funcDir.addVar(param, p.currentType)
+
+def p_found_func_end(p):
+  "found_func_end : empty"
+  p.funcDir.deleteVarTable()
+
+# BODY
+# TODO: Change to statements
 def p_body(p):
   "body : assignment"
   pass
 
+# ASSIGN
 def p_assignment(p):
   "assignment : variable '=' expr"
   pass
 
+# EXPR
 def p_expr_binop(p):
   """expr : expr '+' expr
           | expr '-' expr
@@ -123,6 +151,7 @@ def p_empty(p):
   "empty :"
   pass
 
+# Error handling
 def p_error(p):
   raise Exception(f'({p.lineno}:{p.lexpos}) Syntax error at "{p.value}"')
 

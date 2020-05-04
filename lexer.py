@@ -32,7 +32,7 @@ tokens = [
 ] + list(reserved.values())
 
 # literals = "=<>()[]{}|.,:;"
-literals = "+-*/%$¡?&=<>()[]{}|.,:;"
+literals = "+-*/%$!?&=<>()[]{}|.,:;"
 
 # Simple tokens
 # t_PLUS = r'\+'

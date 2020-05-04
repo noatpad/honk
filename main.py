@@ -8,6 +8,12 @@ Programa hi;
 var int : a, b;
 float : c;
 
+funcion void func()
+var char : d;
+{
+  a = b + c
+}
+
 principal() {
   a = 1 + 2
 }
@@ -31,6 +37,6 @@ result = duckparser.parse(data)
 
 for func in result.directory:
   print(f'{result.directory[func].name} -> {result.directory[func].returnType}')
-  a = result.directory[func].varTable
-  for var in result.directory[func].varTable:
-    print(f'  {a[var].name} -> {a[var].vartype} = {a[var].value}')
+  table = result.directory[func].varTable
+  for var in table:
+    print(f'  {table[var].name} -> {table[var].vartype} = {table[var].value}')
