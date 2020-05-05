@@ -5,12 +5,14 @@ from funcDir import FunctionDirectory
 """ State variables (accessible in `p` within each production)
 - funcDir -> Function directory
 - currentType -> Currently-used type
+- varDimensions -> Helper to determine number of dimensions when declaring a variable
 """
 
 # Precedence rules for arithmetic
 precedence = (
   ('left', '+', '-'),
-  ('left', '*', '/')
+  ('left', '*', '/'),
+  ('right', '-', '$', '!', '?')
 )
 
 # Parsing productions
@@ -53,12 +55,21 @@ def p_found_var_name(p):
   if p.funcDir.findVar(var):
     s_error(p.lineno, p.lexpos, f'Variable "{var}" already exists!"')
   else:
-    p.funcDir.addVar(var, p.currentType)
+    p.funcDir.addVar(var, (p.currentType, p.varDimensions))
+
+def p_variable_mat(p):
+  "variable : ID '[' expr ']' '[' expr ']'"
+  p.varDimensions = 2
+  p[0] = p[1]
+
+def p_variable_list(p):
+  "variable : ID '[' expr ']'"
+  p.varDimensions = 1
+  p[0] = p[1]
 
 def p_variable(p):
-  """variable : ID '[' expr ']' '[' expr ']'
-              | ID '[' expr ']'
-              | ID"""
+  "variable : ID"
+  p.varDimensions = 0
   p[0] = p[1]
 
 # TYPE
@@ -116,8 +127,12 @@ def p_found_func_end(p):
 # BODY
 # TODO: Change to statements
 def p_body(p):
-  "body : assignment"
+  """body : statement body
+          | statement"""
   pass
+
+def p_statement(p):
+  """statement : assignment"""
 
 # ASSIGN
 def p_assignment(p):
@@ -132,6 +147,13 @@ def p_expr_binop(p):
           | expr '/' expr"""
   pass
 
+def p_expr_uop(p):
+  """expr : '-' expr
+          | '$' expr
+          | '!' expr
+          | '?' expr"""
+  pass
+
 def p_expr_group(p):
   "expr : '(' expr ')'"
   pass
@@ -140,12 +162,10 @@ def p_expr_num(p):
   "expr : NUMBER"
   pass
 
-def p_expr_var_elem(p):
-  "expr : ID '[' NUMBER ']'"
-  pass
-
 def p_expr_var(p):
-  "expr : ID"
+  """expr : ID
+          | ID '[' NUMBER ']'
+          | ID '[' NUMBER ']' '[' NUMBER ']'"""
   pass
 
 def p_empty(p):

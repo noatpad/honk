@@ -5,7 +5,7 @@ import lexer, parser
 # data = "1 + 2"
 data = """
 Programa hi;
-var int : a, b;
+var int : a[1], b;
 float : c;
 
 funcion void func()
