@@ -185,3 +185,10 @@ mono_cube = {
     '?': ('bool', 2)
   }
 }
+
+def getBinopResultType(left_type, right_type, operand):
+  try:
+    ret = dual_cube[left_type][right_type][operand]
+    return ret
+  except:
+    return None

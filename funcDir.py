@@ -4,7 +4,6 @@ class Var():
   def __init__(self, name, vartype):
     self.name = name
     self.vartype = vartype
-    self.value = None
 
 class Function():
   def __init__(self, name, returnType):
@@ -14,6 +13,9 @@ class Function():
 
   def addVar(self, name, vartype):
     self.varTable[name] = Var(name,vartype)
+
+  def getVar(self, name):
+    return self.varTable[name]
 
   def deleteVarTable(self):
     self.varTable = None
@@ -28,10 +30,14 @@ class FunctionDirectory():
   def __init__(self):
     self.directory = dict()
     self.currentFunc = None
+    self.globalFunc = None
+
+  def setGlobalFuncton(self, globalFunc):
+    self.globalFunc = globalFunc
 
   def addFunction(self, name, returnType):
-    self.directory[name] = Function(name,returnType)
-    self.currentFunc = name\
+    self.directory[name] = Function(name, returnType)
+    self.currentFunc = name
 
   def addVarTable(self):
     if self.directory[self.currentFunc].hasVarTable() is False:
@@ -39,6 +45,15 @@ class FunctionDirectory():
 
   def addVar(self, name, vartype):
     self.directory[self.currentFunc].addVar(name, vartype)
+
+  def getVar(self, name, depth):
+    if name in self.directory[self.currentFunc].varTable:
+      ret = self.directory[self.currentFunc].getVar(name)
+    else:
+      ret = self.directory[self.globalFunc].getVar(name)
+
+    ret.vartype = (ret.vartype[0], ret.vartype[1] - depth)
+    return ret
 
   def deleteVarTable(self):
     if self.directory[self.currentFunc].hasVarTable() is True:
