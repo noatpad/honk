@@ -1,6 +1,7 @@
 
 from collections import defaultdict
 
+# Dual-operand type matching cube
 dual_cube = {
   ('int', 0): {
     ('int', 0): {
@@ -158,7 +159,8 @@ dual_cube = {
   }
 }
 
-mono_cube = {
+# Single-operand type matching table
+mono_table = {
   ('int', 0): {
     '-': ('int', 0)
   },
@@ -186,9 +188,10 @@ mono_cube = {
   }
 }
 
+# Returns result type of a dual-operand operation
 def getDuoResultType(left_type, right_type, operator):
-  try:
+  try:        # Return type from dual_cube
     ret = dual_cube[left_type][right_type][operator]
     return ret
-  except:
+  except:     # If no entry exists for combination, return None
     return None

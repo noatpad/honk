@@ -10,14 +10,17 @@ class Quads:
     self.quads = deque()
     self.tempCount = 0
 
+  # Push variable name and type to their respective stacks
   def pushVar(self, name, vartype):
     self.sOperands.append(name)
     self.sTypes.append(vartype)
 
+  # Push operator to stack
   def pushOperator(self, op):
     self.sOperators.append(op)
 
-  def foundAssignment(self):
+  # Append assignment quadruple
+  def addAssignQuad(self):
     right_op = self.sOperands.pop()
     right_type = self.sTypes.pop()
     left_op = self.sOperands.pop()
@@ -28,7 +31,8 @@ class Quads:
     if result_type:
       self.quads.append((operator, right_op, None, left_op))
 
-  def foundDualExpr(self):
+  # Append dual-operand operation quadruple
+  def addDualOpQuad(self):
     if self.sOperators and self.sOperators[-1] in "+-*/":
       right_op = self.sOperands.pop()
       right_type = self.sTypes.pop()

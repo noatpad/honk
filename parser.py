@@ -146,7 +146,7 @@ def p_assignment(p):
 
 def p_found_assignment_end(p):
   "found_assignment_end : empty"
-  p.quads.foundAssignment()
+  p.quads.addAssignQuad()
 
 def p_expr_duo(p):
   """expr : expr found_expr_duo_expr '+' found_expr_duo_op expr found_expr_duo_expr
@@ -161,7 +161,7 @@ def p_found_expr_duo_op(p):
 
 def p_found_expr_duo_expr(p):
   "found_expr_duo_expr : empty"
-  p.quads.foundDualExpr()
+  p.quads.addDualOpQuad()
 
 def p_expr_mono(p):
   """expr : '-' expr
