@@ -186,9 +186,9 @@ mono_cube = {
   }
 }
 
-def getBinopResultType(left_type, right_type, operand):
+def getDuoResultType(left_type, right_type, operator):
   try:
-    ret = dual_cube[left_type][right_type][operand]
+    ret = dual_cube[left_type][right_type][operator]
     return ret
   except:
     return None
