@@ -3,19 +3,13 @@ from collections import deque
 
 from lexer import tokens
 from funcDir import FunctionDirectory
-from quadruple import Quadruple
-from semanticCube import getDuoResultType
+from quads import Quads
 
 """ State variables (accessible in `p` within each production)
 - funcDir -> Function directory
+- quads -> Quadruple handler
 - currentType -> Currently-used type
 - varDimensions -> Helper to determine number of dimensions when declaring a variable
-
-- operands -> Stack of operands
-- operators -> Stack of operators
-- types -> Stack of vartypes
-- quads -> Queue of Quadruples
-- tempCount -> Temporary variable count
 """
 
 # Precedence rules for arithmetic
@@ -33,11 +27,7 @@ def p_programa(p):
 def p_found_program(p):
   "found_program : empty"
   p.funcDir = FunctionDirectory()
-  p.operands = deque()
-  p.operators = deque()
-  p.types = deque()
-  p.quads = deque()
-  p.tempCount = 0
+  p.quads = Quads()
 
 def p_found_program_name(p):
   'found_program_name : empty'
@@ -156,19 +146,7 @@ def p_assignment(p):
 
 def p_found_assignment_end(p):
   "found_assignment_end : empty"
-  right_op = p.operands.pop()
-  right_type = p.types.pop()
-  left_op = p.operands.pop()
-  left_type = p.types.pop()
-  operator = p.operators.pop()
-
-  result_type = getDuoResultType(left_type, right_type, operator)
-  if result_type:
-    result = 't' + str(p.tempCount)
-    p.quads.append(Quadruple(operator, left_op, right_op, result))
-    p.operands.append(result)
-    p.types.append(result_type)
-    p.tempCount += 1
+  p.quads.foundAssignment()
 
 def p_expr_duo(p):
   """expr : expr found_expr_duo_expr '+' found_expr_duo_op expr found_expr_duo_expr
@@ -179,24 +157,11 @@ def p_expr_duo(p):
 
 def p_found_expr_duo_op(p):
   "found_expr_duo_op : empty"
-  p.operators.append(p[-1])
+  p.quads.pushOperator(p[-1])
 
 def p_found_expr_duo_expr(p):
   "found_expr_duo_expr : empty"
-  if p.operators and p.operators[-1] in "+-*/":
-    right_op = p.operands.pop()
-    right_type = p.types.pop()
-    left_op = p.operands.pop()
-    left_type = p.types.pop()
-    operator = p.operators.pop()
-
-    result_type = getDuoResultType(left_type, right_type, operator)
-    if result_type:
-      result = 't' + str(p.tempCount)
-      p.quads.append(Quadruple(operator, left_op, right_op, result))
-      p.operands.append(result)
-      p.types.append(result_type)
-      p.tempCount += 1
+  p.quads.foundDualExpr()
 
 def p_expr_mono(p):
   """expr : '-' expr
@@ -211,8 +176,7 @@ def p_expr_group(p):
 
 def p_expr_num(p):
   "expr : NUMBER"
-  p.operands.append(p[1])
-  p.types.append(('int', 0))
+  p.quads.pushVar(p[1], ('int', 0))
 
 def p_expr_var(p):
   "expr : expr_var"
@@ -221,20 +185,17 @@ def p_expr_var(p):
 def p_expr_var_mat_elem(p):
   "expr_var : ID '[' expr ']' '[' expr ']'"
   var = p.funcDir.getVar(p[1], 2)
-  p.operands.append(var.name)
-  p.types.append(var.vartype)
+  p.quads.pushVar(var.name, var.vartype)
 
 def p_expr_var_list_elem(p):
   "expr_var : ID '[' expr ']'"
   var = p.funcDir.getVar(p[1], 1)
-  p.operands.append(var.name)
-  p.types.append(var.vartype)
+  p.quads.pushVar(var.name, var.vartype)
 
 def p_expr_var_atom(p):
   "expr_var : ID"
   var = p.funcDir.getVar(p[1], 0)
-  p.operands.append(var.name)
-  p.types.append(var.vartype)
+  p.quads.pushVar(var.name, var.vartype)
 
 def p_empty(p):
   "empty :"
