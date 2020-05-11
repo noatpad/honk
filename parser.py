@@ -25,6 +25,7 @@ precedence = (
 # PROGRAMA
 def p_programa(p):
   "programa : PROGRAMA found_program ID found_program_name ';' vars functions PRINCIPAL '(' ')' '{' body '}'"
+  p.quads.addEndQuad()
   p[0] = p
 
 def p_found_program(p):

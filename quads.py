@@ -109,6 +109,9 @@ class Quads:
       else:
         raise Exception("Type mismatch!")
 
+  def addEndQuad(self):
+    self.addQuad(('END', None, None, None))
+
   def printQuads(self):
     i = 0
     for q in self.quads:
