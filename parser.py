@@ -199,15 +199,22 @@ def p_write_params(p):
                   | expr_var"""
   pass
 
-# TODO: Missing logic for conditionals
 def p_if(p):
-  """if : SI '(' expr ')' ENTONCES '{' body '}'
-        | SI '(' expr ')' ENTONCES '{' body '}' else"""
-  pass
+  """if : SI '(' expr ')' found_if_expr ENTONCES '{' body '}'
+        | SI '(' expr ')' found_if_expr ENTONCES '{' body '}' else"""
+  p.quads.completeIfQuad()
+
+def p_found_if_expr(p):
+  "found_if_expr : empty"
+  p.quads.addIfQuad()
 
 def p_else(p):
-  "else : SINO '{' body '}'"
+  "else : SINO found_else '{' body '}'"
   pass
+
+def p_found_else(p):
+  "found_else : empty"
+  p.quads.addElseQuad()
 
 # TODO: Missing logic for 'for' loops
 def p_for(p):

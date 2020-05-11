@@ -5,8 +5,10 @@ import lexer, parser
 # data = "1 + 2"
 data = """
 Programa hi;
-var int : a, b;
-int : c;
+var
+  int : a, b;
+  float : f;
+  int : c;
 
 funcion void func()
 var char : d;
@@ -17,6 +19,12 @@ var char : d;
 
 principal() {
   a = (1 + 2) * 3;
+
+  si (a > 3) entonces {
+    b = 5 * 2;
+  } sino {
+    f = 5 / 2;
+  }
 }
 """
 # data = """
