@@ -63,12 +63,12 @@ def p_found_var_name(p):
     p.funcDir.addVar(var, (p.currentType, p.varDimensions))
 
 def p_variable_mat(p):
-  "variable : ID '[' NUMBER ']' '[' NUMBER ']'"
+  "variable : ID '[' CTE_INT ']' '[' CTE_INT ']'"
   p.varDimensions = 2
   p[0] = p[1]
 
 def p_variable_list(p):
-  "variable : ID '[' NUMBER ']'"
+  "variable : ID '[' CTE_INT ']'"
   p.varDimensions = 1
   p[0] = p[1]
 
@@ -242,10 +242,6 @@ def p_expr_group(p):
   "expr : '(' expr ')'"
   pass
 
-def p_expr_num(p):
-  "expr : NUMBER"
-  p.quads.pushVar(p[1], ('int', 0))
-
 def p_expr_var(p):
   "expr : expr_var"
   pass
@@ -264,6 +260,22 @@ def p_expr_var_atom(p):
   "expr_var : ID"
   var = p.funcDir.getVar(p[1], 0)
   p.quads.pushVar(var.name, var.vartype)
+
+def p_cte(p):
+  """expr : CTE_INT
+          | CTE_FLOAT
+          | CTE_CHAR
+          | CTE_BOOL"""
+  t = None
+  if (type(p[1]) is int):
+    t = 'int'
+  elif (type(p[1]) is float):
+    t = 'float'
+  elif (type(p[1]) is bool):
+    t = 'bool'
+  else:
+    t = 'char'
+  p.quads.pushVar(p[1], (t, 0))
 
 def p_empty(p):
   "empty :"
