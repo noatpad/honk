@@ -9,7 +9,6 @@ from quads import Quads
 - funcDir -> Function directory
 - quads -> Quadruple handler
 - currentType -> Currently-used type
-- varDimensions -> Helper to determine number of dimensions when declaring a variable
 """
 
 # Precedence rules for arithmetic
@@ -35,12 +34,12 @@ def p_found_program(p):
 
 def p_found_program_name(p):
   'found_program_name : empty'
-  p.funcDir.addFunction(p[-1], "void")
+  p.funcDir.addFunction(p[-1])
   p.funcDir.setGlobalFunction(p[-1])
 
 # VARS
 def p_vars(p):
-  """vars : VAR found_var var_type
+  """vars : VAR found_var var_declare
           | empty"""
   pass
 
@@ -48,9 +47,9 @@ def p_found_var(p):
   "found_var : empty"
   p.funcDir.createVarTable()
 
-def p_var_type(p):
-  """var_type : type ':' var_name ';' var_type
-              | type ':' var_name ';'"""
+def p_var_declare(p):
+  """var_declare : type ':' var_name ';' var_declare
+                 | type ':' var_name ';'"""
   pass
 
 def p_var_name(p):
@@ -64,22 +63,19 @@ def p_found_var_name(p):
   if p.funcDir.varExists(var):
     s_error(p.lineno, p.lexpos, f'Variable "{var}" already exists!"')
   else:
-    p.funcDir.addVar(var, (p.currentType, p.varDimensions))
+    p.funcDir.addVar(var[0], var[1])
 
 def p_variable_mat(p):
   "variable : ID '[' CTE_INT ']' '[' CTE_INT ']'"
-  p.varDimensions = 2
-  p[0] = p[1]
+  p[0] = (p[1], 2)
 
 def p_variable_list(p):
   "variable : ID '[' CTE_INT ']'"
-  p.varDimensions = 1
-  p[0] = p[1]
+  p[0] = (p[1], 1)
 
 def p_variable(p):
   "variable : ID"
-  p.varDimensions = 0
-  p[0] = p[1]
+  p[0] = (p[1], 0)
 
 # TYPE
 def p_type(p):
@@ -87,7 +83,7 @@ def p_type(p):
           | FLOAT
           | CHAR
           | BOOL"""
-  p.currentType = p[1]
+  p.funcDir.setCurrentType(p[1])
   p[0] = p[1]
 
 # FUNCTIONS
@@ -98,10 +94,10 @@ def p_functions(p):
   pass
 
 def p_func_type(p):
-  """func_type : var_type
+  """func_type : type
                | VOID"""
   if p[1] == 'void':
-    p.currentType = 'void'
+    p.funcDir.setCurrentType('void')
 
 def p_found_func_name(p):
   "found_func_name : empty"
@@ -109,7 +105,7 @@ def p_found_func_name(p):
   if p.funcDir.functionExists(func):
     s_error(p.lineno, p.lexpos, f'Function "{func}" already exists!"')
   else:
-    p.funcDir.addFunction(func, p.currentType)
+    p.funcDir.addFunction(func)
     p.funcDir.createVarTable()
 
 def p_func_params(p):
@@ -118,8 +114,8 @@ def p_func_params(p):
   pass
 
 def p_func_param(p):
-  """func_param : var_type ID found_func_param ',' func_param
-                | var_type ID found_func_param"""
+  """func_param : type variable found_func_param ',' func_param
+                | type variable found_func_param"""
   pass
 
 def p_found_func_param(p):
@@ -128,7 +124,7 @@ def p_found_func_param(p):
   if p.funcDir.varExists(param):
     s_error(p.lineno, p.lexpos, f'Multiple declaration of "{param}"!')
   else:
-    p.funcDir.addVar(param, p.currentType)
+    p.funcDir.addVar(param[0], param[1])
 
 def p_found_func_end(p):
   "found_func_end : empty"
@@ -217,7 +213,7 @@ def p_found_else(p):
   "found_else : empty"
   p.quads.addElseQuad()
 
-# TODO: Missing logic for 'for' loops
+# TODO: Missing logic for 'for' loops (ask about how this works)
 def p_for(p):
   "for : DESDE ID ':' expr HASTA expr HACER '{' body '}'"
   pass
@@ -347,7 +343,7 @@ def p_cte(p):
     t = 'bool'
   else:
     t = 'char'
-  p.quads.pushVar(p[1], (t, 0))
+  p.quads.pushVar(p[1], t)
 
 def p_empty(p):
   "empty :"

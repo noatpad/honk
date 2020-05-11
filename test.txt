@@ -12,7 +12,7 @@ var char : d;
 }
 
 principal() {
-  a = (1 + 2) * 3;
+  a = 3 * (1 + 2);
 
   si (a > 3) entonces {
     b = 5 * 2;

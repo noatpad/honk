@@ -3,188 +3,100 @@ from collections import defaultdict
 
 # Dual-operand type matching cube
 dual_cube = {
-  ('int', 0): {
-    ('int', 0): {
-      '=': ('int', 0),
-      '+': ('int', 0),
-      '-': ('int', 0),
-      '*': ('int', 0),
-      '/': ('float', 0),
-      '%': ('int', 0),
-      '<': ('bool', 0),
-      '<=': ('bool', 0),
-      '>': ('bool', 0),
-      '>=': ('bool', 0),
-      '==': ('bool', 0),
-      '!=': ('bool', 0)
+  'int': {
+    'int': {
+      '=': 'int',
+      '+': 'int',
+      '-': 'int',
+      '*': 'int',
+      '/': 'int',
+      '%': 'int',
+      '<': 'bool',
+      '<=': 'bool',
+      '>': 'bool',
+      '>=': 'bool',
+      '==': 'bool',
+      '!=': 'bool'
     },
-    ('float', 0): {
-      '+': ('float', 0),
-      '-': ('float', 0),
-      '*': ('float', 0),
-      '/': ('float', 0),
-      '<': ('bool', 0),
-      '<=': ('bool', 0),
-      '>': ('bool', 0),
-      '>=': ('bool', 0),
-      '==': ('bool', 0),
-      '!=': ('bool', 0)
+    'float': {
+      '=': 'int',
+      '+': 'float',
+      '-': 'float',
+      '*': 'float',
+      '/': 'float',
+      '<': 'bool',
+      '<=': 'bool',
+      '>': 'bool',
+      '>=': 'bool',
+      '==': 'bool',
+      '!=': 'bool'
     }
   },
-  ('int', 1): {
-    ('int', 1): {
-      '=': ('int', 1),
-      '+': ('int', 1),
-      '-': ('int', 1),
-      '*': ('int', 1),
-      '/': ('float', 1),
-      '%': ('int', 1),
+  'float': {
+    'int': {
+      '=': 'float',
+      '+': 'float',
+      '-': 'float',
+      '*': 'float',
+      '/': 'float',
+      '<': 'bool',
+      '<=': 'bool',
+      '>': 'bool',
+      '>=': 'bool',
+      '==': 'bool',
+      '!=': 'bool'
     },
-    ('float', 1): {
-      '+': ('float', 1),
-      '-': ('float', 1),
-      '*': ('float', 1),
-      '/': ('float', 1),
+    'float': {
+      '=': 'float',
+      '+': 'float',
+      '-': 'float',
+      '*': 'float',
+      '/': 'float',
+      '<': 'bool',
+      '<=': 'bool',
+      '>': 'bool',
+      '>=': 'bool',
+      '==': 'bool',
+      '!=': 'bool'
     }
   },
-  ('int', 2): {
-    ('int', 2): {
-      '=': ('int', 2),
-      '+': ('int', 2),
-      '-': ('int', 2),
-      '*': ('int', 2),
-      '/': ('float', 2),
-      '%': ('int', 2),
-    },
-    ('float', 2): {
-      '+': ('float', 2),
-      '-': ('float', 2),
-      '*': ('float', 2),
-      '/': ('float', 2),
+  'char': {
+    'char': {
+      '=': 'char',
+      '==': 'bool',
+      '!=': 'bool'
     }
   },
-  ('float', 0): {
-    ('int', 0): {
-      '+': ('float', 0),
-      '-': ('float', 0),
-      '*': ('float', 0),
-      '/': ('float', 0),
-      '<': ('bool', 0),
-      '<=': ('bool', 0),
-      '>': ('bool', 0),
-      '>=': ('bool', 0),
-      '==': ('bool', 0),
-      '!=': ('bool', 0)
-    },
-    ('float', 0): {
-      '=': ('float', 0),
-      '+': ('float', 0),
-      '-': ('float', 0),
-      '*': ('float', 0),
-      '/': ('float', 0),
-      '<': ('bool', 0),
-      '<=': ('bool', 0),
-      '>': ('bool', 0),
-      '>=': ('bool', 0),
-      '==': ('bool', 0),
-      '!=': ('bool', 0)
-    }
-  },
-  ('float', 1): {
-    ('int', 1): {
-      '+': ('float', 1),
-      '-': ('float', 1),
-      '*': ('float', 1),
-      '/': ('float', 1)
-    },
-    ('float', 1): {
-      '=': ('float', 1),
-      '+': ('float', 1),
-      '-': ('float', 1),
-      '*': ('float', 1),
-      '/': ('float', 1)
-    }
-  },
-  ('float', 2): {
-    ('int', 2): {
-      '+': ('float', 2),
-      '-': ('float', 2),
-      '*': ('float', 2),
-      '/': ('float', 2)
-    },
-    ('float', 2): {
-      '=': ('float', 2),
-      '+': ('float', 2),
-      '-': ('float', 2),
-      '*': ('float', 2),
-      '/': ('float', 2)
-    }
-  },
-  ('char', 0): {
-    ('char', 0): {
-      '=': ('char', 0),
-      '+': ('char', 1)
-    }
-  },
-  ('char', 1): {
-    ('char', 0): {
-      '+': ('char', 1)
-    },
-    ('char', 1): {
-      '=': ('char', 1),
-      '+': ('char', 1)
-    }
-  },
-  ('char', 2): {
-    ('char', 2): {
-      '=': ('char', 2)
-    }
-  },
-  ('bool', 0): {
-    ('bool', 0): {
-      '=': ('bool', 0),
-      '&': ('bool', 0),
-      '|': ('bool', 0)
-    }
-  },
-  ('bool', 1): {
-    ('bool', 1): {
-      '=': ('bool', 1)
-    }
-  },
-  ('bool', 2): {
-    ('bool', 2): {
-      '=': ('bool', 2)
+  'bool': {
+    'bool': {
+      '=': 'bool',
+      '&': 'bool',
+      '|': 'bool',
+      '==': 'bool',
+      '!=': 'bool'
     }
   }
 }
 
 # Single-operand type matching table
 mono_table = {
-  ('int', 0): {
-    '-': ('int', 0)
+  'int': {
+    '-': 'int',
+    '$': 'int',
+    '!': 'float',
+    '?': 'int'
   },
-  ('int', 2): {
-    '$': ('int', 0),
-    '!': ('float', 2),
-    '?': ('int', 2)
+  'float': {
+    '-': 'float',
+    '$': 'float',
+    '!': 'float',
+    '?': 'float'
   },
-  ('float', 0): {
-    '-': ('float', 0)
+  'char': {
+    '?': 'char'
   },
-  ('float', 2): {
-    '$': ('float', 0),
-    '!': ('float', 2),
-    '?': ('float', 2)
-  },
-  ('char', 2): {
-    '?': ('char', 2)
-  },
-  ('bool', 0): {
-    '!': ('bool', 0)
-  },
-  ('bool', 2): {
-    '?': ('bool', 2)
+  'bool': {
+    '?': 'bool'
   }
 }
 
