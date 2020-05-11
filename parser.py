@@ -87,6 +87,7 @@ def p_type(p):
   p[0] = p[1]
 
 # FUNCTIONS
+# TODO: Missing logic for functions parameters and their types
 def p_functions(p):
   """functions : FUNCION func_type ID found_func_name '(' func_params ')' vars '{' body '}' found_func_end functions
                | empty"""
@@ -112,7 +113,7 @@ def p_func_params(p):
                  | empty"""
   pass
 
-def p_func_params2(p):
+def p_func_param(p):
   """func_param : var_type ID found_func_param ',' func_param
                 | var_type ID found_func_param"""
   pass
@@ -137,7 +138,14 @@ def p_body(p):
   pass
 
 def p_statement(p):
-  "statement : assignment"""
+  """statement : assignment
+               | call_func
+               | return
+               | read
+               | write
+               | if
+               | for
+               | while"""
   pass
 
 def p_assignment(p):
@@ -147,6 +155,66 @@ def p_assignment(p):
 def p_found_assignment_end(p):
   "found_assignment_end : empty"
   p.quads.addAssignQuad()
+
+# TODO: Missing logic for calling functions
+def p_call_func(p):
+  "call_func : ID '(' call_func_params ')' ';'"
+  pass
+
+def p_call_func_params(p):
+  """call_func_params : call_func_param
+                      | empty"""
+  pass
+
+def p_call_func_param(p):
+  """call_func_param : expr ',' call_func_param
+                     | expr"""
+  pass
+
+# TODO: Missing logic for return
+def p_return(p):
+  "return : REGRESA '(' expr ')' ';'"
+  pass
+
+# TODO: Missing logic for read
+def p_read(p):
+  "read : LEE '(' read_params ')' ';'"
+  pass
+
+def p_read_params(p):
+  """read_params : expr_var ',' read_params
+                 | expr_var"""
+  pass
+
+# TODO: Missing logic for write
+def p_write(p):
+  "write : ESCRIBE '(' write_params ')' ';'"
+  pass
+
+def p_write_params(p):
+  """write_params : expr_var ',' write_params
+                  | expr_var"""
+  pass
+
+# TODO: Missing logic for conditionals
+def p_if(p):
+  """if : SI '(' expr ')' ENTONCES '{' body '}'
+        | SI '(' expr ')' ENTONCES '{' body '}' else"""
+  pass
+
+def p_else(p):
+  "else : SINO '{' body '}'"
+  pass
+
+# TODO: Missing logic for 'for' loops
+def p_for(p):
+  "for : DESDE ID ':' expr HASTA expr HACER '{' body '}'"
+  pass
+
+# TODO: Missing logic for 'while' loops
+def p_while(p):
+  "while : MIENTRAS '(' expr ')' HAZ '{' body '}'"
+  pass
 
 def p_expr_duo(p):
   """expr : expr found_expr_duo_expr '+' found_expr_duo_op expr found_expr_duo_expr

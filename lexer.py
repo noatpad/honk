@@ -26,8 +26,6 @@ reserved = {
 # Token list
 tokens = [
   'ID', 'NUMBER',
-  # 'PLUS', 'MINUS', 'MUL', 'DIV', 'MOD',
-  # 'MAT_DETERMINANT', 'MAT_TRANSPOSE', 'MAT_INVERSE',
   'COMMENT',
   'IS_EQUAL', 'IS_NOT_EQUAL', 'LESS_THAN_OR_EQUAL', 'MORE_THAN_OR_EQUAL'
 ] + list(reserved.values())
@@ -36,14 +34,6 @@ tokens = [
 literals = "+-*/%$!?&=<>()[]{}|.,:;"
 
 # Simple tokens
-# t_PLUS = r'\+'
-# t_MINUS = r'-'
-# t_MUL = r'\*'
-# t_DIV = r'/'
-# t_MOD = r'%'
-# t_MAT_DETERMINANT = r'\$'
-# t_MAT_TRANSPOSE = r'¡'
-# t_MAT_INVERSE = r'\?'
 t_IS_EQUAL = r'=='
 t_IS_NOT_EQUAL = r'!='
 t_LESS_THAN_OR_EQUAL = r'<='

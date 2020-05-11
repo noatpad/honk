@@ -37,19 +37,3 @@ result = duckparser.parse(data)
 
 print("# QUADS")
 result.quads.printQuads()
-# i = 1
-# for q in result.quads:
-#   print(f'{i}:\t{q.operation} {q.operand_1} {q.operand_2} {q.result}')
-#   i += 1
-
-# print("# OPERANDS")
-# for op in result.operands: print(op)
-
-# print("# OPERATORS")
-# for op in result.operators: print(op)
-
-# for func in result.directory:
-#   print(f'{result.directory[func].name} -> {result.directory[func].returnType}')
-#   table = result.directory[func].varTable
-#   for var in table:
-#     print(f'  {table[var].name} -> {table[var].vartype}')
