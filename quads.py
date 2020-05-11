@@ -30,10 +30,12 @@ class Quads:
     result_type = getDuoResultType(left_type, right_type, operator)
     if result_type:
       self.quads.append((operator, right_op, None, left_op))
+    else:
+      raise Exception("Type mismatch!")
 
   # Append dual-operand operation quadruple
-  def addDualOpQuad(self):
-    if self.sOperators and self.sOperators[-1] in "+-*/":
+  def addDualOpQuad(self, ops):
+    if self.sOperators and self.sOperators[-1] in ops:
       right_op = self.sOperands.pop()
       right_type = self.sTypes.pop()
       left_op = self.sOperands.pop()
@@ -47,6 +49,8 @@ class Quads:
         self.sOperands.append(result)
         self.sTypes.append(result_type)
         self.tempCount += 1
+      else:
+        raise Exception("Type mismatch!")
 
   def printQuads(self):
     i = 1

@@ -30,7 +30,6 @@ tokens = [
   'IS_EQUAL', 'IS_NOT_EQUAL', 'LESS_THAN_OR_EQUAL', 'MORE_THAN_OR_EQUAL'
 ] + list(reserved.values())
 
-# literals = "=<>()[]{}|.,:;"
 literals = "+-*/%$!?&=<>()[]{}|.,:;"
 
 # Simple tokens

@@ -14,8 +14,11 @@ from quads import Quads
 
 # Precedence rules for arithmetic
 precedence = (
+  ('left', '|'),
+  ('left', '&'),
+  ('left', 'IS_EQUAL', 'IS_NOT_EQUAL', '<', 'LESS_THAN_OR_EQUAL', '>', 'MORE_THAN_OR_EQUAL'),
   ('left', '+', '-'),
-  ('left', '*', '/')
+  ('left', '*', '/', '%')
 )
 
 # Parsing productions
@@ -216,34 +219,87 @@ def p_while(p):
   "while : MIENTRAS '(' expr ')' HAZ '{' body '}'"
   pass
 
-def p_expr_duo(p):
-  """expr : expr found_expr_duo_expr '+' found_expr_duo_op expr found_expr_duo_expr
-          | expr found_expr_duo_expr '-' found_expr_duo_op expr found_expr_duo_expr
-          | expr found_expr_duo_expr '*' found_expr_duo_op expr found_expr_duo_expr
-          | expr found_expr_duo_expr '/' found_expr_duo_op expr found_expr_duo_expr"""
+# EXPRESSION -> Order of operator precedence:
+# Factors (*, /, %) > Arithmetic (+, -) > Comparison (==, !=, <, <=, >, >=) > Logic (&, |)
+def p_expr(p):
+  "expr : expr_logic"
+
+def p_expr_logic(p):
+  "expr_logic : expr_compare found_expr_logic expr_logic2"
   pass
+
+def p_expr_logic2(p):
+  """expr_logic2 : '&' found_expr_duo_op expr_logic
+                 | '|' found_expr_duo_op expr_logic
+                 | empty"""
+  pass
+
+def p_found_expr_logic(p):
+  "found_expr_logic : empty"
+  p.quads.addDualOpQuad(['&', '|'])
+
+def p_expr_compare(p):
+  "expr_compare : expr_arith found_expr_compare expr_compare2"
+  pass
+
+def p_expr_compare2(p):
+  """expr_compare2 : IS_EQUAL found_expr_duo_op expr_compare
+                   | IS_NOT_EQUAL found_expr_duo_op expr_compare
+                   | '<' found_expr_duo_op expr_compare
+                   | LESS_THAN_OR_EQUAL found_expr_duo_op expr_compare
+                   | '>' found_expr_duo_op expr_compare
+                   | MORE_THAN_OR_EQUAL found_expr_duo_op expr_compare
+                   | empty"""
+  pass
+
+def p_found_expr_compare(p):
+  "found_expr_compare : empty"
+  p.quads.addDualOpQuad(['==', '!=', '<', '<=', '>', '>='])
+
+def p_expr_arith(p):
+  "expr_arith : expr_factor found_expr_arith expr_arith2"
+  pass
+
+def p_expr_arith2(p):
+  """expr_arith2 : '+' found_expr_duo_op expr_arith
+                 | '-' found_expr_duo_op expr_arith
+                 | empty"""
+  pass
+
+def p_found_expr_arith(p):
+  "found_expr_arith : empty"
+  p.quads.addDualOpQuad(['+', '-'])
+
+def p_expr_factor(p):
+  "expr_factor : expr_atom found_expr_factor expr_factor2"
+  pass
+
+def p_expr_factor2(p):
+  """expr_factor2 : '*' found_expr_duo_op expr_factor
+                  | '/' found_expr_duo_op expr_factor
+                  | '%' found_expr_duo_op expr_factor
+                  | empty"""
+  pass
+
+def p_found_expr_factor(p):
+  "found_expr_factor : empty"
+  p.quads.addDualOpQuad(['*', '/', '%'])
 
 def p_found_expr_duo_op(p):
   "found_expr_duo_op : empty"
   p.quads.pushOperator(p[-1])
 
-def p_found_expr_duo_expr(p):
-  "found_expr_duo_expr : empty"
-  p.quads.addDualOpQuad()
-
-def p_expr_mono(p):
-  """expr : '-' expr
-          | '!' expr
-          | '$' expr
-          | '?' expr"""
+def p_expr_atom(p):
+  """expr_atom : expr_mono '(' expr ')'
+               | expr_mono expr_var"""
   pass
 
-def p_expr_group(p):
-  "expr : '(' expr ')'"
-  pass
-
-def p_expr_var(p):
-  "expr : expr_var"
+def p_expr_mono_op(p):
+  """expr_mono : '-'
+               | '!'
+               | '$'
+               | '?'
+               | empty"""
   pass
 
 def p_expr_var_mat_elem(p):
@@ -262,10 +318,10 @@ def p_expr_var_atom(p):
   p.quads.pushVar(var.name, var.vartype)
 
 def p_cte(p):
-  """expr : CTE_INT
-          | CTE_FLOAT
-          | CTE_CHAR
-          | CTE_BOOL"""
+  """expr_var : CTE_INT
+              | CTE_FLOAT
+              | CTE_CHAR
+              | CTE_BOOL"""
   t = None
   if (type(p[1]) is int):
     t = 'int'
