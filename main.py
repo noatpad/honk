@@ -2,7 +2,7 @@
 from ply import lex, yacc
 import lexer, parser
 
-# data = "1 + 2"
+# TODO: Add file reading
 data = """
 Programa hi;
 var
@@ -24,6 +24,10 @@ principal() {
     b = 5 * 2;
   } sino {
     f = 5 / 2;
+  }
+
+  mientras (a > 3) haz {
+    a = a - 1;
   }
 }
 """

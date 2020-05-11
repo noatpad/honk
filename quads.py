@@ -46,7 +46,7 @@ class Quads:
     else:
       raise Exception("Type mismatch!")
 
-  # Append if quadruple
+  # Append quadruple for `if` statement
   def addIfQuad(self):
     result_type = self.sTypes.pop()
     if result_type == ('bool', 0):
@@ -56,16 +56,38 @@ class Quads:
     else:
       raise Exception("Type mismatch!")
 
-  # Prepare and append else quadruple
+  # Prepare and append quadruple for `else` statement
   def addElseQuad(self):
     self.addQuad(('GoTo', None, None, None))
     falseJump = self.sJumps.pop()
     self.sJumps.append(self.quadCount - 1)
     self.completeQuad(falseJump, self.quadCount)
 
-  # Complete end of if quadruple
+  # Complete quadruple for `if` statement
   def completeIfQuad(self):
     end = self.sJumps.pop()
+    self.completeQuad(end, self.quadCount)
+
+  # Prepare for `while` block
+  def prepareWhile(self):
+    self.sJumps.append(self.quadCount)
+
+  # Append quadruple for `while` block
+  # NOTE: It's practically identical to addIfQuad()
+  def addWhileQuad(self):
+    result_type = self.sTypes.pop()
+    if result_type == ('bool', 0):
+      result = self.sOperands.pop()
+      self.addQuad(('GoToF', result, None, None))
+      self.sJumps.append(self.quadCount - 1)
+    else:
+      raise Exception("Type mismatch!")
+
+  # Complete quadruple for `while` block
+  def completeWhileQuad(self):
+    end = self.sJumps.pop()
+    ret = self.sJumps.pop()
+    self.addQuad(('GoTo', None, None, ret))
     self.completeQuad(end, self.quadCount)
 
   # Append dual-operand operation quadruple

@@ -221,15 +221,23 @@ def p_for(p):
   "for : DESDE ID ':' expr HASTA expr HACER '{' body '}'"
   pass
 
-# TODO: Missing logic for 'while' loops
 def p_while(p):
-  "while : MIENTRAS '(' expr ')' HAZ '{' body '}'"
-  pass
+  "while : MIENTRAS found_while '(' expr ')' found_while_expr HAZ '{' body '}'"
+  p.quads.completeWhileQuad()
+
+def p_found_while(p):
+  "found_while : empty"
+  p.quads.prepareWhile()
+
+def p_found_while_expr(p):
+  "found_while_expr : empty"
+  p.quads.addWhileQuad()
 
 # EXPRESSION -> Order of operator precedence:
 # Factors (*, /, %) > Arithmetic (+, -) > Comparison (==, !=, <, <=, >, >=) > Logic (&, |)
 def p_expr(p):
   "expr : expr_logic"
+  pass
 
 def p_expr_logic(p):
   "expr_logic : expr_compare found_expr_logic expr_logic2"
