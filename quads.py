@@ -2,6 +2,7 @@
 from collections import deque
 from semanticCube import getDuoResultType
 
+# TODO: Add validation for dimensions
 class Quads:
   def __init__(self):
     self.sOperands = deque()
@@ -20,6 +21,10 @@ class Quads:
   # Push operator to stack
   def pushOperator(self, op):
     self.sOperators.append(op)
+
+  # Pop operator from stack
+  def popOperator(self):
+    return self.sOperators.pop()
 
   # General function to add quads
   def addQuad(self, quad):

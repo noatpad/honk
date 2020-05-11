@@ -8,7 +8,6 @@ from quads import Quads
 """ State variables (accessible in `p` within each production)
 - funcDir -> Function directory
 - quads -> Quadruple handler
-- currentType -> Currently-used type
 """
 
 # Precedence rules for arithmetic
@@ -302,9 +301,13 @@ def p_found_expr_duo_op(p):
   p.quads.pushOperator(p[-1])
 
 def p_expr_atom(p):
-  """expr_atom : expr_mono '(' expr ')'
+  """expr_atom : expr_group
                | expr_mono expr_var"""
   pass
+
+def p_expr_group(p):
+  "expr_group : '(' found_expr_duo_op expr ')'"
+  p.quads.popOperator()
 
 def p_expr_mono_op(p):
   """expr_mono : '-'
