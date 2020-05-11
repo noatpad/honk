@@ -1,0 +1,26 @@
+Programa hi;
+var
+  int : a, b;
+  float : f;
+  int : c;
+
+funcion void func()
+var char : d;
+{
+  a = b + c;
+  a = 1 + b;
+}
+
+principal() {
+  a = (1 + 2) * 3;
+
+  si (a > 3) entonces {
+    b = 5 * 2;
+  } sino {
+    f = 5 / 2;
+  }
+
+  mientras (a > 3) haz {
+    a = a - 1;
+  }
+}

@@ -1,51 +1,42 @@
 
 from ply import lex, yacc
+from sys import argv
+from os import path
 import lexer, parser
 
-# TODO: Add file reading
-data = """
-Programa hi;
-var
-  int : a, b;
-  float : f;
-  int : c;
+# Default variables
+filename = "test.txt"
+data = ''
 
-funcion void func()
-var char : d;
-{
-  a = b + c;
-  a = 1 + b;
-}
+# Take 0-1 arguments from command line
+if len(argv) == 2:    # Pass a filename into the process
+  filename = argv[1]
+elif len(argv) > 2:
+  raise Exception("Command only takes 0 or 1 argument (filename)!")
 
-principal() {
-  a = (1 + 2) * 3;
+# Read file
+try:
+  with open(filename) as f:
+    for line in f:
+      data += line
+except FileNotFoundError:
+  raise Exception(f'{filename} does not exist!')
 
-  si (a > 3) entonces {
-    b = 5 * 2;
-  } sino {
-    f = 5 / 2;
-  }
-
-  mientras (a > 3) haz {
-    a = a - 1;
-  }
-}
-"""
-# data = """
-# 1 + 2 / 3
-# """
-
+# Scan file
 ducklexer = lex.lex(module=lexer)
 ducklexer.input(data)
 
+# Print tokens
 while True:
   token = ducklexer.token()
   if not token:
     break
   print(token)
 
+# Parse file
 duckparser = yacc.yacc(module=parser)
 result = duckparser.parse(data)
 
+# Print quad list
 print("# QUADS")
 result.quads.printQuads()
