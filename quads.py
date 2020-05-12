@@ -9,8 +9,17 @@ class Quads:
     self.sOperators = deque()
     self.sTypes = deque()
     self.sJumps = deque()
+    self.sFuncs = deque()
     self.quads = deque()
     self.quadCount = 0
+    self.tempCount = 0
+
+  # Get current quad counter
+  def getQuadCount(self):
+    return self.quadCount
+
+  # Reset temporal counter
+  def resetTemporals(self):
     self.tempCount = 0
 
   # Push variable name and type to their respective stacks
@@ -22,9 +31,23 @@ class Quads:
   def pushOperator(self, op):
     self.sOperators.append(op)
 
+  # Push function name to stack
+  def pushFunction(self, func):
+    self.sFuncs.append(func)
+
+  def getTopFunction(self):
+    return self.sFuncs[-1]
+
+  def popFunction(self):
+    return self.sFuncs.pop()
+
   # Pop operator from stack
   def popOperator(self):
     return self.sOperators.pop()
+
+  # Pop sTypes from stack
+  def popType(self):
+    return self.sTypes.pop()
 
   # General function to add quads
   def addQuad(self, quad):
@@ -114,6 +137,29 @@ class Quads:
       else:
         raise Exception(f'Type mismatch! {left_type} {operator} {right_type}')
 
+  # Append PARAM Quad
+  def addParamQuad(self, target_param, k):
+    argument = self.sOperands.pop()
+    argument_type = self.sTypes.pop()
+    if argument_type == target_param:
+      self.addQuad(('ARGUMENT', argument, None, k))
+    else:
+      raise Exception(f'Wrong param type! {argument_type} {target_param}')
+
+  # Append ERA quad
+  # TODO: Ask dafaq is this and where to get the size of said dafaq
+  def addEraQuad(self):
+    self.addQuad(('ERA', None, None, None))
+
+  # Append EndFunc quad
+  def addEndFuncQuad(self):
+    self.addQuad(('EndFunc', None, None, None))
+
+  # Append GOSUB quad
+  def addGoSubQuad(self, func, qs):
+    self.addQuad(('GOSUB', func, None, qs))
+
+  # Append END Quad
   def addEndQuad(self):
     self.addQuad(('END', None, None, None))
 

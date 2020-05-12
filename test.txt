@@ -11,6 +11,11 @@ var char : d;
   a = 1 + b;
 }
 
+funcion void e(int a, int b)
+{
+  a = a + b;
+}
+
 principal() {
   a = 3 * (1 + 2);
 
@@ -23,4 +28,7 @@ principal() {
   mientras (a > 3) haz {
     a = a - 1;
   }
+
+  func();
+  e(a, b);
 }

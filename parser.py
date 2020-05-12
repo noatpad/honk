@@ -88,7 +88,7 @@ def p_type(p):
 # FUNCTIONS
 # TODO: Missing logic for functions parameters and their types
 def p_functions(p):
-  """functions : FUNCION func_type ID found_func_name '(' func_params ')' vars '{' body '}' found_func_end functions
+  """functions : FUNCION func_type ID found_func_name '(' func_params ')' vars found_func_start '{' body '}' found_func_end functions
                | empty"""
   pass
 
@@ -124,10 +124,17 @@ def p_found_func_param(p):
     s_error(p.lineno, p.lexpos, f'Multiple declaration of "{param}"!')
   else:
     p.funcDir.addVar(param[0], param[1])
+    p.funcDir.addFuncParam()
+
+def p_found_func_start(p):
+  "found_func_start : empty"
+  p.funcDir.setQuadStart(p.quads.getQuadCount())
 
 def p_found_func_end(p):
   "found_func_end : empty"
   p.funcDir.deleteVarTable()
+  p.quads.resetTemporals()
+  p.quads.addEndFuncQuad()
 
 # BODY
 # TODO: Missing functionality
@@ -157,8 +164,17 @@ def p_found_assignment_end(p):
 
 # TODO: Missing logic for calling functions
 def p_call_func(p):
-  "call_func : ID '(' call_func_params ')' ';'"
+  "call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end ';'"
   pass
+
+def p_found_call_func_name(p):
+  """found_call_func_name : empty"""
+  func = p[-1]
+  if p.funcDir.functionExists(func):
+    p.quads.addEraQuad()
+    p.quads.pushFunction(func)
+  else:
+    raise Exception(f'Function {func}() does not exist!')
 
 def p_call_func_params(p):
   """call_func_params : call_func_param
@@ -166,9 +182,24 @@ def p_call_func_params(p):
   pass
 
 def p_call_func_param(p):
-  """call_func_param : expr ',' call_func_param
-                     | expr"""
+  """call_func_param : expr func_single_step ',' call_func_param
+                     | expr func_single_step"""
   pass
+
+def p_func_single_step(p):
+  "func_single_step : empty"
+  target_param = p.funcDir.getParamOfFunc(p.quads.getTopFunction())
+  p.quads.addParamQuad(target_param, p.funcDir.getParamCount())
+  p.funcDir.incrementParamCount()
+  pass
+
+def p_found_call_func_end(p):
+  "found_call_func_end : empty"
+  func = p.quads.popFunction()
+  if p.funcDir.verifyParams(func):
+    p.quads.addGoSubQuad(func, p.funcDir.getQuadStartOfFunc(func))
+  else:
+    raise Exception(f'Wrong number of parameters in {func}!')
 
 # TODO: Missing logic for return
 def p_return(p):
