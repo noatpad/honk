@@ -15,6 +15,7 @@ class Function():
     self.quadStart = None
     self.varTable = None
     self.paramTable = []
+    self.tempCount = 0
 
   def addVar(self, name, vartype, dimensions):
     self.varTable[name] = Var(name, vartype, dimensions)
@@ -33,6 +34,9 @@ class Function():
 
   def setQuadStart(self, qs):
     self.quadStart = qs
+
+  def setTempCount(self, count):
+    self.tempCount = count
 
 # Function Directory class
 class FunctionDirectory():
@@ -65,6 +69,10 @@ class FunctionDirectory():
   def addFuncParam(self):
     self.directory[self.currentFunc].addParam(self.currentType)
 
+  # Add variable to the current function's var table
+  def addVar(self, name, dimensions):
+    self.directory[self.currentFunc].addVar(name, self.currentType, dimensions)
+
   # Return boolean if function exists
   def functionExists(self, func):
     if func in self.directory:
@@ -80,10 +88,6 @@ class FunctionDirectory():
   def deleteVarTable(self):
     self.directory[self.currentFunc].deleteVarTable()
     self.currentFunc = self.globalFunc
-
-  # Add variable to the current function's var table
-  def addVar(self, name, dimensions):
-    self.directory[self.currentFunc].addVar(name, self.currentType, dimensions)
 
   # Returns desired variable
   def getVar(self, name, depth):
@@ -104,6 +108,10 @@ class FunctionDirectory():
   # Set Start of quad
   def setQuadStart(self, qs):
     self.directory[self.currentFunc].setQuadStart(qs)
+
+  # Set number of temporals used in function
+  def setTempCountForFunc(self, count):
+    self.directory[self.currentFunc].setTempCount(count)
 
   # Get parameter of function
   def getParamOfFunc(self, func):

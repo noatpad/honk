@@ -18,6 +18,10 @@ class QuadManager:
   def getQuadCount(self):
     return self.quadCount
 
+  # Get temporal counter
+  def getTempCount(self):
+    return self.tempCount
+
   # Reset temporal counter
   def resetTemporals(self):
     self.tempCount = 0
