@@ -3,7 +3,7 @@ from collections import deque
 from semanticCube import getDuoResultType
 
 # TODO: Add validation for dimensions
-class Quads:
+class QuadManager:
   def __init__(self):
     self.sOperands = deque()
     self.sOperators = deque()
@@ -142,7 +142,7 @@ class Quads:
     argument = self.sOperands.pop()
     argument_type = self.sTypes.pop()
     if argument_type == target_param:
-      self.addQuad(('ARGUMENT', argument, None, k))
+      self.addQuad(('PARAM', argument, None, k))
     else:
       raise Exception(f'Wrong param type! {argument_type} {target_param}')
 
@@ -166,5 +166,5 @@ class Quads:
   def printQuads(self):
     i = 0
     for q in self.quads:
-      print(f'{i}:\t{q[0]} {q[1]} {q[2]} {q[3]}')
+      print(f'{i}:\t{q[0]}\t{q[1]}\t{q[2]}\t{q[3]}')
       i += 1

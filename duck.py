@@ -39,4 +39,4 @@ result = duckparser.parse(data)
 
 # Print quad list
 print("# QUADS")
-result.quads.printQuads()
+result.printQuads()
