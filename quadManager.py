@@ -117,6 +117,10 @@ class QuadManager:
       else:
         raise Exception(f'Type mismatch! {left_type} {operator} {right_type}')
 
+  # Append READ quadruple
+  def addReadQuad(self):
+    self.addQuad(('READ', None, None, self.sOperands.pop()))
+
   # Append PRINT quadruple
   def addPrintQuad(self, string):
     if string:

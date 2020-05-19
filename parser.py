@@ -203,15 +203,18 @@ def p_return(p):
   pass
 
 ## READ
-# TODO: Missing logic for read
 def p_read(p):
   "read : LEE '(' read_params ')' ';'"
   pass
 
 def p_read_params(p):
-  """read_params : expr_var ',' read_params
-                 | expr_var"""
+  """read_params : expr_var found_read_param ',' read_params
+                 | expr_var found_read_param"""
   pass
+
+def p_found_read_param(p):
+  "found_read_param : empty"
+  quads.addReadQuad()
 
 ## PRINT
 def p_print(p):
@@ -251,7 +254,6 @@ def p_found_else(p):
   quads.addElseQuad()
 
 ## FOR
-# TODO: Missing logic for 'for' loops (ask about how this works)
 def p_for(p):
   "for : DESDE ID found_for_iterator ':' expr found_for_start HASTA expr found_for_cond HACER '{' body '}'"
   quads.pushVar(quads.getTopOperand(), quads.getTopType())
@@ -412,8 +414,7 @@ def p_cte(p):
   """expr_var : CTE_INT
               | CTE_FLOAT
               | CTE_CHAR
-              | CTE_BOOL
-              | STRING"""
+              | CTE_BOOL"""
   t = None
   if (type(p[1]) is int):
     t = 'int'

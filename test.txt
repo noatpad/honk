@@ -35,4 +35,7 @@ principal() {
   desde i : 3 hasta 10 hacer { b = 15 + 20; }
 
   escribe(a, b, "Hi");
+
+  lee(a, b);
+  lee(c);
 }
