@@ -53,30 +53,38 @@ def p_var_declare(p):
   pass
 
 def p_var_name(p):
-  """var_name : variable p_found_var_name ',' var_name
-              | variable p_found_var_name"""
+  """var_name : variable_declare var_dims ',' var_name
+              | variable_declare var_dims"""
   pass
 
-def p_found_var_name(p):
-  "p_found_var_name : empty"
-  var = p[-1]
-  if not funcDir.varExists(var):
-    funcDir.addVar(var[0], quads.vDir.generateVirtualAddress(funcDir.getCurrentFunc(), funcDir.getCurrentType()))
+def p_variable_declare(p):
+  "variable_declare : ID"
+  var = p[1]
+  if funcDir.varAvailable(var):
+    funcDir.addVar(var[0], quads.vDir.generateVirtualAddress(funcDir.currentFunc, funcDir.currentType))
+    funcDir.setVarHelper(var)
   else:
     s_error(f'Variable "{var}" already exists!"')
 
-# TODO: Redo arrays and matrixes
-def p_variable_mat(p):
-  "variable : ID '[' CTE_INT ']' '[' CTE_INT ']'"
-  p[0] = (p[1], 2)
+def p_var_no_dims(p):
+  "var_dims : empty"
+  pass
 
-def p_variable_list(p):
-  "variable : ID '[' CTE_INT ']'"
-  p[0] = (p[1], 1)
+def p_var_dims(p):
+  """var_dims : dim dim
+              | dim"""
+  if len(p) == 3:
+    p[0] = p[1] * p[2]
+  else:
+    p[0] = p[1]
 
-def p_variable(p):
-  "variable : ID"
-  p[0] = (p[1], 0)
+  quads.vDir.makeSpaceForArray(funcDir.currentFunc, funcDir.currentType, p[0] - 1)
+
+
+def p_var_dim(p):
+  "dim : '[' CTE_INT ']'"
+  funcDir.addDimensionToVar(funcDir.varHelper, p[2])
+  p[0] = p[2]
 
 # TYPE
 def p_type(p):
@@ -115,15 +123,15 @@ def p_func_params(p):
   pass
 
 def p_func_param(p):
-  """func_param : type variable found_func_param ',' func_param
-                | type variable found_func_param"""
+  """func_param : type ID found_func_param ',' func_param
+                | type ID found_func_param"""
   pass
 
 def p_found_func_param(p):
   "found_func_param : empty"
   param = p[-1]
-  if not funcDir.varExists(param):
-    funcDir.addVar(param[0], quads.vDir.generateVirtualAddress(funcDir.getCurrentFunc(), funcDir.getCurrentType()))
+  if funcDir.varAvailable(param):
+    funcDir.addVar(param[0], quads.vDir.generateVirtualAddress(funcDir.currentFunc, funcDir.currentType))
     funcDir.addFuncParam()
   else:
     s_error(f'Multiple declaration of "{param}"!')
@@ -136,8 +144,6 @@ def p_found_func_end(p):
   "found_func_end : empty"
   funcDir.deleteVarTable()
   quads.addEndFuncQuad()
-  # funcDir.setTempCountForFunc(quads.getTempCount())
-  # funcDir.prepareEra()
 
 # BODY
 def p_body(p):
@@ -168,12 +174,7 @@ def p_found_assignment_end(p):
 ## RETURN
 def p_return(p):
   "return : REGRESA '(' expr ')' ';'"
-  # "return : REGRESA '(' expr found_return_expr ')' ';'"
   quads.addReturnQuad()
-
-# # def p_found_return_expr(p):
-#   "found_return_expr : empty"
-#   quads.addReturnQuad()
 
 ## READ
 def p_read(p):
@@ -443,7 +444,7 @@ def p_call_func_param(p):
 def p_func_single_step(p):
   "func_single_step : empty"
   target_param = funcDir.getParamOfFunc(quads.getTopFunction())
-  quads.addParamQuad(target_param, funcDir.getParamCount())
+  quads.addParamQuad(target_param, funcDir.paramCount)
   funcDir.incrementParamCount()
   pass
 

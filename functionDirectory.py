@@ -8,6 +8,8 @@ class Constant():
     self.vartype = vartype
     self.vAddr = vAddr
 
+
+
 ## -- VARIABLE
 class Var():
   def __init__(self, name, vartype, vAddr):
@@ -15,6 +17,7 @@ class Var():
     self.vartype = vartype
     self.dimensions = []
     self.vAddr = vAddr
+
 
 
 ## -- FUNCTION
@@ -27,7 +30,6 @@ class Function():
     self.varTable = None
     self.cteTable = None
     self.paramTable = []
-    # self.tempCount = 0
     self.era = []
 
   ## GETTERS
@@ -43,10 +45,6 @@ class Function():
   def setQuadStart(self, qs):
     self.quadStart = qs
 
-  # # Set number of temporals used in function
-  # def setTempCount(self, count):
-  #   self.tempCount = count
-
   # Set "era" (local and temporary counters)
   def setEra(self, era):
     self.era = era
@@ -58,7 +56,15 @@ class Function():
 
     if self.debug:
       v = self.varTable[name]
-      print(f'\t\t\t\t\t> VAR: {v.name} - {v.vartype}{v.dimensions} -> {v.vAddr}')
+      print(f'\t\t\t\t\t> VAR: {v.name} - {v.vartype} -> {v.vAddr}')
+
+  # Add dimension to var
+  def addDimensionToVar(self, var, dim):
+    self.varTable[var].dimensions.append(dim)
+
+    if self.debug:
+      v = self.varTable[var]
+      print(f'\t\t\t\t\t>> VAR: {v.name} - {v.vartype}{v.dimensions} -> {v.vAddr}')
 
   # Add constant
   def addCte(self, value, vartype, vAddr):
@@ -93,6 +99,7 @@ class FunctionDirectory():
     self.currentFunc = None
     self.currentType = "void"
     self.paramCount = 0
+    self.varHelper = None
 
   ## SETTERS
   # NOTE: `currentFunc` is set in addFunction()
@@ -108,13 +115,13 @@ class FunctionDirectory():
   def setCurrentType(self, t):
     self.currentType = t
 
+  # Set var helper used in parser
+  def setVarHelper(self, var):
+    self.varHelper = var
+
   # Set start of quad for function
   def setQuadStart(self, qs):
     self.directory[self.currentFunc].setQuadStart(qs)
-
-  # Set number of temporals used in function
-  # def setTempCountForFunc(self, count):
-  #   self.directory[self.currentFunc].setTempCount(count)
 
   # Set "era" for function
   def setEra(self, era):
@@ -151,14 +158,6 @@ class FunctionDirectory():
 
     return ret.vAddr
 
-  # Get current function in parser
-  def getCurrentFunc(self):
-    return self.currentFunc
-
-  # Get currently used type in parser
-  def getCurrentType(self):
-    return self.currentType
-
   # Get parameter of function
   def getParamOfFunc(self, func):
     return self.directory[func].paramTable[self.paramCount]
@@ -174,10 +173,6 @@ class FunctionDirectory():
   # Get current function's return type
   def getCurrentFuncReturnType(self):
     return self.directory[self.currentFunc].returnType
-
-  # Get param count of function
-  def getParamCount(self):
-    return self.paramCount
 
   # Get ERA of function
   def getEra(self, func):
@@ -199,6 +194,10 @@ class FunctionDirectory():
   # Add variable to the current function's var table
   def addVar(self, name, vAddr):
     self.directory[self.currentFunc].addVar(name, self.currentType, vAddr)
+
+  # Add dimension to a specified variable in the current scope
+  def addDimensionToVar(self, var, dim):
+    self.directory[self.currentFunc].addDimensionToVar(var, dim)
 
   # Add constant to the current function's constants table
   def addCte(self, value, vartype, vAddr):
@@ -226,8 +225,14 @@ class FunctionDirectory():
       return True
     return False
 
-  # Returns a boolean if variable exists in local or global function
+  # Returns a boolean if variable exists in local or global scope
   def varExists(self, var):
     if var in self.directory[self.currentFunc].varTable or var in self.directory[self.globalFunc].varTable:
+      return True
+    return False
+
+  # Returns a boolean if variable is available to declare in current context
+  def varAvailable(self, var):
+    if var not in self.directory[self.currentFunc].varTable:
       return True
     return False

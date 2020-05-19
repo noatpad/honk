@@ -2,7 +2,7 @@ Programa hi;
 var
   int : a, b;
   float : f;
-  int : c;
+  int : c, d[10], x[3][5], e[2][3];
 
 funcion void func()
 var char : d;

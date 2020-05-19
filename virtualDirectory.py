@@ -21,6 +21,9 @@ class VirtualDirectory:
     self.tempCounter = [0, 0, 0, 0]
     self.cteCounter = [0, 0, 0, 0]
 
+    # Total counter
+    self.totalCounter = 0
+
   def getEra(self):
     return [self.localCounter, self.tempCounter]
 
@@ -28,7 +31,7 @@ class VirtualDirectory:
     self.localCounter = [0, 0, 0, 0]
     self.tempCounter = [0, 0, 0, 0]
 
-  def generateVirtualAddress(self, scope, vartype):
+  def setSpace(self, scope, vartype, space):
     # Select variable type
     v = None
     if vartype == 'int':
@@ -44,26 +47,35 @@ class VirtualDirectory:
     # if v == 3 and (scope in ['global', 'local', 'temp']):
     #   raise Exception(f"Can't set {vartype} in {scope}!")
 
+    # Update total counter
+    self.totalCounter += space
+
     # Select scope (with validation checks)
     if scope == 'global':   # Global
-      if self.globalRanges[v] + self.globalCounter[v] >= self.globalRanges[v + 1]:
+      if self.globalRanges[v] + self.globalCounter[v] + space >= self.globalRanges[v + 1]:
         raise Exception(f"Out of bounds! {vartype} in {scope}")
-      self.globalCounter[v] += 1
+      self.globalCounter[v] += space
       return self.globalRanges[v] + self.globalCounter[v] - 1
     elif scope == 'temp':   # Temp
-      if self.tempRanges[v] + self.tempCounter[v] >= self.tempRanges[v + 1]:
+      if self.tempRanges[v] + self.tempCounter[v] + space >= self.tempRanges[v + 1]:
         raise Exception(f"Out of bounds! {vartype} in {scope}")
-      self.tempCounter[v] += 1
+      self.tempCounter[v] += space
       return self.tempRanges[v] + self.tempCounter[v] - 1
     elif scope == 'cte':    # Constants
-      if self.cteRanges[v] + self.cteCounter[v] >= self.cteRanges[v + 1]:
+      if self.cteRanges[v] + self.cteCounter[v] + space >= self.cteRanges[v + 1]:
         raise Exception(f"Out of bounds! {vartype} in {scope}")
-      self.cteCounter[v] += 1
+      self.cteCounter[v] += space
       return self.cteRanges[v] + self.cteCounter[v] - 1
     else:                   # Local (any local function)
-      if self.localRanges[v] + self.localCounter[v] >= self.localRanges[v + 1]:
+      if self.localRanges[v] + self.localCounter[v] + space >= self.localRanges[v + 1]:
         raise Exception(f"Out of bounds! {vartype} in {scope}")
-      self.localCounter[v] += 1
+      self.localCounter[v] += space
       return self.localRanges[v] + self.localCounter[v] - 1
 
     raise Exception(f'Invalid vartype/scope?! -> {vartype}, {scope}')
+
+  def generateVirtualAddress(self, scope, vartype):
+    return self.setSpace(scope, vartype, 1)
+
+  def makeSpaceForArray(self, scope, vartype, value):
+    self.setSpace(scope, vartype, value)
