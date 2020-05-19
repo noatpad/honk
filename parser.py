@@ -55,7 +55,7 @@ def p_found_var_name(p):
   "p_found_var_name : empty"
   var = p[-1]
   if not funcDir.varExists(var):
-    funcDir.addVar(var[0], var[1], quads.vDir.generateVirtualAddress(funcDir.getCurrentFunc(), funcDir.getCurrentType()))
+    funcDir.addVar(var[0], quads.vDir.generateVirtualAddress(funcDir.getCurrentFunc(), funcDir.getCurrentType()))
   else:
     s_error(f'Variable "{var}" already exists!"')
 
@@ -117,7 +117,7 @@ def p_found_func_param(p):
   "found_func_param : empty"
   param = p[-1]
   if not funcDir.varExists(param):
-    funcDir.addVar(param[0], param[1], quads.vDir.generateVirtualAddress(funcDir.getCurrentFunc(), funcDir.getCurrentType()))
+    funcDir.addVar(param[0], quads.vDir.generateVirtualAddress(funcDir.getCurrentFunc(), funcDir.getCurrentType()))
     funcDir.addFuncParam()
   else:
     s_error(f'Multiple declaration of "{param}"!')
@@ -240,7 +240,7 @@ def p_found_for_iterator(p):
   var = p[-1]
   if not funcDir.varExists(var):
     funcDir.setCurrentType('int')
-    funcDir.addVar(var, 0, quads.vDir.generateVirtualAddress('temp', 'int'))
+    funcDir.addVar(var, quads.vDir.generateVirtualAddress('temp', 'int'))
     quads.pushVar(var, 'int')
     quads.pushVar(var, 'int')
     quads.pushVar(var, 'int')
@@ -368,17 +368,17 @@ def p_expr_mono_op(p):
 # TODO: Redo arrays and matrixes
 def p_expr_var_mat_elem(p):
   "expr_var : ID '[' expr ']' '[' expr ']'"
-  var = funcDir.getVar(p[1], 2)
+  var = funcDir.getVar(p[1])
   quads.pushVar(var.name, var.vartype)
 
 def p_expr_var_list_elem(p):
   "expr_var : ID '[' expr ']'"
-  var = funcDir.getVar(p[1], 1)
+  var = funcDir.getVar(p[1])
   quads.pushVar(var.name, var.vartype)
 
 def p_expr_var_atom(p):
   "expr_var : ID"
-  var = funcDir.getVar(p[1], 0)
+  var = funcDir.getVar(p[1])
   quads.pushVar(var.name, var.vartype)
 
 def p_cte(p):

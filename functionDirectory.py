@@ -10,10 +10,10 @@ class Constant():
 
 ## -- VARIABLE
 class Var():
-  def __init__(self, name, vartype, dimensions, vAddr):
+  def __init__(self, name, vartype, vAddr):
     self.name = name
     self.vartype = vartype
-    self.dimensions = dimensions
+    self.dimensions = []
     self.vAddr = vAddr
 
 
@@ -52,8 +52,8 @@ class Function():
 
   ## PUSH/ADD
   # Add variable
-  def addVar(self, name, vartype, dimensions, vAddr):
-    self.varTable[name] = Var(name, vartype, dimensions, vAddr)
+  def addVar(self, name, vartype, vAddr):
+    self.varTable[name] = Var(name, vartype, vAddr)
 
   # Add constant
   def addCte(self, value, vartype, vAddr):
@@ -115,34 +115,29 @@ class FunctionDirectory():
     self.paramCount += 1
 
   ## GETTERS
+  # TODO: Search through constants
   # Returns desired variable
-  def getVar(self, name, depth):
+  def getVar(self, name):
     ret = None
-    if name in self.directory[self.currentFunc].varTable:     # First check local variables
+    # Priority: Local -> Global -> Constants
+    if name in self.directory[self.currentFunc].varTable:
       ret = self.directory[self.currentFunc].getVar(name)
-    elif name in self.directory[self.globalFunc].varTable:    # Then check global variables
+    elif name in self.directory[self.globalFunc].varTable:
       ret = self.directory[self.globalFunc].getVar(name)
     else:     # Else, raise an error
       raise Exception(f'Variable "{name} does not exist!')
-
-    if depth > ret.dimensions:
-      raise Exception(f'{name} has {ret.dimensions} dimensions! (Trying to access depth {depth})')
-    ret.dimensions = ret.dimensions - depth
 
     return ret
 
   # Returns virtual address of desired variable
   def getVAddr(self, name):
     ret = None
-    if name in self.directory[self.currentFunc].varTable:     # First check local variables
+    if name in self.directory[self.currentFunc].varTable:
       ret = self.directory[self.currentFunc].getVar(name)
-    elif name in self.directory[self.globalFunc].varTable:    # Then check global variables
+    elif name in self.directory[self.globalFunc].varTable:
       ret = self.directory[self.globalFunc].getVar(name)
-    # elif name in self.directory[self.getCurrentFunc].cteTable:    # Finally check the constants
-    #   ret = self.directory[self.currentFunc].getCte(name)
-    else:     # Else, raise an error
+    else:
       return name   # NOTE: It's an address if it reaches here?
-      # raise Exception(f'Variable "{name}" does not exist!')
 
     return ret.vAddr
 
@@ -189,8 +184,8 @@ class FunctionDirectory():
     self.directory[self.currentFunc].addParam(self.currentType)
 
   # Add variable to the current function's var table
-  def addVar(self, name, dimensions, vAddr):
-    self.directory[self.currentFunc].addVar(name, self.currentType, dimensions, vAddr)
+  def addVar(self, name, vAddr):
+    self.directory[self.currentFunc].addVar(name, self.currentType, vAddr)
 
   # Add constant to the current function's constants table
   def addCte(self, value, vartype, vAddr):

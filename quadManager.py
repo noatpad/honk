@@ -236,7 +236,8 @@ class QuadManager:
 
   # Debug function
   def debug(self):
-    print(" - DEBUG - ")
+    print(" - - - DEBUG - - - ")
+    print("--- QUAD MANAGER")
     self.printQuads()
     print("sOperands ->", list(self.sOperands))
     print("sOperators ->", list(self.sOperators))
