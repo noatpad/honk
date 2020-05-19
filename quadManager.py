@@ -5,7 +5,8 @@ from virtualDirectory import VirtualDirectory
 
 # TODO: Add validation for dimensions
 class QuadManager:
-  def __init__(self, funcDir):
+  def __init__(self, funcDir, debug):
+    self.debug = debug
     self.funcDir = funcDir
     self.vDir = VirtualDirectory()
     self.sOperands = deque()
@@ -73,6 +74,8 @@ class QuadManager:
   ## GENERAL QUAD FUNCTIONS
   # General function to add quads
   def addQuad(self, quad):
+    if self.debug:
+      print(f'{self.quadCount}:\t{quad[0]}\t{quad[1]}\t{quad[2]}\t{quad[3]}')
     self.quads.append(quad)
     self.quadCount += 1
 
@@ -81,6 +84,9 @@ class QuadManager:
     quadToChange = list(self.quads[index])
     quadToChange[3] = jump
     self.quads[index] = tuple(quadToChange)
+
+    if self.debug:
+      print(f'\t\t\t\t\t! Completed quad {index} with jump {jump}')
 
   ## QUAD FUNCTIONS
   # Append assignment quadruple
@@ -113,6 +119,10 @@ class QuadManager:
         self.addQuad((operator, self.funcDir.getVAddr(left_op), self.funcDir.getVAddr(right_op), result))
         self.sOperands.append(result)
         self.sTypes.append(result_type)
+
+        if self.debug:
+          print(f'\t\t\t\t\t> TMP: t{self.tempCount} - {result_type} -> {result}')
+
         self.tempCount += 1
       else:
         raise Exception(f'Type mismatch! {left_type} {operator} {right_type}')
@@ -235,12 +245,11 @@ class QuadManager:
       i += 1
 
   # Debug function
-  def debug(self):
+  def debugStep(self):
     print(" - - - DEBUG - - - ")
-    print("--- QUAD MANAGER")
-    self.printQuads()
     print("sOperands ->", list(self.sOperands))
     print("sOperators ->", list(self.sOperators))
     print("sTypes ->", list(self.sTypes))
     print("sJumps ->", list(self.sJumps))
     print("sFuncs ->", list(self.sJumps))
+    print(" - - - DEBUG - - - ")

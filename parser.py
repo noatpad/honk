@@ -5,8 +5,11 @@ from lexer import tokens
 from functionDirectory import FunctionDirectory
 from quadManager import QuadManager
 
-funcDir = FunctionDirectory()
-quads = QuadManager(funcDir)
+# For debugging purposes
+debug = True
+
+funcDir = FunctionDirectory(debug)
+quads = QuadManager(funcDir, debug)
 
 # Precedence rules for arithmetic
 precedence = (
@@ -23,11 +26,14 @@ def p_programa(p):
   "programa : PROGRAMA ID found_program_name ';' vars functions PRINCIPAL '(' ')' '{' body '}'"
   quads.addEndQuad()
   p[0] = quads
-  quads.debug()
+  quads.debugStep()
 
 # Make a GOTO quad to main()
 def p_found_program_name(p):
   'found_program_name : empty'
+  if quads.debug:
+      print("\n|==|==|==|==|==|==|==|==| START DEBUG LOG |==|==|==|==|==|==|==|==|\n")
+
   funcDir.addFunction('global')
   funcDir.setGlobalFunction()
 

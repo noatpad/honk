@@ -19,7 +19,8 @@ class Var():
 
 ## -- FUNCTION
 class Function():
-  def __init__(self, name, returnType):
+  def __init__(self, name, returnType, debug):
+    self.debug = debug
     self.name = name
     self.returnType = returnType
     self.quadStart = None
@@ -55,9 +56,17 @@ class Function():
   def addVar(self, name, vartype, vAddr):
     self.varTable[name] = Var(name, vartype, vAddr)
 
+    if self.debug:
+      v = self.varTable[name]
+      print(f'\t\t\t\t\t> VAR: {v.name} - {v.vartype}{v.dimensions} -> {v.vAddr}')
+
   # Add constant
   def addCte(self, value, vartype, vAddr):
     self.cteTable[value] = Constant(value, vartype, vAddr)
+
+    if self.debug:
+      c = self.cteTable[value]
+      print(f'\t\t\t\t\t> CTE: {c.value} - {c.vartype} -> {c.vAddr}')
 
   # Add parameter
   def addParam(self, vartype):
@@ -77,7 +86,8 @@ class Function():
 
 ## -- FUNCTION DIRECTORY
 class FunctionDirectory():
-  def __init__(self):
+  def __init__(self, debug):
+    self.debug = debug
     self.directory = dict()
     self.globalFunc = None
     self.currentFunc = None
@@ -176,8 +186,11 @@ class FunctionDirectory():
   ## PUSH/ADD
   # Adds function to the directory
   def addFunction(self, name):
-    self.directory[name] = Function(name, self.currentType)
+    self.directory[name] = Function(name, self.currentType, self.debug)
     self.currentFunc = name
+
+    if self.debug:
+      print(f'-- {self.currentFunc} - {self.currentType}')
 
   # Add parameters to current function
   def addFuncParam(self):
