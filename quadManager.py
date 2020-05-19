@@ -14,6 +14,11 @@ class QuadManager:
     self.quadCount = 0
     self.tempCount = 0
 
+  ## GETTERS
+  # Get function from top of `sFuncs` stack
+  def getTopFunction(self):
+    return self.sFuncs[-1]
+
   # Get current quad counter
   def getQuadCount(self):
     return self.quadCount
@@ -22,10 +27,7 @@ class QuadManager:
   def getTempCount(self):
     return self.tempCount
 
-  # Reset temporal counter
-  def resetTemporals(self):
-    self.tempCount = 0
-
+  ## PUSH
   # Push variable name and type to their respective stacks
   def pushVar(self, name, vartype):
     self.sOperands.append(name)
@@ -39,9 +41,8 @@ class QuadManager:
   def pushFunction(self, func):
     self.sFuncs.append(func)
 
-  def getTopFunction(self):
-    return self.sFuncs[-1]
-
+  ## POP
+  # Pop function from stack
   def popFunction(self):
     return self.sFuncs.pop()
 
@@ -49,10 +50,16 @@ class QuadManager:
   def popOperator(self):
     return self.sOperators.pop()
 
-  # Pop sTypes from stack
+  # Pop type from stack
   def popType(self):
     return self.sTypes.pop()
 
+  ## RESET
+  # Reset temporal counter
+  def resetTemporals(self):
+    self.tempCount = 0
+
+  ## GENERAL QUAD FUNCTIONS
   # General function to add quads
   def addQuad(self, quad):
     self.quads.append(quad)
@@ -64,6 +71,7 @@ class QuadManager:
     quadToChange[3] = jump
     self.quads[index] = tuple(quadToChange)
 
+  ## QUAD FUNCTIONS
   # Append assignment quadruple
   def addAssignQuad(self):
     right_op = self.sOperands.pop()
@@ -167,6 +175,7 @@ class QuadManager:
   def addEndQuad(self):
     self.addQuad(('END', None, None, None))
 
+  # Print all quads
   def printQuads(self):
     i = 0
     for q in self.quads:

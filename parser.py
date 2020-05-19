@@ -148,6 +148,7 @@ def p_statement(p):
                | while"""
   pass
 
+## ASSIGNMENT
 def p_assignment(p):
   "assignment : expr_var '=' found_expr_duo_op expr found_assignment_end ';'"
   pass
@@ -156,6 +157,7 @@ def p_found_assignment_end(p):
   "found_assignment_end : empty"
   quadManager.addAssignQuad()
 
+## CALL_FUNCTION
 def p_call_func(p):
   "call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end ';'"
   pass
@@ -194,11 +196,13 @@ def p_found_call_func_end(p):
   else:
     raise Exception(f'Wrong number of parameters in {func}!')
 
+## RETURN
 # TODO: Missing logic for return
 def p_return(p):
   "return : REGRESA '(' expr ')' ';'"
   pass
 
+## READ
 # TODO: Missing logic for read
 def p_read(p):
   "read : LEE '(' read_params ')' ';'"
@@ -209,6 +213,7 @@ def p_read_params(p):
                  | expr_var"""
   pass
 
+## WRITE
 # TODO: Missing logic for write
 def p_write(p):
   "write : ESCRIBE '(' write_params ')' ';'"
@@ -219,6 +224,7 @@ def p_write_params(p):
                   | expr_var"""
   pass
 
+## IF
 def p_if(p):
   """if : SI '(' expr ')' found_if_expr ENTONCES '{' body '}'
         | SI '(' expr ')' found_if_expr ENTONCES '{' body '}' else"""
@@ -228,6 +234,7 @@ def p_found_if_expr(p):
   "found_if_expr : empty"
   quadManager.addIfQuad()
 
+## ELSE
 def p_else(p):
   "else : SINO found_else '{' body '}'"
   pass
@@ -236,11 +243,13 @@ def p_found_else(p):
   "found_else : empty"
   quadManager.addElseQuad()
 
+## FOR
 # TODO: Missing logic for 'for' loops (ask about how this works)
 def p_for(p):
   "for : DESDE ID ':' expr HASTA expr HACER '{' body '}'"
   pass
 
+## WHILE
 def p_while(p):
   "while : MIENTRAS found_while '(' expr ')' found_while_expr HAZ '{' body '}'"
   quadManager.completeWhileQuad()
@@ -254,7 +263,10 @@ def p_found_while_expr(p):
   quadManager.addWhileQuad()
 
 # EXPRESSION -> Order of operator precedence:
-# Factors (*, /, %) > Arithmetic (+, -) > Comparison (==, !=, <, <=, >, >=) > Logic (&, |)
+# - Factors (*, /, %)
+# - Arithmetic (+, -)
+# - Comparison (==, !=, <, <=, >, >=)
+# - Logic (&, |)
 def p_expr(p):
   "expr : expr_logic"
   pass
@@ -380,5 +392,6 @@ def p_empty(p):
 def p_error(p):
   raise Exception(f'({p.lineno}:{p.lexpos}) Syntax error at "{p.value}"')
 
+# Manual error (line number & position are kinda broken...)
 def s_error(lineno, lexpos, msg):
   raise Exception(f'({lineno}:{lexpos} - {msg}')
