@@ -200,9 +200,8 @@ class QuadManager:
       raise Exception(f'Wrong param type! {param_type} {target_param}')
 
   # Append ERA quad
-  # TODO: Ask dafaq is this and where to get the size of said dafaq
-  def addEraQuad(self):
-    self.addQuad(('ERA', None, None, None))
+  def addEraQuad(self, func):
+    self.addQuad(('ERA', None, None, self.funcDir.getEra(func)))
 
   # Append EndFunc quad
   def addEndFuncQuad(self):

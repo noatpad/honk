@@ -146,14 +146,6 @@ class FunctionDirectory():
 
     return ret.vAddr
 
-  # Get parameter of function
-  def getParamOfFunc(self, func):
-    return self.directory[func].paramTable[self.paramCount]
-
-  # Get quadStart of function
-  def getQuadStartOfFunc(self, func):
-    return self.directory[func].quadStart
-
   # Get current function in parser
   def getCurrentFunc(self):
     return self.currentFunc
@@ -162,6 +154,14 @@ class FunctionDirectory():
   def getCurrentType(self):
     return self.currentType
 
+  # Get parameter of function
+  def getParamOfFunc(self, func):
+    return self.directory[func].paramTable[self.paramCount]
+
+  # Get quadStart of function
+  def getQuadStartOfFunc(self, func):
+    return self.directory[func].quadStart
+
   # Get current function's return type
   def getCurrentFuncReturnType(self):
     return self.directory[self.currentFunc].returnType
@@ -169,6 +169,10 @@ class FunctionDirectory():
   # Get param count of function
   def getParamCount(self):
     return self.paramCount
+
+  # Get ERA of function
+  def getEra(self, func):
+    return self.directory[self.currentFunc].era
 
   ## PUSH/ADD
   # Adds function to the directory

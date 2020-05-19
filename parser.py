@@ -140,13 +140,13 @@ def p_body(p):
 
 def p_statement(p):
   """statement : assignment
-               | call_func
                | return
                | read
                | print
                | if
                | for
-               | while"""
+               | while
+               | call_func"""
   pass
 
 ## ASSIGNMENT
@@ -157,45 +157,6 @@ def p_assignment(p):
 def p_found_assignment_end(p):
   "found_assignment_end : empty"
   quads.addAssignQuad()
-
-## CALL_FUNCTION
-def p_call_func(p):
-  "call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end ';'"
-  pass
-
-def p_found_call_func_name(p):
-  """found_call_func_name : empty"""
-  func = p[-1]
-  if funcDir.functionExists(func):
-    quads.addEraQuad()
-    quads.pushFunction(func)
-  else:
-    raise Exception(f'Function {func}() does not exist!')
-
-def p_call_func_params(p):
-  """call_func_params : call_func_param
-                      | empty"""
-  pass
-
-def p_call_func_param(p):
-  """call_func_param : expr func_single_step ',' call_func_param
-                     | expr func_single_step"""
-  pass
-
-def p_func_single_step(p):
-  "func_single_step : empty"
-  target_param = funcDir.getParamOfFunc(quads.getTopFunction())
-  quads.addParamQuad(target_param, funcDir.getParamCount())
-  funcDir.incrementParamCount()
-  pass
-
-def p_found_call_func_end(p):
-  "found_call_func_end : empty"
-  func = quads.popFunction()
-  if funcDir.verifyParamCount(func):
-    quads.addGoSubQuad(func, funcDir.getQuadStartOfFunc(func))
-  else:
-    raise Exception(f'Wrong number of parameters in {func}!')
 
 ## RETURN
 def p_return(p):
@@ -435,6 +396,45 @@ def p_cte(p):
   vAddr = quads.vDir.generateVirtualAddress('cte', t)
   funcDir.addCte(p[1], t, vAddr)
   quads.pushVar(vAddr, t)
+
+## CALL_FUNCTION
+def p_call_func(p):
+  "call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end ';'"
+  pass
+
+def p_found_call_func_name(p):
+  """found_call_func_name : empty"""
+  func = p[-1]
+  if funcDir.functionExists(func):
+    quads.addEraQuad(func)
+    quads.pushFunction(func)
+  else:
+    raise Exception(f'Function {func}() does not exist!')
+
+def p_call_func_params(p):
+  """call_func_params : call_func_param
+                      | empty"""
+  pass
+
+def p_call_func_param(p):
+  """call_func_param : expr func_single_step ',' call_func_param
+                     | expr func_single_step"""
+  pass
+
+def p_func_single_step(p):
+  "func_single_step : empty"
+  target_param = funcDir.getParamOfFunc(quads.getTopFunction())
+  quads.addParamQuad(target_param, funcDir.getParamCount())
+  funcDir.incrementParamCount()
+  pass
+
+def p_found_call_func_end(p):
+  "found_call_func_end : empty"
+  func = quads.popFunction()
+  if funcDir.verifyParamCount(func):
+    quads.addGoSubQuad(func, funcDir.getQuadStartOfFunc(func))
+  else:
+    raise Exception(f'Wrong number of parameters in {func}!')
 
 def p_empty(p):
   "empty :"
