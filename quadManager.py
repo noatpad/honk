@@ -15,7 +15,15 @@ class QuadManager:
     self.tempCount = 0
 
   ## GETTERS
-  # Get function from top of `sFuncs` stack
+  # Get operand from top of stack
+  def getTopOperand(self):
+    return self.sOperands[-1]
+
+  # Get type from top of stack
+  def getTopType(self):
+    return self.sTypes[-1]
+
+  # Get function from top of stack
   def getTopFunction(self):
     return self.sFuncs[-1]
 
@@ -49,6 +57,10 @@ class QuadManager:
   # Pop operator from stack
   def popOperator(self):
     return self.sOperators.pop()
+
+  # Pop operand from stack
+  def popOperand(self):
+    return self.sOperands.pop()
 
   # Pop type from stack
   def popType(self):
@@ -86,6 +98,25 @@ class QuadManager:
     else:
       raise Exception(f'Type mismatch! {left_type} {operator} {right_type}')
 
+  # Append dual-operand operation quadruple
+  def addDualOpQuad(self, ops):
+    if self.sOperators and self.sOperators[-1] in ops:
+      right_op = self.sOperands.pop()
+      right_type = self.sTypes.pop()
+      left_op = self.sOperands.pop()
+      left_type = self.sTypes.pop()
+      operator = self.sOperators.pop()
+
+      result_type = getDuoResultType(left_type, right_type, operator)
+      if result_type:
+        result = 't' + str(self.tempCount)
+        self.addQuad((operator, left_op, right_op, result))
+        self.sOperands.append(result)
+        self.sTypes.append(result_type)
+        self.tempCount += 1
+      else:
+        raise Exception(f'Type mismatch! {left_type} {operator} {right_type}')
+
   # Append quadruple for `if` statement
   def addIfQuad(self):
     result_type = self.sTypes.pop()
@@ -108,13 +139,13 @@ class QuadManager:
     end = self.sJumps.pop()
     self.completeQuad(end, self.quadCount)
 
-  # Prepare for `while` block
-  def prepareWhile(self):
+  # Prepare for/while block
+  def prepareLoop(self):
     self.sJumps.append(self.quadCount)
 
   # Append quadruple for `while` block
   # NOTE: It's practically identical to addIfQuad()
-  def addWhileQuad(self):
+  def addLoopCondQuad(self):
     result_type = self.sTypes.pop()
     if result_type == 'bool':
       result = self.sOperands.pop()
@@ -124,30 +155,11 @@ class QuadManager:
       raise Exception(f'Type mismatch! {result_type} != bool')
 
   # Complete quadruple for `while` block
-  def completeWhileQuad(self):
+  def completeLoopQuad(self):
     end = self.sJumps.pop()
     ret = self.sJumps.pop()
     self.addQuad(('GoTo', None, None, ret))
     self.completeQuad(end, self.quadCount)
-
-  # Append dual-operand operation quadruple
-  def addDualOpQuad(self, ops):
-    if self.sOperators and self.sOperators[-1] in ops:
-      right_op = self.sOperands.pop()
-      right_type = self.sTypes.pop()
-      left_op = self.sOperands.pop()
-      left_type = self.sTypes.pop()
-      operator = self.sOperators.pop()
-
-      result_type = getDuoResultType(left_type, right_type, operator)
-      if result_type:
-        result = 't' + str(self.tempCount)
-        self.addQuad((operator, left_op, right_op, result))
-        self.sOperands.append(result)
-        self.sTypes.append(result_type)
-        self.tempCount += 1
-      else:
-        raise Exception(f'Type mismatch! {left_type} {operator} {right_type}')
 
   # Append PARAM Quad
   def addParamQuad(self, target_param, k):
@@ -181,3 +193,11 @@ class QuadManager:
     for q in self.quads:
       print(f'{i}:\t{q[0]}\t{q[1]}\t{q[2]}\t{q[3]}')
       i += 1
+
+  # Debug function
+  def debug(self):
+    print("sOperands ->", list(self.sOperands))
+    print("sOperators ->", list(self.sOperators))
+    print("sTypes ->", list(self.sTypes))
+    print("sJumps ->", list(self.sJumps))
+    print("sFuncs ->", list(self.sJumps))

@@ -31,4 +31,6 @@ principal() {
 
   func();
   e(a, b);
+
+  desde i : 3 hasta 10 hacer { b = 15 + 20; }
 }
