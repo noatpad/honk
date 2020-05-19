@@ -25,7 +25,7 @@ reserved = {
 
 # Token list
 tokens = [
-  'ID', 'CTE_INT', 'CTE_FLOAT', 'CTE_CHAR', 'CTE_BOOL',
+  'ID', 'CTE_INT', 'CTE_FLOAT', 'CTE_CHAR', 'CTE_BOOL', 'STRING'
   'IS_EQUAL', 'IS_NOT_EQUAL', 'LESS_THAN_OR_EQUAL', 'MORE_THAN_OR_EQUAL'
 ] + list(reserved.values())
 
@@ -61,6 +61,11 @@ def t_CTE_CHAR(t):
 def t_CTE_BOOL(t):
   r'(true|false)'
   t.value = (t.value == "true")
+  return t
+
+def t_STRING(t):
+  r'\".+\"'
+  t.value = t.value[1:-1]
   return t
 
 # Ignored characters and tokens
