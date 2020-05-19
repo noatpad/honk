@@ -125,13 +125,12 @@ def p_found_func_start(p):
   "found_func_start : empty"
   funcDir.setQuadStart(quads.getQuadCount())
 
-# TODO: Check if function has a return statement if non-void
 def p_found_func_end(p):
   "found_func_end : empty"
   funcDir.deleteVarTable()
-  funcDir.setTempCountForFunc(quads.getTempCount())
-  quads.resetTemporals()
   quads.addEndFuncQuad()
+  # funcDir.setTempCountForFunc(quads.getTempCount())
+  # funcDir.prepareEra()
 
 # BODY
 def p_body(p):
@@ -199,10 +198,14 @@ def p_found_call_func_end(p):
     raise Exception(f'Wrong number of parameters in {func}!')
 
 ## RETURN
-# TODO: Missing logic for return
 def p_return(p):
   "return : REGRESA '(' expr ')' ';'"
-  pass
+  # "return : REGRESA '(' expr found_return_expr ')' ';'"
+  quads.addReturnQuad()
+
+# # def p_found_return_expr(p):
+#   "found_return_expr : empty"
+#   quads.addReturnQuad()
 
 ## READ
 def p_read(p):

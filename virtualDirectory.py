@@ -2,6 +2,7 @@
 class VirtualDirectory:
   def __init__(self):
     # TODO: Make booleans only constants
+    # NOTE: Remember constants are distributed throughout the whole program
     # Virtual address ranges
     # (|| int || float || char || bool ||)
     # self.globalRanges = (1000, 4000, 6500, 7999, 7999)
@@ -19,6 +20,13 @@ class VirtualDirectory:
     self.localCounter = [0, 0, 0, 0]
     self.tempCounter = [0, 0, 0, 0]
     self.cteCounter = [0, 0, 0, 0]
+
+  def getEra(self):
+    return [self.localCounter, self.tempCounter]
+
+  def resetLocalCounters(self):
+    self.localCounter = [0, 0, 0, 0]
+    self.tempCounter = [0, 0, 0, 0]
 
   def generateVirtualAddress(self, scope, vartype):
     # Select variable type

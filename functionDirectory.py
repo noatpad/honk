@@ -26,7 +26,8 @@ class Function():
     self.varTable = None
     self.cteTable = None
     self.paramTable = []
-    self.tempCount = 0
+    # self.tempCount = 0
+    self.era = []
 
   ## GETTERS
   # Get variable
@@ -41,9 +42,13 @@ class Function():
   def setQuadStart(self, qs):
     self.quadStart = qs
 
-  # Set number of temporals used in function
-  def setTempCount(self, count):
-    self.tempCount = count
+  # # Set number of temporals used in function
+  # def setTempCount(self, count):
+  #   self.tempCount = count
+
+  # Set "era" (local and temporary counters)
+  def setEra(self, era):
+    self.era = era
 
   ## PUSH/ADD
   # Add variable
@@ -98,8 +103,12 @@ class FunctionDirectory():
     self.directory[self.currentFunc].setQuadStart(qs)
 
   # Set number of temporals used in function
-  def setTempCountForFunc(self, count):
-    self.directory[self.currentFunc].setTempCount(count)
+  # def setTempCountForFunc(self, count):
+  #   self.directory[self.currentFunc].setTempCount(count)
+
+  # Set "era" for function
+  def setEra(self, era):
+    self.directory[self.currentFunc].setEra(era)
 
   # Increment param count of function by 1
   def incrementParamCount(self):
@@ -152,6 +161,10 @@ class FunctionDirectory():
   # Get currently used type in parser
   def getCurrentType(self):
     return self.currentType
+
+  # Get current function's return type
+  def getCurrentFuncReturnType(self):
+    return self.directory[self.currentFunc].returnType
 
   # Get param count of function
   def getParamCount(self):

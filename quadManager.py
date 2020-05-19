@@ -16,6 +16,7 @@ class QuadManager:
     self.quads = deque()
     self.quadCount = 0
     self.tempCount = 0
+    self.returnCount = 0
 
   ## GETTERS
   # Get operand from top of stack
@@ -69,11 +70,6 @@ class QuadManager:
   def popType(self):
     return self.sTypes.pop()
 
-  ## RESET
-  # Reset temporal counter
-  def resetTemporals(self):
-    self.tempCount = 0
-
   ## GENERAL QUAD FUNCTIONS
   # General function to add quads
   def addQuad(self, quad):
@@ -120,6 +116,20 @@ class QuadManager:
         self.tempCount += 1
       else:
         raise Exception(f'Type mismatch! {left_type} {operator} {right_type}')
+
+  # Append RETURN quadruple
+  def addReturnQuad(self):
+    vartype = self.sTypes.pop()
+    returntype = self.funcDir.getCurrentFuncReturnType()
+
+    if returntype is "void":
+      raise Exception("There can't be return statements in non-void functions!")
+    elif vartype != returntype:
+      raise Exception(f"Returned variable doesn't match return type! -> {vartype} != {returntype}")
+
+    var = self.sOperands.pop()
+    self.addQuad(("RETURN", None, None, self.funcDir.getVAddr(var)))
+    self.returnCount += 1
 
   # Append READ quadruple
   def addReadQuad(self):
@@ -196,18 +206,29 @@ class QuadManager:
 
   # Append EndFunc quad
   def addEndFuncQuad(self):
+    if self.returnCount == 0 and self.funcDir.getCurrentFuncReturnType() != 'void':
+      raise Exception("This function is missing a return statement!")
+
+    self.funcDir.setEra(self.vDir.getEra())
+    self.resetFuncCounters()
     self.addQuad(('EndFunc', None, None, None))
 
   # TODO: Use address of function
   # Append GOSUB quad
   def addGoSubQuad(self, func, qs):
-    self.addQuad(('GOSUB', func, None, qs))
+    self.addQuad(('GoSub', func, None, qs))
 
   # Append END Quad
   def addEndQuad(self):
     self.addQuad(('END', None, None, None))
 
   ## FUNCTIONS
+  # Reset temporal counter
+  def resetFuncCounters(self):
+    self.tempCount = 0
+    self.returnCount = 0
+    self.vDir.resetLocalCounters()
+
   # Print all quads
   def printQuads(self):
     i = 0

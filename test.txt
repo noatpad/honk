@@ -11,9 +11,10 @@ var char : d;
   a = 1 + b;
 }
 
-funcion void e(int a, int b)
+funcion int e(int a, int b)
 {
   a = a + b;
+  regresa(a);
 }
 
 principal() {
