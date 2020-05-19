@@ -117,6 +117,14 @@ class QuadManager:
       else:
         raise Exception(f'Type mismatch! {left_type} {operator} {right_type}')
 
+  # Append PRINT quadruple
+  def addPrintQuad(self, string):
+    if string:
+      self.addQuad(('PRINT', None, None, string))
+    else:
+      self.addQuad(('PRINT', None, None, self.sOperands.pop()))
+      self.sTypes.pop()
+
   # Append quadruple for `if` statement
   def addIfQuad(self):
     result_type = self.sTypes.pop()
@@ -187,6 +195,7 @@ class QuadManager:
   def addEndQuad(self):
     self.addQuad(('END', None, None, None))
 
+  ## FUNCTIONS
   # Print all quads
   def printQuads(self):
     i = 0

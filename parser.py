@@ -142,7 +142,7 @@ def p_statement(p):
                | call_func
                | return
                | read
-               | write
+               | print
                | if
                | for
                | while"""
@@ -213,16 +213,23 @@ def p_read_params(p):
                  | expr_var"""
   pass
 
-## WRITE
-# TODO: Missing logic for write
-def p_write(p):
-  "write : ESCRIBE '(' write_params ')' ';'"
+## PRINT
+def p_print(p):
+  "print : ESCRIBE '(' print_params ')' ';'"
   pass
 
-def p_write_params(p):
-  """write_params : expr_var ',' write_params
-                  | expr_var"""
+def p_print_params(p):
+  """print_params : print_param ',' print_params
+                  | print_param"""
   pass
+
+def p_print_param(p):
+  "print_param : expr"
+  quads.addPrintQuad(False)
+
+def p_print_string(p):
+  "print_param : STRING"
+  quads.addPrintQuad(p[1])
 
 ## IF
 def p_if(p):
@@ -405,7 +412,8 @@ def p_cte(p):
   """expr_var : CTE_INT
               | CTE_FLOAT
               | CTE_CHAR
-              | CTE_BOOL"""
+              | CTE_BOOL
+              | STRING"""
   t = None
   if (type(p[1]) is int):
     t = 'int'
