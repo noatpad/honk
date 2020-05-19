@@ -6,7 +6,7 @@ from functionDirectory import FunctionDirectory
 from quadManager import QuadManager
 
 funcDir = FunctionDirectory()
-quads = QuadManager()
+quads = QuadManager(funcDir)
 
 # Precedence rules for arithmetic
 precedence = (
@@ -23,6 +23,7 @@ def p_programa(p):
   "programa : PROGRAMA ID found_program_name ';' vars functions PRINCIPAL '(' ')' '{' body '}'"
   quads.addEndQuad()
   p[0] = quads
+  quads.debug()
 
 def p_found_program_name(p):
   'found_program_name : empty'
@@ -255,6 +256,7 @@ def p_found_else(p):
   quads.addElseQuad()
 
 ## FOR
+# TODO: Add constant 1 to constants table
 def p_for(p):
   "for : DESDE ID found_for_iterator ':' expr found_for_start HASTA expr found_for_cond HACER '{' body '}'"
   quads.pushVar(quads.getTopOperand(), quads.getTopType())
@@ -427,7 +429,7 @@ def p_cte(p):
   elif (type(p[1] is bool)):
     t = 'bool'
 
-  vAddr = quads.vDir.generateVirtualAddress('temp', t)
+  vAddr = quads.vDir.generateVirtualAddress('cte', t)
   funcDir.addCte(p[1], t, vAddr)
   quads.pushVar(vAddr, t)
 

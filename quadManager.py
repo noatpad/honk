@@ -5,7 +5,8 @@ from virtualDirectory import VirtualDirectory
 
 # TODO: Add validation for dimensions
 class QuadManager:
-  def __init__(self):
+  def __init__(self, funcDir):
+    self.funcDir = funcDir
     self.vDir = VirtualDirectory()
     self.sOperands = deque()
     self.sOperators = deque()
@@ -96,7 +97,7 @@ class QuadManager:
 
     result_type = getDuoResultType(left_type, right_type, operator)
     if result_type:
-      self.addQuad((operator, right_op, None, left_op))
+      self.addQuad((operator, self.funcDir.getVAddr(right_op), None, self.funcDir.getVAddr(left_op)))
     else:
       raise Exception(f'Type mismatch! {left_type} {operator} {right_type}')
 
@@ -113,7 +114,7 @@ class QuadManager:
       if result_type:
         # result = 't' + str(self.tempCount)
         result = self.vDir.generateVirtualAddress('temp', result_type)
-        self.addQuad((operator, left_op, right_op, result))
+        self.addQuad((operator, self.funcDir.getVAddr(left_op), self.funcDir.getVAddr(right_op), result))
         self.sOperands.append(result)
         self.sTypes.append(result_type)
         self.tempCount += 1
@@ -122,15 +123,18 @@ class QuadManager:
 
   # Append READ quadruple
   def addReadQuad(self):
-    self.addQuad(('READ', None, None, self.sOperands.pop()))
+    var = self.sOperands.pop()
+    self.sTypes.pop()
+    self.addQuad(('READ', None, None, self.funcDir.getVAddr(var)))
 
   # Append PRINT quadruple
   def addPrintQuad(self, string):
     if string:
       self.addQuad(('PRINT', None, None, string))
     else:
-      self.addQuad(('PRINT', None, None, self.sOperands.pop()))
+      var = self.sOperands.pop()
       self.sTypes.pop()
+      self.addQuad(('PRINT', None, None, self.funcDir.getVAddr(var)))
 
   # Append quadruple for `if` statement
   def addIfQuad(self):
@@ -178,12 +182,12 @@ class QuadManager:
 
   # Append PARAM Quad
   def addParamQuad(self, target_param, k):
-    argument = self.sOperands.pop()
-    argument_type = self.sTypes.pop()
-    if argument_type == target_param:
-      self.addQuad(('PARAM', argument, None, k))
+    param = self.sOperands.pop()
+    param_type = self.sTypes.pop()
+    if param_type == target_param:
+      self.addQuad(('PARAM', self.funcDir.getVAddr(param), None, k))
     else:
-      raise Exception(f'Wrong param type! {argument_type} {target_param}')
+      raise Exception(f'Wrong param type! {param_type} {target_param}')
 
   # Append ERA quad
   # TODO: Ask dafaq is this and where to get the size of said dafaq
@@ -194,6 +198,7 @@ class QuadManager:
   def addEndFuncQuad(self):
     self.addQuad(('EndFunc', None, None, None))
 
+  # TODO: Use address of function
   # Append GOSUB quad
   def addGoSubQuad(self, func, qs):
     self.addQuad(('GOSUB', func, None, qs))
@@ -212,6 +217,7 @@ class QuadManager:
 
   # Debug function
   def debug(self):
+    print(" - DEBUG - ")
     print("sOperands ->", list(self.sOperands))
     print("sOperators ->", list(self.sOperators))
     print("sTypes ->", list(self.sTypes))

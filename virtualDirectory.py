@@ -41,21 +41,21 @@ class VirtualDirectory:
       if self.globalRanges[v] + self.globalCounter[v] >= self.globalRanges[v + 1]:
         raise Exception(f"Out of bounds! {vartype} in {scope}")
       self.globalCounter[v] += 1
-      return self.globalCounter[v] - 1
+      return self.globalRanges[v] + self.globalCounter[v] - 1
     elif scope == 'temp':   # Temp
       if self.tempRanges[v] + self.tempCounter[v] >= self.tempRanges[v + 1]:
         raise Exception(f"Out of bounds! {vartype} in {scope}")
       self.tempCounter[v] += 1
-      return self.tempCounter[v] - 1
+      return self.tempRanges[v] + self.tempCounter[v] - 1
     elif scope == 'cte':    # Constants
       if self.cteRanges[v] + self.cteCounter[v] >= self.cteRanges[v + 1]:
         raise Exception(f"Out of bounds! {vartype} in {scope}")
       self.cteCounter[v] += 1
-      return self.cteCounter[v] - 1
+      return self.cteRanges[v] + self.cteCounter[v] - 1
     else:                   # Local (any local function)
       if self.localRanges[v] + self.localCounter[v] >= self.localRanges[v + 1]:
         raise Exception(f"Out of bounds! {vartype} in {scope}")
       self.localCounter[v] += 1
-      return self.localCounter[v] - 1
+      return self.localRanges[v] + self.localCounter[v] - 1
 
     raise Exception(f'Invalid vartype/scope?! -> {vartype}, {scope}')

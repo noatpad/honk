@@ -33,6 +33,9 @@ class Function():
   def getVar(self, name):
     return self.varTable[name]
 
+  def getCte(self, value):
+    return self.cteTable[value]
+
   ## SETTERS
   # Set start of quad for function
   def setQuadStart(self, qs):
@@ -118,6 +121,21 @@ class FunctionDirectory():
     ret.dimensions = ret.dimensions - depth
 
     return ret
+
+  # Returns virtual address of desired variable
+  def getVAddr(self, name):
+    ret = None
+    if name in self.directory[self.currentFunc].varTable:     # First check local variables
+      ret = self.directory[self.currentFunc].getVar(name)
+    elif name in self.directory[self.globalFunc].varTable:    # Then check global variables
+      ret = self.directory[self.globalFunc].getVar(name)
+    # elif name in self.directory[self.getCurrentFunc].cteTable:    # Finally check the constants
+    #   ret = self.directory[self.currentFunc].getCte(name)
+    else:     # Else, raise an error
+      return name   # NOTE: It's an address if it reaches here?
+      # raise Exception(f'Variable "{name}" does not exist!')
+
+    return ret.vAddr
 
   # Get parameter of function
   def getParamOfFunc(self, func):
