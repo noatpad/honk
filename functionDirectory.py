@@ -162,6 +162,10 @@ class FunctionDirectory():
   def getQuadStartOfFunc(self, func):
     return self.directory[func].quadStart
 
+  # Get a function's return type
+  def getReturnTypeOfFunc(self, func):
+    return self.directory[func].returnType
+
   # Get current function's return type
   def getCurrentFuncReturnType(self):
     return self.directory[self.currentFunc].returnType

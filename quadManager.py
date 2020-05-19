@@ -190,6 +190,15 @@ class QuadManager:
     self.addQuad(('GoTo', None, None, ret))
     self.completeQuad(end, self.quadCount)
 
+  # Append EndFunc quad
+  def addEndFuncQuad(self):
+    if self.returnCount == 0 and self.funcDir.getCurrentFuncReturnType() != 'void':
+      raise Exception("This function is missing a return statement!")
+
+    self.funcDir.setEra(self.vDir.getEra())
+    self.resetFuncCounters()
+    self.addQuad(('EndFunc', None, None, None))
+
   # Append PARAM Quad
   def addParamQuad(self, target_param, k):
     param = self.sOperands.pop()
@@ -203,16 +212,6 @@ class QuadManager:
   def addEraQuad(self, func):
     self.addQuad(('ERA', None, None, self.funcDir.getEra(func)))
 
-  # Append EndFunc quad
-  def addEndFuncQuad(self):
-    if self.returnCount == 0 and self.funcDir.getCurrentFuncReturnType() != 'void':
-      raise Exception("This function is missing a return statement!")
-
-    self.funcDir.setEra(self.vDir.getEra())
-    self.resetFuncCounters()
-    self.addQuad(('EndFunc', None, None, None))
-
-  # TODO: Use address of function
   # Append GOSUB quad
   def addGoSubQuad(self, func, qs):
     self.addQuad(('GoSub', func, None, qs))
@@ -238,6 +237,7 @@ class QuadManager:
   # Debug function
   def debug(self):
     print(" - DEBUG - ")
+    self.printQuads()
     print("sOperands ->", list(self.sOperands))
     print("sOperators ->", list(self.sOperators))
     print("sTypes ->", list(self.sTypes))

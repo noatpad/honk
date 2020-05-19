@@ -25,6 +25,7 @@ def p_programa(p):
   p[0] = quads
   quads.debug()
 
+# Make a GOTO quad to main()
 def p_found_program_name(p):
   'found_program_name : empty'
   funcDir.addFunction('global')
@@ -140,13 +141,13 @@ def p_body(p):
 
 def p_statement(p):
   """statement : assignment
+               | call_func
                | return
                | read
                | print
                | if
                | for
-               | while
-               | call_func"""
+               | while"""
   pass
 
 ## ASSIGNMENT
@@ -345,9 +346,11 @@ def p_found_expr_duo_op(p):
   "found_expr_duo_op : empty"
   quads.pushOperator(p[-1])
 
+# TODO: Fix mono operator
 def p_expr_atom(p):
   """expr_atom : expr_group
-               | expr_mono expr_var"""
+               | expr_var
+               | expr_call_func"""
   pass
 
 def p_expr_group(p):
@@ -397,10 +400,20 @@ def p_cte(p):
   funcDir.addCte(p[1], t, vAddr)
   quads.pushVar(vAddr, t)
 
+def p_expr_call_func(p):
+  "expr_call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end"
+  func = quads.popFunction()
+  if quads.funcDir.getReturnTypeOfFunc(func) == 'void':
+    raise Exception("This function is void and cannot be used as an expression!")
+
 ## CALL_FUNCTION
+# NOTE: Ask teacher about how a "function is assigned to a variable"
 def p_call_func(p):
   "call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end ';'"
-  pass
+  func = quads.popFunction()
+  quads.pushVar('??', 'int')
+  if quads.funcDir.getReturnTypeOfFunc(func) != 'void':
+    raise Exception("This function is non-void, therefore it can't be used outside of an expression!")
 
 def p_found_call_func_name(p):
   """found_call_func_name : empty"""
@@ -430,7 +443,7 @@ def p_func_single_step(p):
 
 def p_found_call_func_end(p):
   "found_call_func_end : empty"
-  func = quads.popFunction()
+  func = quads.getTopFunction()
   if funcDir.verifyParamCount(func):
     quads.addGoSubQuad(func, funcDir.getQuadStartOfFunc(func))
   else:
