@@ -123,6 +123,7 @@ def p_found_func_start(p):
   "found_func_start : empty"
   funcDir.setQuadStart(quadManager.getQuadCount())
 
+# TODO: Check if function has a return statement if non-void
 def p_found_func_end(p):
   "found_func_end : empty"
   funcDir.deleteVarTable()
@@ -131,10 +132,9 @@ def p_found_func_end(p):
   quadManager.addEndFuncQuad()
 
 # BODY
-# TODO: Missing functionality
 def p_body(p):
   """body : statement body
-          | statement"""
+          | empty"""
   pass
 
 def p_statement(p):
@@ -156,7 +156,6 @@ def p_found_assignment_end(p):
   "found_assignment_end : empty"
   quadManager.addAssignQuad()
 
-# TODO: Missing logic for calling functions
 def p_call_func(p):
   "call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end ';'"
   pass
@@ -190,7 +189,7 @@ def p_func_single_step(p):
 def p_found_call_func_end(p):
   "found_call_func_end : empty"
   func = quadManager.popFunction()
-  if funcDir.verifyParams(func):
+  if funcDir.verifyParamCount(func):
     quadManager.addGoSubQuad(func, funcDir.getQuadStartOfFunc(func))
   else:
     raise Exception(f'Wrong number of parameters in {func}!')

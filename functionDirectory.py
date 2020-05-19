@@ -118,7 +118,7 @@ class FunctionDirectory():
     return self.directory[func].paramTable[self.paramCount]
 
   # Verify number of parameters of function
-  def verifyParams(self, func):
+  def verifyParamCount(self, func):
     # print(self.paramCount, len(self.directory[func].paramTable))
     return (self.paramCount == len(self.directory[func].paramTable))
 

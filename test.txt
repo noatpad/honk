@@ -30,5 +30,5 @@ principal() {
   }
 
   func();
-  e(a, b);
+  e(a, f);
 }
