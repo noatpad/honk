@@ -26,8 +26,8 @@ def p_programa(p):
 
 def p_found_program_name(p):
   'found_program_name : empty'
-  funcDir.addFunction(p[-1])
-  funcDir.setGlobalFunction(p[-1])
+  funcDir.addFunction('global')
+  funcDir.setGlobalFunction()
 
 # VARS
 def p_vars(p):
@@ -53,10 +53,11 @@ def p_found_var_name(p):
   "p_found_var_name : empty"
   var = p[-1]
   if not funcDir.varExists(var):
-    funcDir.addVar(var[0], var[1])
+    funcDir.addVar(var[0], var[1], quads.vDir.generateVirtualAddress(funcDir.getCurrentFunc(), funcDir.getCurrentType()))
   else:
-    s_error(p.lineno, p.lexpos, f'Variable "{var}" already exists!"')
+    s_error(f'Variable "{var}" already exists!"')
 
+# TODO: Redo arrays and matrixes
 def p_variable_mat(p):
   "variable : ID '[' CTE_INT ']' '[' CTE_INT ']'"
   p[0] = (p[1], 2)
@@ -95,7 +96,7 @@ def p_found_func_name(p):
   "found_func_name : empty"
   func = p[-1]
   if funcDir.functionExists(func):
-    s_error(p.lineno, p.lexpos, f'Function "{func}" already exists!"')
+    s_error(f'Function "{func}" already exists!"')
   else:
     funcDir.addFunction(func)
     funcDir.createVarTable()
@@ -114,10 +115,10 @@ def p_found_func_param(p):
   "found_func_param : empty"
   param = p[-1]
   if not funcDir.varExists(param):
-    funcDir.addVar(param[0], param[1])
+    funcDir.addVar(param[0], param[1], quads.vDir.generateVirtualAddress(funcDir.getCurrentFunc(), funcDir.getCurrentType()))
     funcDir.addFuncParam()
   else:
-    s_error(p.lineno, p.lexpos, f'Multiple declaration of "{param}"!')
+    s_error(f'Multiple declaration of "{param}"!')
 
 def p_found_func_start(p):
   "found_func_start : empty"
@@ -272,12 +273,12 @@ def p_found_for_iterator(p):
   var = p[-1]
   if not funcDir.varExists(var):
     funcDir.setCurrentType('int')
-    funcDir.addVar(var, 0)
+    funcDir.addVar(var, 0, quads.vDir.generateVirtualAddress('temp', 'int'))
     quads.pushVar(var, 'int')
     quads.pushVar(var, 'int')
     quads.pushVar(var, 'int')
   else:
-    s_error(p.lineno, p.lexpos, f'Variable "{var}" already exists!"')
+    s_error(f'Variable "{var}" already exists!"')
 
 def p_found_for_start(p):
   "found_for_start : empty"
@@ -395,6 +396,7 @@ def p_expr_mono_op(p):
                | empty"""
   pass
 
+# TODO: Redo arrays and matrixes
 def p_expr_var_mat_elem(p):
   "expr_var : ID '[' expr ']' '[' expr ']'"
   var = funcDir.getVar(p[1], 2)
@@ -413,18 +415,21 @@ def p_expr_var_atom(p):
 def p_cte(p):
   """expr_var : CTE_INT
               | CTE_FLOAT
-              | CTE_CHAR
-              | CTE_BOOL"""
+              | CTE_BOOL
+              | CTE_CHAR"""
   t = None
   if (type(p[1]) is int):
     t = 'int'
   elif (type(p[1]) is float):
     t = 'float'
-  elif (type(p[1]) is bool):
-    t = 'bool'
-  else:
+  elif (type(p[1]) is str):
     t = 'char'
-  quads.pushVar(p[1], t)
+  elif (type(p[1] is bool)):
+    t = 'bool'
+
+  vAddr = quads.vDir.generateVirtualAddress('temp', t)
+  funcDir.addCte(p[1], t, vAddr)
+  quads.pushVar(vAddr, t)
 
 def p_empty(p):
   "empty :"
@@ -435,5 +440,5 @@ def p_error(p):
   raise Exception(f'({p.lineno}:{p.lexpos}) Syntax error at "{p.value}"')
 
 # Manual error (line number & position are kinda broken...)
-def s_error(lineno, lexpos, msg):
-  raise Exception(f'({lineno}:{lexpos} - {msg}')
+def s_error(msg):
+  raise Exception(f'{msg}')

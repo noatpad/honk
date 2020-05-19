@@ -1,10 +1,12 @@
 
 from collections import deque
 from semanticCube import getDuoResultType
+from virtualDirectory import VirtualDirectory
 
 # TODO: Add validation for dimensions
 class QuadManager:
   def __init__(self):
+    self.vDir = VirtualDirectory()
     self.sOperands = deque()
     self.sOperators = deque()
     self.sTypes = deque()
@@ -109,7 +111,8 @@ class QuadManager:
 
       result_type = getDuoResultType(left_type, right_type, operator)
       if result_type:
-        result = 't' + str(self.tempCount)
+        # result = 't' + str(self.tempCount)
+        result = self.vDir.generateVirtualAddress('temp', result_type)
         self.addQuad((operator, left_op, right_op, result))
         self.sOperands.append(result)
         self.sTypes.append(result_type)

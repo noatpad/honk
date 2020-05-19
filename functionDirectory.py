@@ -1,11 +1,20 @@
+
 from collections import defaultdict
+
+## -- CONSTANT
+class Constant():
+  def __init__(self, value, vartype, vAddr):
+    self.value = value
+    self.vartype = vartype
+    self.vAddr = vAddr
 
 ## -- VARIABLE
 class Var():
-  def __init__(self, name, vartype, dimensions):
+  def __init__(self, name, vartype, dimensions, vAddr):
     self.name = name
     self.vartype = vartype
     self.dimensions = dimensions
+    self.vAddr = vAddr
 
 
 ## -- FUNCTION
@@ -15,6 +24,7 @@ class Function():
     self.returnType = returnType
     self.quadStart = None
     self.varTable = None
+    self.cteTable = None
     self.paramTable = []
     self.tempCount = 0
 
@@ -34,8 +44,12 @@ class Function():
 
   ## PUSH/ADD
   # Add variable
-  def addVar(self, name, vartype, dimensions):
-    self.varTable[name] = Var(name, vartype, dimensions)
+  def addVar(self, name, vartype, dimensions, vAddr):
+    self.varTable[name] = Var(name, vartype, dimensions, vAddr)
+
+  # Add constant
+  def addCte(self, value, vartype, vAddr):
+    self.cteTable[value] = Constant(value, vartype, vAddr)
 
   # Add parameter
   def addParam(self, vartype):
@@ -44,10 +58,12 @@ class Function():
   # Create var table
   def createVarTable(self):
     self.varTable = dict()
+    self.cteTable = dict()
 
   # Delete var table
   def deleteVarTable(self):
     self.varTable = None
+    self.cteTable = None
 
 
 
@@ -55,16 +71,16 @@ class Function():
 class FunctionDirectory():
   def __init__(self):
     self.directory = dict()
-    self.currentFunc = None
     self.globalFunc = None
+    self.currentFunc = None
     self.currentType = "void"
     self.paramCount = 0
 
   ## SETTERS
   # NOTE: `currentFunc` is set in addFunction()
   # Set name for global function
-  def setGlobalFunction(self, globalFunc):
-    self.globalFunc = globalFunc
+  def setGlobalFunction(self):
+    self.globalFunc = 'global'
 
   # Set name for current function
   def setCurrentFunction(self, currentFunc):
@@ -111,6 +127,14 @@ class FunctionDirectory():
   def getQuadStartOfFunc(self, func):
     return self.directory[func].quadStart
 
+  # Get current function in parser
+  def getCurrentFunc(self):
+    return self.currentFunc
+
+  # Get currently used type in parser
+  def getCurrentType(self):
+    return self.currentType
+
   # Get param count of function
   def getParamCount(self):
     return self.paramCount
@@ -126,8 +150,12 @@ class FunctionDirectory():
     self.directory[self.currentFunc].addParam(self.currentType)
 
   # Add variable to the current function's var table
-  def addVar(self, name, dimensions):
-    self.directory[self.currentFunc].addVar(name, self.currentType, dimensions)
+  def addVar(self, name, dimensions, vAddr):
+    self.directory[self.currentFunc].addVar(name, self.currentType, dimensions, vAddr)
+
+  # Add constant to the current function's constants table
+  def addCte(self, value, vartype, vAddr):
+    self.directory[self.currentFunc].addCte(value, vartype, vAddr)
 
   ## FUNCTIONS
   # Creates var table for current function
