@@ -430,23 +430,6 @@ def p_found_expr_var_dim_expr(p):
   "found_expr_var_dim_expr : empty"
   quads.addArrQuads()
 
-
-# TODO: Redo arrays and matrixes
-# def p_expr_var_mat_elem(p):
-#   "expr_var : ID '[' expr ']' '[' expr ']'"
-#   var = funcDir.getVar(p[1])
-#   quads.pushVar(var.name, var.vartype)
-
-# def p_expr_var_list_elem(p):
-#   "expr_var : ID '[' expr ']'"
-#   var = funcDir.getVar(p[1])
-#   quads.pushVar(var.name, var.vartype)
-
-# def p_expr_var_atom(p):
-#   "expr_var : ID"
-#   var = funcDir.getVar(p[1])
-#   quads.pushVar(var.name, var.vartype)
-
 def p_cte(p):
   """expr_var : CTE_INT
               | CTE_FLOAT

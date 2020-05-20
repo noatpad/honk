@@ -2,7 +2,8 @@
 from ply import lex, yacc
 from sys import argv
 from os import path
-import lexer, parser, honk
+import lexer, parser
+from honk import honk
 
 # Default variables
 filename = "test.txt"
@@ -46,3 +47,6 @@ try:
       data += line
 except FileNotFoundError:
   raise Exception('build.o does not exist!')
+
+# Honk away
+honk(data)
