@@ -2,7 +2,7 @@
 from ply import lex, yacc
 from sys import argv
 from os import path
-import lexer, parser
+import lexer, parser, honk
 
 # Default variables
 filename = "test.txt"
@@ -33,6 +33,16 @@ while True:
     break
   print(token)
 
-# Parse file
+# Parse file and build .o file
 duckparser = yacc.yacc(module=parser)
 resultQM = duckparser.parse(data)
+
+# Read .o file
+data = ''
+
+try:
+  with open('quack.o') as f:
+    for line in f:
+      data += line
+except FileNotFoundError:
+  raise Exception('build.o does not exist!')

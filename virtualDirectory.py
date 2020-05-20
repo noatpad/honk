@@ -28,6 +28,10 @@ class VirtualDirectory:
   def getEra(self):
     return [self.localCounter, self.tempCounter]
 
+  # Get all ranges
+  def getRanges(self):
+    return [self.globalRanges, self.localRanges, self.tempRanges, self.cteRanges]
+
   # Reset local counters to 0
   def resetLocalCounters(self):
     self.localCounter = [0, 0, 0, 0]

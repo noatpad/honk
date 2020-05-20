@@ -320,13 +320,17 @@ class QuadManager:
     print(f'> Building {filename}...')
 
     f = open(filename, 'w')
-    f.write(' -> CTES START\n')
+    f.write('-> RANGES START\n')
+    for r in self.vDir.getRanges():
+      f.write(f'{r[0]}\t{r[1]}\t{r[2]}\t{r[3]}\t{r[4]}\n')
+    f.write('->| RANGES END\n')
+    f.write('-> CTES START\n')
     for cte in self.funcDir.cteTable.values():
-      f.write(f'{cte.value} {cte.vartype} {cte.vAddr}\n')
-    f.write(' ->| CTES END\n')
-    f.write(' -> QUADS START\n')
+      f.write(f'{cte.value}\t{cte.vartype}\t{cte.vAddr}\n')
+    f.write('->| CTES END\n')
+    f.write('-> QUADS START\n')
     for q in self.quads:
-      f.write(f'{q[0]} {q[1]} {q[2]} {q[3]}\n')
-    f.write(' ->| QUADS END\n')
+      f.write(f'{q[0]}\t{q[1]}\t{q[2]}\t{q[3]}\n')
+    f.write('->| QUADS END\n')
 
     print(f'> Done!')
