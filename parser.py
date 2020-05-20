@@ -25,8 +25,8 @@ precedence = (
 def p_programa(p):
   "programa : PROGRAMA ID found_program_name ';' vars functions PRINCIPAL '(' ')' '{' body '}'"
   quads.addEndQuad()
-  p[0] = quads
   quads.debugStep()
+  p[0] = quads
 
 # Make a GOTO quad to main()
 def p_found_program_name(p):
@@ -75,8 +75,10 @@ def p_var_dims(p):
               | dim"""
   if len(p) == 3:
     p[0] = p[1] * p[2]
+    funcDir.setMDimToVar(funcDir.varHelper, [p[2], 1])
   else:
     p[0] = p[1]
+    funcDir.setMDimToVar(funcDir.varHelper, [1])
 
   quads.vDir.makeSpaceForArray(funcDir.currentFunc, funcDir.currentType, p[0] - 1)
 
@@ -96,7 +98,7 @@ def p_type(p):
   p[0] = p[1]
 
 # FUNCTIONS
-# TODO: Missing logic for functions parameters and their types
+# TODO: Recursion?
 def p_functions(p):
   """functions : FUNCION func_type ID found_func_name '(' func_params ')' vars found_func_start '{' body '}' found_func_end functions
                | empty"""
@@ -372,21 +374,68 @@ def p_expr_mono_op(p):
                | empty"""
   pass
 
+def p_expr_var(p):
+  "expr_var : expr_var_name expr_var_dims"
+  pass
+
+def p_expr_var_name(p):
+  "expr_var_name : ID"
+  var = funcDir.getVar(p[1])
+  quads.pushVar(var.name, var.vartype)
+
+def p_expr_var_no_dims(p):
+  "expr_var_dims : empty"
+  pass
+
+def p_expr_var_dims(p):
+  """expr_var_dims : found_expr_var_dims expr_var_dim found_expr_var_dim_2 expr_var_dim
+                   | found_expr_var_dims expr_var_dim"""
+  quads.addArrEndQuad()
+
+def p_found_expr_var_dims(p):
+  "found_expr_var_dims : empty"
+  arr = quads.popOperand()
+  quads.popType()
+  quads.dimCount = 0
+  quads.sDims.append((arr, 0))
+  quads.sOperators.append('(')
+
+def p_expr_var_dim(p):
+  "expr_var_dim : found_expr_var_dim '[' expr found_expr_var_dim_expr ']'"
+  pass
+
+def p_found_expr_var_dim(p):
+  "found_expr_var_dim : empty"
+  sdim = quads.sDims[-1]
+  quads.dimCount += 1
+  if quads.dimCount > len(funcDir.getDimensionsOfVar(sdim[0])):
+    raise Exception(f'{sdim[0]} has {len(funcDir.getDimensionsOfVar(sdim[0]))} dimension(s)! -> {quads.dimCount}')
+
+def p_found_expr_var_dim_2(p):
+  "found_expr_var_dim_2 : empty"
+  sdim = quads.sDims.pop()
+  quads.sDims.append((sdim[0], quads.dimCount))
+
+def p_found_expr_var_dim_expr(p):
+  "found_expr_var_dim_expr : empty"
+  quads.addArrQuads()
+
+
 # TODO: Redo arrays and matrixes
-def p_expr_var_mat_elem(p):
-  "expr_var : ID '[' expr ']' '[' expr ']'"
-  var = funcDir.getVar(p[1])
-  quads.pushVar(var.name, var.vartype)
+# def p_expr_var_mat_elem(p):
+#   "expr_var : ID '[' expr ']' '[' expr ']'"
+#   var = funcDir.getVar(p[1])
+#   quads.pushVar(var.name, var.vartype)
 
-def p_expr_var_list_elem(p):
-  "expr_var : ID '[' expr ']'"
-  var = funcDir.getVar(p[1])
-  quads.pushVar(var.name, var.vartype)
+# def p_expr_var_list_elem(p):
+#   "expr_var : ID '[' expr ']'"
+#   var = funcDir.getVar(p[1])
+#   quads.pushVar(var.name, var.vartype)
 
-def p_expr_var_atom(p):
-  "expr_var : ID"
-  var = funcDir.getVar(p[1])
-  quads.pushVar(var.name, var.vartype)
+# def p_expr_var_atom(p):
+#   "expr_var : ID"
+#   var = funcDir.getVar(p[1])
+#   quads.pushVar(var.name, var.vartype)
 
 def p_cte(p):
   """expr_var : CTE_INT

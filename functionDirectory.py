@@ -16,6 +16,7 @@ class Var():
     self.name = name
     self.vartype = vartype
     self.dimensions = []
+    self.mDim = None
     self.vAddr = vAddr
 
 
@@ -40,6 +41,14 @@ class Function():
   def getCte(self, value):
     return self.cteTable[value]
 
+  # Get dimensions of a specified variable
+  def getDimensionsOfVar(self, name):
+    return self.varTable[name].dimensions
+
+  # Get mDim from a specified variable
+  def getMdim(self, name):
+    return self.varTable[name].mDim
+
   ## SETTERS
   # Set start of quad for function
   def setQuadStart(self, qs):
@@ -48,6 +57,10 @@ class Function():
   # Set "era" (local and temporary counters)
   def setEra(self, era):
     self.era = era
+
+  # Set mDim of a specified var
+  def setMDimToVar(self, name, mdim):
+    self.varTable[name].mDim = mdim
 
   ## PUSH/ADD
   # Add variable
@@ -127,12 +140,17 @@ class FunctionDirectory():
   def setEra(self, era):
     self.directory[self.currentFunc].setEra(era)
 
+  # Set mDim to a specified variable
+  def setMDimToVar(self, name, mdim):
+    self.directory[self.currentFunc].setMDimToVar(name, mdim)
+
   # Increment param count of function by 1
   def incrementParamCount(self):
     self.paramCount += 1
 
   ## GETTERS
   # TODO: Search through constants
+  # TODO: Make a centralized variable getter (some functions won't work locally)
   # Returns desired variable
   def getVar(self, name):
     ret = None
@@ -157,6 +175,14 @@ class FunctionDirectory():
       return name   # NOTE: It's an address if it reaches here?
 
     return ret.vAddr
+
+  # Get dimensions of a specified variable
+  def getDimensionsOfVar(self, name):
+    return self.directory[self.currentFunc].getDimensionsOfVar(name)
+
+  # Get mDim from a specified variable
+  def getMdim(self, name):
+    return self.directory[self.currentFunc].getMdim(name)
 
   # Get parameter of function
   def getParamOfFunc(self, func):

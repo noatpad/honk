@@ -14,10 +14,12 @@ class QuadManager:
     self.sTypes = deque()
     self.sJumps = deque()
     self.sFuncs = deque()
+    self.sDims = deque()
     self.quads = deque()
     self.quadCount = 0
     self.tempCount = 0
     self.returnCount = 0
+    self.dimCount = 0
 
   ## GETTERS
   # Get operand from top of stack
@@ -86,7 +88,7 @@ class QuadManager:
     self.quads[index] = tuple(quadToChange)
 
     if self.debug:
-      print(f'\t\t\t\t\t! Completed quad {index} with jump {jump}')
+      print(f'\t\t\t\t\t! Completed quad #{index} with jump to {jump}')
 
   ## QUAD FUNCTIONS
   # Append assignment quadruple
@@ -200,6 +202,47 @@ class QuadManager:
     self.addQuad(('GoTo', None, None, ret))
     self.completeQuad(end, self.quadCount)
 
+  # Add quads used for array access
+  def addArrQuads(self):
+    sdim = self.sDims[-1]
+    dimensions = self.funcDir.getDimensionsOfVar(sdim[0])
+    limit = dimensions[sdim[1]]
+    mdim = self.funcDir.getMdim(sdim[0])
+
+    # Quad for verifying bounds
+    self.addQuad(('VERIFY', self.sOperands[-1], None, limit))
+
+    # If 2nd dimension available, * d1 m0
+    if sdim[1] < len(dimensions):
+      # aux = self.sOperands.pop()
+      self.sOperands.append(mdim[sdim[1]])
+      self.sTypes.append('int')
+      self.sOperators.append('*')
+      self.addDualOpQuad(['*'])
+
+    # If past 1st dimension, + (* d1 m0) d2
+    if sdim[1] >= 1:
+      self.sOperators.append('+')
+      self.addDualOpQuad(['+'])
+
+  # Add quads for ending array access
+  def addArrEndQuad(self):
+    # Sum the base address of variable
+    sdim = self.sDims.pop()
+    self.sOperands.append(self.funcDir.getVAddr(sdim[0]))
+    self.sTypes.append('int')
+    self.sOperators.append('+')
+    self.addDualOpQuad('+')
+
+    # Indicate the result is an address, not a value
+    q = self.quads[-1]
+    self.quads[-1] = (q[0], q[1], q[2], (q[3],))
+    self.sOperands[-1] = (q[3],)
+    self.sOperators.pop()
+
+    if self.debug:
+      print(f'\t\t\t\t\t! Turned quad result #{self.quadCount - 1} into an address -> {self.quads[-1][3]}')
+
   # Append EndFunc quad
   def addEndFuncQuad(self):
     if self.returnCount == 0 and self.funcDir.getCurrentFuncReturnType() != 'void':
@@ -252,4 +295,5 @@ class QuadManager:
     print("sTypes ->", list(self.sTypes))
     print("sJumps ->", list(self.sJumps))
     print("sFuncs ->", list(self.sJumps))
+    print("sDims ->", list(self.sDims))
     print(" - - - DEBUG - - - ")

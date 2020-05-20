@@ -24,13 +24,16 @@ class VirtualDirectory:
     # Total counter
     self.totalCounter = 0
 
+  # Get a function's ERA
   def getEra(self):
     return [self.localCounter, self.tempCounter]
 
+  # Reset local counters to 0
   def resetLocalCounters(self):
     self.localCounter = [0, 0, 0, 0]
     self.tempCounter = [0, 0, 0, 0]
 
+  # Set space and counters based on a variable's needs
   def setSpace(self, scope, vartype, space):
     # Select variable type
     v = None
@@ -74,8 +77,10 @@ class VirtualDirectory:
 
     raise Exception(f'Invalid vartype/scope?! -> {vartype}, {scope}')
 
+  # Generate virtual address for a variable
   def generateVirtualAddress(self, scope, vartype):
     return self.setSpace(scope, vartype, 1)
 
+  # Make more room for array variables
   def makeSpaceForArray(self, scope, vartype, value):
     self.setSpace(scope, vartype, value)
