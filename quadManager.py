@@ -309,4 +309,7 @@ class QuadManager:
     print("sJumps ->", list(self.sJumps))
     print("sFuncs ->", list(self.sJumps))
     print("sDims ->", list(self.sDims))
+    print("- CTES")
+    for c in self.funcDir.cteTable.values():
+      print(c.value, c.vartype, c.vAddr)
     print(" - - - DEBUG - - - ")

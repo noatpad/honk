@@ -458,8 +458,12 @@ def p_cte(p):
   elif (type(p[1] is bool)):
     t = 'bool'
 
-  vAddr = quads.vDir.generateVirtualAddress('cte', t)
-  funcDir.addCte(p[1], t, vAddr)
+  vAddr = None
+  if funcDir.cteExists(p[1]):
+    vAddr = funcDir.getCte(p[1]).vAddr
+  else:
+    vAddr = quads.vDir.generateVirtualAddress('cte', t)
+    funcDir.addCte(p[1], t, vAddr)
   quads.pushVar(vAddr, t)
 
 def p_expr_call_func(p):

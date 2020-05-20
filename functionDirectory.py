@@ -29,7 +29,6 @@ class Function():
     self.returnType = returnType
     self.quadStart = None
     self.varTable = None
-    self.cteTable = None
     self.paramTable = []
     self.era = []
 
@@ -37,9 +36,6 @@ class Function():
   # Get variable
   def getVar(self, name):
     return self.varTable[name]
-
-  def getCte(self, value):
-    return self.cteTable[value]
 
   # Get dimensions of a specified variable
   def getDimensionsOfVar(self, name):
@@ -79,14 +75,6 @@ class Function():
       v = self.varTable[var]
       print(f'\t\t\t\t\t>> VAR: {v.name} - {v.vartype}{v.dimensions} -> {v.vAddr}')
 
-  # Add constant
-  def addCte(self, value, vartype, vAddr):
-    self.cteTable[value] = Constant(value, vartype, vAddr)
-
-    if self.debug:
-      c = self.cteTable[value]
-      print(f'\t\t\t\t\t> CTE: {c.value} - {c.vartype} -> {c.vAddr}')
-
   # Add parameter
   def addParam(self, vartype):
     self.paramTable.append(vartype)
@@ -108,6 +96,7 @@ class FunctionDirectory():
   def __init__(self, debug):
     self.debug = debug
     self.directory = dict()
+    self.cteTable = dict()
     self.globalFunc = None
     self.currentFunc = None
     self.currentType = "void"
@@ -149,7 +138,6 @@ class FunctionDirectory():
     self.paramCount += 1
 
   ## GETTERS
-  # TODO: Search through constants
   # TODO: Make a centralized variable getter (some functions won't work locally)
   # Returns desired variable
   def getVar(self, name):
@@ -175,6 +163,10 @@ class FunctionDirectory():
       return name   # NOTE: It's an address if it reaches here?
 
     return ret.vAddr
+
+  # Get constant
+  def getCte(self, value):
+    return self.cteTable[value]
 
   # Get dimensions of a specified variable
   def getDimensionsOfVar(self, name):
@@ -221,13 +213,17 @@ class FunctionDirectory():
   def addVar(self, name, vAddr):
     self.directory[self.currentFunc].addVar(name, self.currentType, vAddr)
 
+  # Add constant
+  def addCte(self, value, vartype, vAddr):
+    self.cteTable[value] = Constant(value, vartype, vAddr)
+
+    if self.debug:
+      c = self.cteTable[value]
+      print(f'\t\t\t\t\t> CTE: {c.value} - {c.vartype} -> {c.vAddr}')
+
   # Add dimension to a specified variable in the current scope
   def addDimensionToVar(self, var, dim):
     self.directory[self.currentFunc].addDimensionToVar(var, dim)
-
-  # Add constant to the current function's constants table
-  def addCte(self, value, vartype, vAddr):
-    self.directory[self.currentFunc].addCte(value, vartype, vAddr)
 
   ## FUNCTIONS
   # Creates var table for current function
@@ -256,6 +252,10 @@ class FunctionDirectory():
     if var in self.directory[self.currentFunc].varTable or var in self.directory[self.globalFunc].varTable:
       return True
     return False
+
+  # Returns a boolean if a constant exists
+  def cteExists(self, cte):
+    return cte in self.cteTable
 
   # Returns a boolean if variable is available to declare in current context
   def varAvailable(self, var):
