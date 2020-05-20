@@ -23,7 +23,7 @@ precedence = (
 # Parsing productions
 # PROGRAMA
 def p_programa(p):
-  "programa : PROGRAMA ID found_program_name ';' vars functions PRINCIPAL '(' ')' '{' body '}'"
+  "programa : PROGRAMA ID found_program_name ';' vars functions main '(' ')' '{' body '}'"
   quads.addEndQuad()
   quads.debugStep()
   p[0] = quads
@@ -36,6 +36,7 @@ def p_found_program_name(p):
 
   funcDir.addFunction('global')
   funcDir.setGlobalFunction()
+  quads.addMainQuad()
 
 # VARS
 def p_vars(p):
@@ -146,6 +147,11 @@ def p_found_func_end(p):
   "found_func_end : empty"
   funcDir.deleteVarTable()
   quads.addEndFuncQuad()
+
+# PRINCIPAL
+def p_principal(p):
+  "main : PRINCIPAL"
+  quads.completeMainQuad()
 
 # BODY
 def p_body(p):

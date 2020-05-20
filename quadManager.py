@@ -91,6 +91,19 @@ class QuadManager:
       print(f'\t\t\t\t\t! Completed quad #{index} with jump to {jump}')
 
   ## QUAD FUNCTIONS
+  # Append quad to go to main
+  def addMainQuad(self):
+    self.addQuad(('GoTo', None, None, None))
+    self.sJumps.append(0)
+
+  # Complete quad to go to main
+  def completeMainQuad(self):
+    ret = self.sJumps.pop()
+    self.completeQuad(ret, self.quadCount)
+
+    if self.debug:
+      print(f'--- main')
+
   # Append assignment quadruple
   def addAssignQuad(self):
     right_op = self.sOperands.pop()
