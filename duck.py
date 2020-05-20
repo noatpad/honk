@@ -35,8 +35,4 @@ while True:
 
 # Parse file
 duckparser = yacc.yacc(module=parser)
-result = duckparser.parse(data)
-
-# Print quad list
-# print("# QUADS")
-# result.printQuads()
+resultQM = duckparser.parse(data)

@@ -24,9 +24,13 @@ precedence = (
 # PROGRAMA
 def p_programa(p):
   "programa : PROGRAMA ID found_program_name ';' vars functions main '(' ')' '{' body '}'"
+  # Finish parsing
   quads.addEndQuad()
   quads.debugStep()
   p[0] = quads
+
+  # Build .o
+  quads.build()
 
 # Make a GOTO quad to main()
 def p_found_program_name(p):

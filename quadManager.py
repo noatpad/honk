@@ -9,13 +9,13 @@ class QuadManager:
     self.debug = debug
     self.funcDir = funcDir
     self.vDir = VirtualDirectory()
+    self.quads = deque()
     self.sOperands = deque()
     self.sOperators = deque()
     self.sTypes = deque()
     self.sJumps = deque()
     self.sFuncs = deque()
     self.sDims = deque()
-    self.quads = deque()
     self.quadCount = 0
     self.tempCount = 0
     self.returnCount = 0
@@ -286,7 +286,7 @@ class QuadManager:
   def addEndQuad(self):
     self.addQuad(('END', None, None, None))
 
-  ## FUNCTIONS
+  ## FUNCTIONS (PARSING)
   # Reset temporal counter
   def resetFuncCounters(self):
     self.tempCount = 0
@@ -313,3 +313,20 @@ class QuadManager:
     for c in self.funcDir.cteTable.values():
       print(c.value, c.vartype, c.vAddr)
     print(" - - - DEBUG - - - ")
+
+  ## FUNCTIONS (BUILDING)
+  def build(self):
+    filename = 'quack.o'
+    print(f'> Building {filename}...')
+
+    f = open(filename, 'w')
+    f.write(' -> CTES START\n')
+    for cte in self.funcDir.cteTable.values():
+      f.write(f'{cte.value} {cte.vartype} {cte.vAddr}\n')
+    f.write(' ->| CTES END\n')
+    f.write(' -> QUADS START\n')
+    for q in self.quads:
+      f.write(f'{q[0]} {q[1]} {q[2]} {q[3]}\n')
+    f.write(' ->| QUADS END\n')
+
+    print(f'> Done!')
