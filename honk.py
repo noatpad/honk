@@ -7,7 +7,10 @@ class Address:
     self.vartype = vartype
 
 class HonkVM:
-  def __init__(self, obj):
+  def __init__(self, obj, debug=False):
+    # For debugging purposes
+    self.debug = debug
+
     # Split lines and turned it into a queue
     lines = deque(obj.split('\n'))
 
@@ -15,10 +18,16 @@ class HonkVM:
     if lines.popleft() != '-> RANGES START':
       self._ded()
 
-    self.globalRange = (lines.popleft().split('\t'))
-    self.localRange = (lines.popleft().split('\t'))
-    self.tempRange = (lines.popleft().split('\t'))
-    self.cteRange = (lines.popleft().split('\t'))
+    self.globalRanges = (lines.popleft().split('\t'))
+    self.localRanges = (lines.popleft().split('\t'))
+    self.tempRanges = (lines.popleft().split('\t'))
+    self.cteRanges = (lines.popleft().split('\t'))
+
+    if self.debug:
+      self._debugMsg('Init', f'Global ranges: {self.globalRanges}')
+      self._debugMsg('Init', f'Local ranges: {self.localRanges}')
+      self._debugMsg('Init', f'Temp ranges: {self.tempRanges}')
+      self._debugMsg('Init', f'Cte ranges: {self.cteRanges}')
 
     if lines.popleft() != '->| RANGES END':
       self._ded()
@@ -39,6 +48,9 @@ class HonkVM:
       data = line.split('\t')
       self.memory[data[2]] = Address(data[0], data[1])
 
+      if self.debug:
+        self._debugMsg('Init', f'{data[0]} -> ({data[2]})')
+
     # Get and set quads
     self.quads = deque()
 
@@ -53,21 +65,67 @@ class HonkVM:
 
       self.quads.append(line.split('\t'))
 
-  ## INIT FUNCTIONS
-  # Error
+  # VM init error
   def _ded(self):
     raise Exception('quack has commit die')
 
+  # Debugger message
+  def _debugMsg(self, quad, msg):
+    print(f'{quad}: {msg}')
+
   ## EXECUTION FUNCTIONS
+  # TODO: Add validation for ranges
+  # TODO: Add missing functions
+  def getValue(self, addr):
+    try:
+      ret = self.memory[addr]
+      return ret.value
+    except:
+      raise Exception(f"Value doesn't exist in memory?! -> ({addr})")
+
+  def setValue(self, value, addr):
+    self.memory[addr] = Address(value, None)
+
   # Execute virtual machine
   def execute(self):
-    for quad in self.quads:
+    ip = 0
+
+    while True:
       # Let it begin. The super-switch case
-      print(quad)
+      quad = self.quads[ip]
+      op = quad[0]
 
-    #   if (op in ['+', '-', '/', '*']):
-    #     pass
+      # Dual-op operation
+      if op in ['+', '-', '/', '*']:
+        left = self.getValue(quad[1])
+        right = self.getValue(quad[2])
+        result = eval(f'{left} {op} {right}')
+        self.setValue(result, quad[3])
+        if self.debug:
+          self._debugMsg(ip, f'{left} {op} {right} = {result} -> ({quad[3]})')
+      # Assignment
+      elif op == '=':
+        value = self.getValue(quad[1])
+        self.setValue(value, quad[3])
+        if self.debug:
+          self._debugMsg(ip, f'{value} -> ({quad[3]})')
+      # Go to #
+      elif op == 'GoTo':
+        if self.debug:
+          self._debugMsg(ip, f'Jump -> {int(quad[3])}')
+        ip = int(quad[3])
+        continue
+      # Program End
+      elif op == 'END':
+        break
+      else:
+        self._debugMsg(ip, f'! -> {quad}')
 
-def honk(obj):
-  vm = HonkVM(obj)
+      ip += 1
+
+# # # # # # # # # # # # # # # # # # # # # # #
+# # # # HECKING HONK LIKE NO TOMORROW # # # #
+# # # # # # # # # # # # # # # # # # # # # # #
+def honk(obj, debug=False):
+  vm = HonkVM(obj, debug)
   vm.execute()

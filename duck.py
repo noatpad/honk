@@ -28,11 +28,11 @@ ducklexer = lex.lex(module=lexer)
 ducklexer.input(data)
 
 # Print tokens
-while True:
-  token = ducklexer.token()
-  if not token:
-    break
-  print(token)
+# while True:
+#   token = ducklexer.token()
+#   if not token:
+#     break
+#   print(token)
 
 # Parse file and build .o file
 duckparser = yacc.yacc(module=parser)
@@ -49,4 +49,4 @@ except FileNotFoundError:
   raise Exception('build.o does not exist!')
 
 # Honk away
-honk(data)
+honk(data, True)

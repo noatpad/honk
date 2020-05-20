@@ -317,7 +317,9 @@ class QuadManager:
   ## FUNCTIONS (BUILDING)
   def build(self):
     filename = 'quack.o'
-    print(f'> Building {filename}...')
+
+    if self.debug:
+      print(f'> Building {filename}...')
 
     f = open(filename, 'w')
     f.write('-> RANGES START\n')
@@ -333,4 +335,5 @@ class QuadManager:
       f.write(f'{q[0]}\t{q[1]}\t{q[2]}\t{q[3]}\n')
     f.write('->| QUADS END\n')
 
-    print(f'> Done!')
+    if self.debug:
+      print(f'> Done!')

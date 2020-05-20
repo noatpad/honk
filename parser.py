@@ -6,7 +6,7 @@ from functionDirectory import FunctionDirectory
 from quadManager import QuadManager
 
 # For debugging purposes
-debug = True
+debug = False
 
 funcDir = FunctionDirectory(debug)
 quads = QuadManager(funcDir, debug)
@@ -26,7 +26,6 @@ def p_programa(p):
   "programa : PROGRAMA ID found_program_name ';' vars functions main '(' ')' '{' body '}'"
   # Finish parsing
   quads.addEndQuad()
-  quads.debugStep()
   p[0] = quads
 
   # Build .o
