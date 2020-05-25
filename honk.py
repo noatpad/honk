@@ -192,7 +192,14 @@ class HonkVM:
           else:
             self.setValue(value, addr)
             break
+      # Verify matrix access dimension
+      elif op == 'VERIFY':
+        index = self.getValue(quad[1], quad)
+        limit = int(quad[3])
+        self._debugMsg(ip, f'Verifying that {index} < {limit}...')
 
+        if index >= limit:
+          raise Exception(f'{index} is above the array\'s range of {limit}')
       # Program End
       elif op == 'END':
         break
