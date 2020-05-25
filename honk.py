@@ -11,7 +11,7 @@ class HonkVM:
     # For debugging purposes
     self.debug = debug
 
-    # Split lines and turned it into a queue
+    # Split lines and turn it into a queue
     lines = deque(obj.split('\n'))
 
     # Get and set ranges
@@ -23,11 +23,10 @@ class HonkVM:
     self.tempRanges = (lines.popleft().split('\t'))
     self.cteRanges = (lines.popleft().split('\t'))
 
-    if self.debug:
-      self._debugMsg('Init', f'Global ranges: {self.globalRanges}')
-      self._debugMsg('Init', f'Local ranges: {self.localRanges}')
-      self._debugMsg('Init', f'Temp ranges: {self.tempRanges}')
-      self._debugMsg('Init', f'Cte ranges: {self.cteRanges}')
+    self._debugMsg('Init', f'Global ranges: {self.globalRanges}')
+    self._debugMsg('Init', f'Local ranges: {self.localRanges}')
+    self._debugMsg('Init', f'Temp ranges: {self.tempRanges}')
+    self._debugMsg('Init', f'Cte ranges: {self.cteRanges}')
 
     if lines.popleft() != '->| RANGES END':
       self._ded()
@@ -48,8 +47,7 @@ class HonkVM:
       data = line.split('\t')
       self.memory[data[2]] = Address(data[0], data[1])
 
-      if self.debug:
-        self._debugMsg('Init', f'{data[0]} -> ({data[2]})')
+      self._debugMsg('Init', f'{data[0]} -> ({data[2]})')
 
     # Get and set quads
     self.quads = deque()
@@ -71,7 +69,8 @@ class HonkVM:
 
   # Debugger message
   def _debugMsg(self, quad, msg):
-    print(f'{quad}: {msg}')
+    if self.debug:
+      print(f'{quad}: {msg}')
 
   ## EXECUTION FUNCTIONS
   # TODO: Add validation for ranges
@@ -96,25 +95,31 @@ class HonkVM:
       op = quad[0]
 
       # Dual-op operation
-      if op in ['+', '-', '/', '*']:
+      if op in ['+', '-', '/', '*', '==', '!=', '<', '<=', '>', '>=']:
         left = self.getValue(quad[1])
         right = self.getValue(quad[2])
         result = eval(f'{left} {op} {right}')
         self.setValue(result, quad[3])
-        if self.debug:
-          self._debugMsg(ip, f'{left} {op} {right} = {result} -> ({quad[3]})')
+        self._debugMsg(ip, f'{left} {op} {right} = {result} -> ({quad[3]})')
       # Assignment
       elif op == '=':
         value = self.getValue(quad[1])
         self.setValue(value, quad[3])
-        if self.debug:
-          self._debugMsg(ip, f'{value} -> ({quad[3]})')
+        self._debugMsg(ip, f'{value} -> ({quad[3]})')
       # Go to #
       elif op == 'GoTo':
-        if self.debug:
-          self._debugMsg(ip, f'Jump -> {int(quad[3])}')
+        self._debugMsg(ip, f'Jump -> {int(quad[3])}')
         ip = int(quad[3])
         continue
+      # Go to # if false
+      elif op == 'GoToF':
+        boolean = self.getValue(quad[1])
+        if boolean:
+          self._debugMsg(ip, f'Allowed jump -> {int(quad[3])}')
+          ip = int(quad[3])
+          continue
+        else:
+          self._debugMsg(ip, f'Denied jump -> {int(quad[3])}')
       # Program End
       elif op == 'END':
         break

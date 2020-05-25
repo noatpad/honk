@@ -6,7 +6,7 @@ from functionDirectory import FunctionDirectory
 from quadManager import QuadManager
 
 # For debugging purposes
-debug = False
+debug = True
 
 funcDir = FunctionDirectory(debug)
 quads = QuadManager(funcDir, debug)
