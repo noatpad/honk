@@ -4,10 +4,10 @@ class VirtualDirectory:
     # NOTE: Remember constants are distributed throughout the whole program
     # Virtual address ranges
     # (|| int || float || char || bool ||)
-    self.globalRanges = (1000, 4000, 6500, 8000, 8999)
-    self.localRanges = (9000, 13000, 16000, 17000, 17999)
-    self.tempRanges = (18000, 23000, 26000, 27000, 27999)
-    self.cteRanges = (28000, 29000, 30000, 31000, 32000)
+    self.globalRanges = (1000, 4000, 7000, 8000, 9000)
+    self.localRanges = (9000, 13000, 17000, 18500, 20000)
+    self.tempRanges = (20000, 24000, 28000, 29500, 31000)
+    self.cteRanges = (31000, 34000, 37000, 37500, 38000)
 
     # Variable counters
     # [int, float, char, bool]
