@@ -19,10 +19,10 @@ class HonkVM:
     if lines.popleft() != '-> RANGES START':
       self._ded()
 
-    self.globalRanges = (lines.popleft().split('\t'))
-    self.localRanges = (lines.popleft().split('\t'))
-    self.tempRanges = (lines.popleft().split('\t'))
-    self.cteRanges = (lines.popleft().split('\t'))
+    self.globalRanges = (self._stringsToNumbers(lines.popleft().split('\t')))
+    self.localRanges = (self._stringsToNumbers(lines.popleft().split('\t')))
+    self.tempRanges = (self._stringsToNumbers(lines.popleft().split('\t')))
+    self.cteRanges = (self._stringsToNumbers(lines.popleft().split('\t')))
 
     self._debugMsg('Init', f'Global ranges: {self.globalRanges}')
     self._debugMsg('Init', f'Local ranges: {self.localRanges}')
@@ -46,9 +46,9 @@ class HonkVM:
         break
 
       data = line.split('\t')
-      self.memory[data[2]] = Address(data[0], data[1])
+      self.memory[int(data[2])] = Address(int(data[0]), data[1])
 
-      self._debugMsg('Init', f'{data[0]} -> ({data[2]})')
+      self._debugMsg('Init', f'{int(data[0])} -> ({int(data[2])})')
 
     # Get and set quads
     self.quads = deque()
@@ -63,6 +63,10 @@ class HonkVM:
         break
 
       self.quads.append(line.split('\t'))
+
+  # Covert array of strings into ints
+  def _stringsToNumbers(self, arr):
+    return [int(i) for i in arr]
 
   # VM init error
   def _ded(self):
@@ -79,14 +83,18 @@ class HonkVM:
   # Get a value from an address
   def getValue(self, addr, quad):
     try:
-      ret = self.memory[addr]
+      ret = self.memory[int(addr)]
       return ret.value
     except:
-      raise Exception(f"Value doesn't exist in memory?! -> ({addr}) from {quad}")
+      raise Exception(f"Value doesn't exist in memory?! -> ({int(addr)}) from {quad}")
 
-# Set a value and save it in memory
+  # Set a value and save it in memory
   def setValue(self, value, addr):
-    self.memory[addr] = Address(value, None)
+    self.memory[int(addr)] = Address(value, None)
+
+  # Get type by address
+  def getTypeByAddress(self, addr):
+    pass
 
   # Execute virtual machine
   def execute(self):
@@ -138,7 +146,7 @@ class HonkVM:
       elif op == 'READ':
         self._debugMsg(ip, f'Requesting input...')
         user_input = input("> ")
-
+        pass
 
       # Program End
       elif op == 'END':
