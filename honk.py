@@ -75,12 +75,15 @@ class HonkVM:
   ## EXECUTION FUNCTIONS
   # TODO: Add validation for ranges
   # TODO: Add missing functions
-  def getValue(self, addr):
+  def getValue(self, addr, quad):
     try:
-      ret = self.memory[addr]
-      return ret.value
+      if type(addr) is str:   # If a string, just return it
+        return addr
+      else:                   # If anything else, it's a memory address
+        ret = self.memory[addr]
+        return ret.value
     except:
-      raise Exception(f"Value doesn't exist in memory?! -> ({addr})")
+      raise Exception(f"Value doesn't exist in memory?! -> ({addr}) from {quad}")
 
   def setValue(self, value, addr):
     self.memory[addr] = Address(value, None)
@@ -96,14 +99,14 @@ class HonkVM:
 
       # Dual-op operation
       if op in ['+', '-', '/', '*', '==', '!=', '<', '<=', '>', '>=']:
-        left = self.getValue(quad[1])
-        right = self.getValue(quad[2])
+        left = self.getValue(quad[1], quad)
+        right = self.getValue(quad[2], quad)
         result = eval(f'{left} {op} {right}')
         self.setValue(result, quad[3])
         self._debugMsg(ip, f'{left} {op} {right} = {result} -> ({quad[3]})')
       # Assignment
       elif op == '=':
-        value = self.getValue(quad[1])
+        value = self.getValue(quad[1], quad)
         self.setValue(value, quad[3])
         self._debugMsg(ip, f'{value} -> ({quad[3]})')
       # Go to #
@@ -113,13 +116,18 @@ class HonkVM:
         continue
       # Go to # if false
       elif op == 'GoToF':
-        boolean = self.getValue(quad[1])
+        boolean = self.getValue(quad[1], quad)
         if boolean:
           self._debugMsg(ip, f'Allowed jump -> {int(quad[3])}')
           ip = int(quad[3])
           continue
         else:
           self._debugMsg(ip, f'Denied jump -> {int(quad[3])}')
+      # Print
+      elif op == 'PRINT':
+        self._debugMsg(ip, f'Printing -> ({quad[3]})')
+        value = self.getValue(quad[3], quad)
+        print(str(value))
       # Program End
       elif op == 'END':
         break
