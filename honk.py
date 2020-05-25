@@ -94,7 +94,28 @@ class HonkVM:
 
   # Get type by address
   def getTypeByAddress(self, addr):
-    pass
+    addr = int(addr)
+    if addr < self.globalRanges[0] or addr >= self.localRanges[4]:
+      raise Exception(f'Accessing prohibited memory! -> ({addr})')
+
+    if addr < self.globalRanges[1]:
+      return 'int'
+    elif addr < self.globalRanges[2]:
+      return 'float'
+    elif addr < self.globalRanges[3]:
+      return 'char'
+    elif addr < self.globalRanges[4]:
+      return 'bool'
+    elif addr < self.localRanges[1]:
+      return 'int'
+    elif addr < self.localRanges[2]:
+      return 'float'
+    elif addr < self.localRanges[3]:
+      return 'char'
+    elif addr < self.localRanges[4]:
+      return 'bool'
+
+    raise Exception(f'How did we get here?? -> ({addr})')
 
   # Execute virtual machine
   def execute(self):
@@ -119,7 +140,7 @@ class HonkVM:
         self._debugMsg(ip, f'{value} -> ({quad[3]})')
       # Go to #
       elif op == 'GoTo':
-        self._debugMsg(ip, f'Jump -> {int(quad[3])}')
+        self._debugMsg(ip, f'Jump -> {quad[3]}')
         ip = int(quad[3])
         continue
       # Go to # if false
@@ -128,7 +149,7 @@ class HonkVM:
         if boolean:
           self._debugMsg(ip, f'Denied jump because true')
         else:
-          self._debugMsg(ip, f'Allowed jump -> {int(quad[3])}')
+          self._debugMsg(ip, f'Allowed jump -> {quad[3]}')
           ip = int(quad[3])
           continue
       # Print
@@ -144,9 +165,33 @@ class HonkVM:
           print(str(value))
       # Read input
       elif op == 'READ':
-        self._debugMsg(ip, f'Requesting input...')
-        user_input = input("> ")
-        pass
+        addr = quad[3]
+        input_type = self.getTypeByAddress(addr)
+        self._debugMsg(ip, f'Requesting input for ({addr}), type: {input_type}...')
+
+        while True:
+          user_input = input("> ")
+          try:
+            value = None
+            if input_type == 'int':
+              value = int(user_input)
+            elif input_type == 'float':
+              value = float(user_input)
+            elif input_type == 'bool':
+              if value == 'True':
+                value = True
+              elif value == 'False':
+                value = False
+              else:
+                raise Exception("Invalid type!")
+            elif input_type == 'char':
+              value = user_input[0]
+          except:
+            print('! Invalid type! Try again...')
+            continue
+          else:
+            self.setValue(value, addr)
+            break
 
       # Program End
       elif op == 'END':
