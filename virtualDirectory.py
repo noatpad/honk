@@ -1,18 +1,14 @@
 
 class VirtualDirectory:
   def __init__(self):
-    # TODO: Make booleans only constants
     # NOTE: Remember constants are distributed throughout the whole program
+    # FIXME: A range's end is the same as another's start. Apply -1 to the end
     # Virtual address ranges
     # (|| int || float || char || bool ||)
-    # self.globalRanges = (1000, 4000, 6500, 7999, 7999)
-    # self.localRanges = (8000, 12000, 15000, 16999, 16999)
-    # self.tempRanges = (17000, 22000, 25000, 26999, 26999)
-    # self.cteRanges = (27000, 28500, 30000, 31000, 32000)
     self.globalRanges = (1000, 4000, 6500, 8000, 8999)
     self.localRanges = (9000, 13000, 16000, 17000, 17999)
     self.tempRanges = (18000, 23000, 26000, 27000, 27999)
-    self.cteRanges = (27000, 28500, 30000, 31000, 32000)
+    self.cteRanges = (28000, 29000, 30000, 31000, 32000)
 
     # Variable counters
     # [int, float, char, bool]

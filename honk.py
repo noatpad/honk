@@ -1,5 +1,6 @@
 
 from collections import deque, defaultdict
+import re
 
 class Address:
   def __init__(self, value, vartype):
@@ -75,16 +76,15 @@ class HonkVM:
   ## EXECUTION FUNCTIONS
   # TODO: Add validation for ranges
   # TODO: Add missing functions
+  # Get a value from an address
   def getValue(self, addr, quad):
     try:
-      if type(addr) is str:   # If a string, just return it
-        return addr
-      else:                   # If anything else, it's a memory address
-        ret = self.memory[addr]
-        return ret.value
+      ret = self.memory[addr]
+      return ret.value
     except:
       raise Exception(f"Value doesn't exist in memory?! -> ({addr}) from {quad}")
 
+# Set a value and save it in memory
   def setValue(self, value, addr):
     self.memory[addr] = Address(value, None)
 
@@ -118,16 +118,28 @@ class HonkVM:
       elif op == 'GoToF':
         boolean = self.getValue(quad[1], quad)
         if boolean:
+          self._debugMsg(ip, f'Denied jump because true')
+        else:
           self._debugMsg(ip, f'Allowed jump -> {int(quad[3])}')
           ip = int(quad[3])
           continue
-        else:
-          self._debugMsg(ip, f'Denied jump -> {int(quad[3])}')
       # Print
       elif op == 'PRINT':
-        self._debugMsg(ip, f'Printing -> ({quad[3]})')
-        value = self.getValue(quad[3], quad)
-        print(str(value))
+        operand = quad[3]
+        if re.match(r'\".+\"', operand):
+          string = operand[1:-1]
+          self._debugMsg(ip, f'Printing string: {string}')
+          print(string)
+        else:
+          value = self.getValue(int(quad[3]), quad)
+          self._debugMsg(ip, f'Printing value: {value} <- ({quad[3]})')
+          print(str(value))
+      # Read input
+      elif op == 'READ':
+        self._debugMsg(ip, f'Requesting input...')
+        user_input = input("> ")
+
+
       # Program End
       elif op == 'END':
         break
