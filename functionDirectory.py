@@ -9,7 +9,6 @@ class Constant():
     self.vAddr = vAddr
 
 
-
 ## -- VARIABLE
 class Var():
   def __init__(self, name, vartype, vAddr):
@@ -18,7 +17,6 @@ class Var():
     self.dimensions = []
     self.mDim = None
     self.vAddr = vAddr
-
 
 
 ## -- FUNCTION
@@ -88,7 +86,6 @@ class Function():
   def deleteVarTable(self):
     self.varTable = None
     self.cteTable = None
-
 
 
 ## -- FUNCTION DIRECTORY

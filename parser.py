@@ -242,9 +242,17 @@ def p_found_else(p):
 # TODO: Add constant 1 to constants table
 def p_for(p):
   "for : DESDE ID found_for_iterator ':' expr found_for_start HASTA expr found_for_cond HACER '{' body '}'"
+  # Get constant of 1
+  oneAddr = None
+  if funcDir.cteExists(1):
+    oneAddr = funcDir.getCte(1).vAddr
+  else:
+    oneAddr = quads.vDir.generateVirtualAddress('cte', 'int')
+    funcDir.addCte(1, 'int', oneAddr)
+
   quads.pushVar(quads.getTopOperand(), quads.getTopType())
   quads.pushVar(quads.getTopOperand(), quads.getTopType())
-  quads.pushVar(1, 'int')
+  quads.pushVar(oneAddr, 'int')
   quads.pushOperator('=')
   quads.pushOperator('+')
   quads.addDualOpQuad(['+'])

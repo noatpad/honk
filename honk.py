@@ -131,8 +131,8 @@ class HonkVM:
           self._debugMsg(ip, f'Printing string: {string}')
           print(string)
         else:
-          value = self.getValue(int(quad[3]), quad)
-          self._debugMsg(ip, f'Printing value: {value} <- ({quad[3]})')
+          value = self.getValue(operand, quad)
+          self._debugMsg(ip, f'Printing value: {value} <- ({operand})')
           print(str(value))
       # Read input
       elif op == 'READ':
