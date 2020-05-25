@@ -2,7 +2,6 @@
 class VirtualDirectory:
   def __init__(self):
     # NOTE: Remember constants are distributed throughout the whole program
-    # FIXME: A range's end is the same as another's start. Apply -1 to the end
     # Virtual address ranges
     # (|| int || float || char || bool ||)
     self.globalRanges = (1000, 4000, 6500, 8000, 8999)
@@ -55,22 +54,22 @@ class VirtualDirectory:
 
     # Select scope (with validation checks)
     if scope == 'global':   # Global
-      if self.globalRanges[v] + self.globalCounter[v] + space >= self.globalRanges[v + 1]:
+      if self.globalRanges[v] + self.globalCounter[v] + space >= self.globalRanges[v + 1] - 1:
         raise Exception(f"Out of bounds! {vartype} in {scope}")
       self.globalCounter[v] += space
       return self.globalRanges[v] + self.globalCounter[v] - 1
     elif scope == 'temp':   # Temp
-      if self.tempRanges[v] + self.tempCounter[v] + space >= self.tempRanges[v + 1]:
+      if self.tempRanges[v] + self.tempCounter[v] + space >= self.tempRanges[v + 1] - 1:
         raise Exception(f"Out of bounds! {vartype} in {scope}")
       self.tempCounter[v] += space
       return self.tempRanges[v] + self.tempCounter[v] - 1
     elif scope == 'cte':    # Constants
-      if self.cteRanges[v] + self.cteCounter[v] + space >= self.cteRanges[v + 1]:
+      if self.cteRanges[v] + self.cteCounter[v] + space >= self.cteRanges[v + 1] - 1:
         raise Exception(f"Out of bounds! {vartype} in {scope}")
       self.cteCounter[v] += space
       return self.cteRanges[v] + self.cteCounter[v] - 1
     else:                   # Local (any local function)
-      if self.localRanges[v] + self.localCounter[v] + space >= self.localRanges[v + 1]:
+      if self.localRanges[v] + self.localCounter[v] + space >= self.localRanges[v + 1] - 1:
         raise Exception(f"Out of bounds! {vartype} in {scope}")
       self.localCounter[v] += space
       return self.localRanges[v] + self.localCounter[v] - 1
