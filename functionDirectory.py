@@ -62,7 +62,12 @@ class Function():
 
     if self.debug:
       v = self.varTable[var]
-      print(f'\t\t\t\t\t>> VAR: {v.name} - {v.vartype}{v.dimensions} -> {v.vAddr}')
+      space = 1
+      for i in v.dimensions:
+        space *= i
+      space += v.vAddr - 1
+
+      print(f'\t\t\t\t\t>> VAR: {v.name} - {v.vartype}{v.dimensions} -> {v.vAddr} - {space}')
 
   # Add parameter
   def addParam(self, vartype):
