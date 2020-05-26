@@ -7,6 +7,16 @@ class Address:
     self.value = value
     self.vartype = vartype
 
+  def getActualValue(self):
+    if self.vartype == 'int':
+      return int(self.value)
+    elif self.vartype == 'float':
+      return float(self.value)
+    elif self.vartype == 'bool':
+      return (self.value == 'True')
+    else:
+      return self.value
+
 class HonkVM:
   def __init__(self, obj, debug=False):
     # For debugging purposes
@@ -35,6 +45,15 @@ class HonkVM:
     # Prepare memory
     self.memory = dict()
 
+    self.Globals = [None] * (self.globalRanges[4] - self.globalRanges[0])
+    self.Locals = [None] * (self.localRanges[4] - self.localRanges[0])
+    self.Temps = [None] * (self.tempRanges[4] - self.tempRanges[0])
+    self.Ctes = [None] * (self.cteRanges[4] - self.cteRanges[0])
+    self.GlobalCount = 0
+    self.LocalCount = 0
+    self.TempCount = 0
+    self.CteCount = 0
+
     # Get and set constants
     if lines.popleft() != '-> CTES START':
       self._ded()
@@ -46,8 +65,11 @@ class HonkVM:
         break
 
       data = line.split('\t')
-      self.memory[int(data[2])] = Address(int(data[0]), data[1])
+      # self.memory[int(data[2])] = Address(int(data[0]), data[1])
+      # self._debugMsg('Init', f'{data[0]} -> ({data[2]})')
 
+      addr = int(data[2]) - self.cteRanges[0]
+      self.Ctes[addr] = Address(data[0], data[1])
       self._debugMsg('Init', f'{data[0]} -> ({data[2]})')
 
     # Prepare ERAs
@@ -99,26 +121,78 @@ class HonkVM:
       print(f'{quad}: {msg}')
 
   ## EXECUTION FUNCTIONS
+  # Get type based on a memory range's address
+  def getTypeByRange(self, addr, range):
+    if addr < range[1]:
+      return 'int'
+    elif addr < range[2]:
+      return 'float'
+    elif addr < range[3]:
+      return 'char'
+    else:
+      return 'bool'
+
   # Get a value from an address
   def getValue(self, addr):
     try:
       if re.match(r'\(\d+,\)', addr):
         ptr = addr[1:-2]
-        ret = self.memory[self.getValue(ptr)]
-        return ret.value
+        return self.getValue(str(self.getValue(ptr)))
+
+      addr = int(addr)
+      if addr < self.globalRanges[0] or addr >= self.cteRanges[4]:
+        raise Exception(f'Getting from out of bounds! -> ({addr})')
+
+      if addr < self.globalRanges[4]:
+        return self.Globals[addr - self.globalRanges[0]].getActualValue()
+      elif addr < self.localRanges[4]:
+        return self.Locals[addr - self.localRanges[0]].getActualValue()
+      elif addr < self.tempRanges[4]:
+        return self.Temps[addr - self.tempRanges[0]].getActualValue()
       else:
-        ret = self.memory[int(addr)]
-        return ret.value
+        return self.Ctes[addr - self.cteRanges[0]].getActualValue()
     except:
       raise Exception(f"Value doesn't exist in memory?! -> ({addr})")
+    # try:
+    #   if re.match(r'\(\d+,\)', addr):
+    #     ptr = addr[1:-2]
+    #     ret = self.memory[self.getValue(ptr)]
+    #     return ret.value
+    #   else:
+    #     ret = self.memory[int(addr)]
+    #     return ret.value
+    # except:
+    #   raise Exception(f"Value doesn't exist in memory?! -> ({addr})")
 
   # Set a value and save it in memory
   def setValue(self, value, addr):
+    print(addr)
     if re.match(r'\(\d+,\)', addr):
       ptr = addr[1:-2]
-      self.memory[self.getValue(ptr)] = Address(value, None)
+      self.setValue(value, str(self.getValue(ptr)))
     else:
-      self.memory[int(addr)] = Address(value, None)
+      addr = int(addr)
+      if addr < self.globalRanges[0] or addr >= self.tempRanges[4]:
+        return Exception(f'Setting in invalid memory! -> ({addr})')
+
+      elif addr < self.globalRanges[4]:
+        rangeAddr = addr - self.globalRanges[0]
+        self.Globals[rangeAddr] = Address(value, self.getTypeByRange(addr, self.globalRanges))
+      elif addr < self.localRanges[4]:
+        rangeAddr = addr - self.localRanges[0]
+        self.Locals[rangeAddr] = Address(value, self.getTypeByRange(addr, self.localRanges))
+      elif addr < self.tempRanges[4]:
+        rangeAddr = addr - self.tempRanges[0]
+        self.Temps[rangeAddr] = Address(value, self.getTypeByRange(addr, self.tempRanges))
+      else:
+        rangeAddr = addr - self.cteRanges[0]
+        self.Ctes[rangeAddr] = Address(value, self.getTypeByRange(addr, self.cteRanges))
+
+    # if re.match(r'\(\d+,\)', addr):
+    #   ptr = addr[1:-2]
+    #   self.memory[self.getValue(ptr)] = Address(value, None)
+    # else:
+    #   self.memory[int(addr)] = Address(value, None)
 
   # Get type by address
   def getTypeByAddress(self, addr):
