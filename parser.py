@@ -242,48 +242,20 @@ def p_found_else(p):
 # TODO: Add constant 1 to constants table
 def p_for(p):
   "for : DESDE ID found_for_iterator ':' expr found_for_start HASTA expr found_for_cond HACER '{' body '}'"
-  # Get constant of 1
-  oneAddr = None
-  if funcDir.cteExists(1):
-    oneAddr = funcDir.getCte(1).vAddr
-  else:
-    oneAddr = quads.vDir.generateVirtualAddress('cte', 'int')
-    funcDir.addCte(1, 'int', oneAddr)
-
-  quads.pushVar(quads.getTopOperand(), quads.getTopType())
-  quads.pushVar(quads.getTopOperand(), quads.getTopType())
-  quads.pushVar(oneAddr, 'int')
-  quads.pushOperator('=')
-  quads.pushOperator('+')
-  quads.addDualOpQuad(['+'])
-  quads.addAssignQuad()
-  quads.completeLoopQuad()
-  quads.popOperand()
-  quads.popType()
+  quads.addForEndQuads()
 
 def p_found_for_iterator(p):
   "found_for_iterator : empty"
-  var = p[-1]
-  if not funcDir.varExists(var):
-    funcDir.setCurrentType('int')
-    funcDir.addVar(var, quads.vDir.generateVirtualAddress('temp', 'int'))
-    quads.pushVar(var, 'int')
-    quads.pushVar(var, 'int')
-    quads.pushVar(var, 'int')
-  else:
-    s_error(f'Variable "{var}" already exists!"')
+  quads.addForIteratorQuads(p[-1])
+
 
 def p_found_for_start(p):
   "found_for_start : empty"
-  quads.pushOperator('=')
-  quads.addAssignQuad()
-  quads.prepareLoop()
+  quads.addForStartQuad()
 
 def p_found_for_cond(p):
   "found_for_cond : empty"
-  quads.pushOperator('<=')
-  quads.addDualOpQuad(['<='])
-  quads.addLoopCondQuad()
+  quads.addForCondQuads()
 
 ## WHILE
 def p_while(p):

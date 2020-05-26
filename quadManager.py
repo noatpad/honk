@@ -215,6 +215,50 @@ class QuadManager:
     self.addQuad(('GoTo', None, None, ret))
     self.completeQuad(end, self.quadCount)
 
+  # Add quads for when the iterator of a 'for' loop is found
+  def addForIteratorQuads(self, var):
+    if not self.funcDir.varExists(var):
+      self.funcDir.setCurrentType('int')
+      self.funcDir.addVar(var, self.vDir.generateVirtualAddress('temp', 'int'))
+      self.pushVar(var, 'int')
+      self.pushVar(var, 'int')
+      self.pushVar(var, 'int')
+    else:
+      raise Exception(f'Variable "{var}" already exists!"')
+
+  # Add quads for a 'for' loop's initial assignment
+  def addForStartQuad(self):
+    self.pushOperator('=')
+    self.addAssignQuad()
+    self.prepareLoop()
+
+  # Add quads for a 'for' loop's condition check
+  def addForCondQuads(self):
+    self.pushOperator('<=')
+    self.addDualOpQuad(['<='])
+    self.addLoopCondQuad()
+
+  # Add quads for a 'for' loop's increment
+  def addForEndQuads(self):
+    # Get constant of 1
+    oneAddr = None
+    if self.funcDir.cteExists(1):
+      oneAddr = self.funcDir.getCte(1).vAddr
+    else:
+      oneAddr = self.vDir.generateVirtualAddress('cte', 'int')
+      self.funcDir.addCte(1, 'int', oneAddr)
+
+    self.pushVar(self.getTopOperand(), self.getTopType())
+    self.pushVar(self.getTopOperand(), self.getTopType())
+    self.pushVar(oneAddr, 'int')
+    self.pushOperator('=')
+    self.pushOperator('+')
+    self.addDualOpQuad(['+'])
+    self.addAssignQuad()
+    self.completeLoopQuad()
+    self.popOperand()
+    self.popType()
+
   # Add quads used for array access
   def addArrQuads(self):
     sdim = self.sDims[-1]

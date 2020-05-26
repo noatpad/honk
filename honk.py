@@ -122,10 +122,10 @@ class HonkVM:
     ip = 0
 
     while True:
-      # Let it begin. The super-switch case
       quad = self.quads[ip]
       op = quad[0]
 
+      ## - Let it begin. The super-switch case
       # Dual-op operation
       if op in ['+', '-', '/', '*', '==', '!=', '<', '<=', '>', '>=']:
         left = self.getValue(quad[1], quad)
@@ -169,6 +169,7 @@ class HonkVM:
         input_type = self.getTypeByAddress(addr)
         self._debugMsg(ip, f'Requesting input for ({addr}), type: {input_type}...')
 
+        # Repeat asking for input until correct
         while True:
           user_input = input("> ")
           try:
