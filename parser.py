@@ -463,6 +463,7 @@ def p_found_call_func_end(p):
   "found_call_func_end : empty"
   func = quads.getTopFunction()
   if funcDir.verifyParamCount(func):
+    funcDir.resetParamCount()
     quads.addGoSubQuad(func, funcDir.getQuadStartOfFunc(func))
   else:
     raise Exception(f'Wrong number of parameters in {func}!')

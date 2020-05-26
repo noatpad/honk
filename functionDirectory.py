@@ -126,6 +126,10 @@ class FunctionDirectory():
   def incrementParamCount(self):
     self.paramCount += 1
 
+  # Reset param count to 0
+  def resetParamCount(self):
+    self.paramCount = 0
+
   ## GETTERS
   # TODO: Make a centralized variable getter (some functions won't work locally)
   # Returns desired variable
@@ -223,7 +227,6 @@ class FunctionDirectory():
 
   # Verify number of parameters of function
   def verifyParamCount(self, func):
-    # print(self.paramCount, len(self.directory[func].paramTable))
     return (self.paramCount == len(self.directory[func].paramTable))
 
   # Return boolean if function exists
