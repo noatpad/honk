@@ -239,7 +239,6 @@ def p_found_else(p):
   quads.addElseQuad()
 
 ## FOR
-# TODO: Add constant 1 to constants table
 def p_for(p):
   "for : DESDE ID found_for_iterator ':' expr found_for_start HASTA expr found_for_cond HACER '{' body '}'"
   quads.addForEndQuads()
@@ -370,6 +369,7 @@ def p_expr_var(p):
 def p_expr_var_name(p):
   "expr_var_name : ID"
   var = funcDir.getVar(p[1])
+  funcDir.setVarHelper(var.name)
   quads.pushVar(var.name, var.vartype)
 
 def p_expr_var_no_dims(p):
@@ -377,37 +377,26 @@ def p_expr_var_no_dims(p):
   pass
 
 def p_expr_var_dims(p):
-  """expr_var_dims : found_expr_var_dims expr_var_dim found_expr_var_dim_2 expr_var_dim
+  """expr_var_dims : found_expr_var_dims expr_var_dim expr_var_dim
                    | found_expr_var_dims expr_var_dim"""
-  quads.addArrEndQuad()
+  quads.addBaseAddressQuad()
 
 def p_found_expr_var_dims(p):
   "found_expr_var_dims : empty"
-  arr = quads.popOperand()
-  quads.popType()
-  quads.dimCount = 0
-  quads.sDims.append((arr, 0))
-  quads.sOperators.append('(')
+  quads.sDims.append((funcDir.varHelper, 0))
 
 def p_expr_var_dim(p):
-  "expr_var_dim : found_expr_var_dim '[' expr found_expr_var_dim_expr ']'"
-  pass
-
-def p_found_expr_var_dim(p):
-  "found_expr_var_dim : empty"
-  sdim = quads.sDims[-1]
-  quads.dimCount += 1
-  if quads.dimCount > len(funcDir.getDimensionsOfVar(sdim[0])):
-    raise Exception(f'{sdim[0]} has {len(funcDir.getDimensionsOfVar(sdim[0]))} dimension(s)! -> {quads.dimCount}')
-
-def p_found_expr_var_dim_2(p):
-  "found_expr_var_dim_2 : empty"
-  sdim = quads.sDims.pop()
-  quads.sDims.append((sdim[0], quads.dimCount))
-
-def p_found_expr_var_dim_expr(p):
-  "found_expr_var_dim_expr : empty"
+  "expr_var_dim : '[' expr_var_open_dim expr ']'"
   quads.addArrQuads()
+
+def p_expr_var_open_dim(p):
+  "expr_var_open_dim : empty"
+  aux = quads.sDims.pop()
+  if aux[1] + 1 > len(funcDir.getDimensionsOfVar(aux[0])):
+    raise Exception(f'{aux[0]} has {len(funcDir.getDimensionsOfVar(aux[0]))} dimension(s)! -> {aux[1]}')
+
+  quads.sDims.append((aux[0], aux[1] + 1))
+  quads.sOperators.append('(')
 
 def p_cte(p):
   """expr_var : CTE_INT
@@ -439,7 +428,6 @@ def p_expr_call_func(p):
     raise Exception("This function is void and cannot be used as an expression!")
 
 ## CALL_FUNCTION
-# NOTE: Ask teacher about how a "function is assigned to a variable"
 def p_call_func(p):
   "call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end ';'"
   func = quads.popFunction()

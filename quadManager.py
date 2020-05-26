@@ -3,7 +3,6 @@ from collections import deque
 from semanticCube import getDuoResultType
 from virtualDirectory import VirtualDirectory
 
-# TODO: Add validation for dimensions
 class QuadManager:
   def __init__(self, funcDir, debug):
     self.debug = debug
@@ -129,7 +128,6 @@ class QuadManager:
 
       result_type = getDuoResultType(left_type, right_type, operator)
       if result_type:
-        # result = 't' + str(self.tempCount)
         result = self.vDir.generateVirtualAddress('temp', result_type)
         self.addQuad((operator, self.funcDir.getVAddr(left_op), self.funcDir.getVAddr(right_op), result))
         self.sOperands.append(result)
@@ -241,16 +239,11 @@ class QuadManager:
   # Add quads for a 'for' loop's increment
   def addForEndQuads(self):
     # Get constant of 1
-    oneAddr = None
-    if self.funcDir.cteExists(1):
-      oneAddr = self.funcDir.getCte(1).vAddr
-    else:
-      oneAddr = self.vDir.generateVirtualAddress('cte', 'int')
-      self.funcDir.addCte(1, 'int', oneAddr)
+    one = self.upsertCte(1, 'int')
 
     self.pushVar(self.getTopOperand(), self.getTopType())
     self.pushVar(self.getTopOperand(), self.getTopType())
-    self.pushVar(oneAddr, 'int')
+    self.pushVar(one.vAddr, one.vartype)
     self.pushOperator('=')
     self.pushOperator('+')
     self.addDualOpQuad(['+'])
@@ -259,46 +252,42 @@ class QuadManager:
     self.popOperand()
     self.popType()
 
-  # Add quads used for array access
+  # Add necessary quads for array access
   def addArrQuads(self):
-    sdim = self.sDims[-1]
-    dimensions = self.funcDir.getDimensionsOfVar(sdim[0])
-    limit = dimensions[sdim[1]]
-    mdim = self.funcDir.getMdim(sdim[0])
+    aux = self.sDims[-1]
+    dims = self.funcDir.getDimensionsOfVar(aux[0])
+    self.addQuad(('VERIFY', self.sOperands[-1], None, dims[aux[1] - 1]))
 
-    # Quad for verifying bounds
-    self.addQuad(('VERIFY', self.sOperands[-1], None, limit))
-
-    # If 2nd dimension available, * d1 m0
-    if sdim[1] < len(dimensions):
-      # aux = self.sOperands.pop()
-      self.sOperands.append(mdim[sdim[1]])
-      self.sTypes.append('int')
+    # Only do the following for first dimension and if a second dimension exists
+    if len(dims) - aux[1] == 1:
+      mul = self.upsertCte(dims[1], 'int')
+      self.pushVar(mul.vAddr, mul.vartype)
       self.sOperators.append('*')
       self.addDualOpQuad(['*'])
+    elif len(dims) == 2:     # NOTE: Hacky removal of useless constant for second dimension
+      self.sOperands.pop()
+      self.sTypes.pop()
 
-    # If past 1st dimension, + (* d1 m0) d2
-    if sdim[1] >= 1:
-      self.sOperators.append('+')
-      self.addDualOpQuad(['+'])
+    self.popOperator()
 
-  # Add quads for ending array access
-  def addArrEndQuad(self):
-    # Sum the base address of variable
-    sdim = self.sDims.pop()
-    self.sOperands.append(self.funcDir.getVAddr(sdim[0]))
-    self.sTypes.append('int')
-    self.sOperators.append('+')
-    self.addDualOpQuad('+')
+  def addBaseAddressQuad(self):
+    self.debugStep()
+    self.sDims.pop()
+    offset = self.sOperands.pop()
+    self.sTypes.pop()
+    arr = self.sOperands.pop()
+    result_type = self.sTypes.pop()
+    base = self.funcDir.getVAddr(arr)
 
-    # Indicate the result is an address, not a value
-    q = self.quads[-1]
-    self.quads[-1] = (q[0], q[1], q[2], (q[3],))
-    self.sOperands[-1] = (q[3],)
-    self.sOperators.pop()
+    result = self.vDir.generateVirtualAddress('temp', result_type)
+    self.addQuad(('+->', offset, base, result))
+    self.sOperands.append((result,))
+    self.sTypes.append(result_type)
 
     if self.debug:
-      print(f'\t\t\t\t\t! Turned quad result #{self.quadCount - 1} into an address -> {self.quads[-1][3]}')
+      print(f'\t\t\t\t\t> PTR: t{self.tempCount} - {result_type} -> ({result})')
+
+    self.tempCount += 1
 
   # Append EndFunc quad
   def addEndFuncQuad(self):
@@ -337,6 +326,13 @@ class QuadManager:
     self.returnCount = 0
     self.vDir.resetLocalCounters()
 
+  # Get a constant if it exists, otherwise create one and return it
+  def upsertCte(self, value, vartype):
+    if not self.funcDir.cteExists(value):
+      vAddr = self.vDir.generateVirtualAddress('cte', vartype)
+      self.funcDir.addCte(value, vartype, vAddr)
+    return self.funcDir.getCte(value)
+
   # Print all quads
   def printQuads(self):
     i = 0
@@ -346,17 +342,17 @@ class QuadManager:
 
   # Debug function
   def debugStep(self):
-    print(" - - - DEBUG - - - ")
-    print("sOperands ->", list(self.sOperands))
-    print("sOperators ->", list(self.sOperators))
-    print("sTypes ->", list(self.sTypes))
-    print("sJumps ->", list(self.sJumps))
-    print("sFuncs ->", list(self.sJumps))
-    print("sDims ->", list(self.sDims))
-    print("- CTES")
+    print("\t - - - DEBUG - - - ")
+    print("\tsOperands ->", list(self.sOperands))
+    print("\tsOperators ->", list(self.sOperators))
+    print("\tsTypes ->", list(self.sTypes))
+    print("\tsJumps ->", list(self.sJumps))
+    print("\tsFuncs ->", list(self.sJumps))
+    print("\tsDims ->", list(self.sDims))
+    print("\t- CTES")
     for c in self.funcDir.cteTable.values():
       print(c.value, c.vartype, c.vAddr)
-    print(" - - - DEBUG - - - ")
+    print("\t - - - DEBUG END - - - ")
 
   ## FUNCTIONS (BUILDING)
   def build(self):

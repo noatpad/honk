@@ -78,19 +78,26 @@ class HonkVM:
       print(f'{quad}: {msg}')
 
   ## EXECUTION FUNCTIONS
-  # TODO: Add validation for ranges
-  # TODO: Add missing functions
   # Get a value from an address
-  def getValue(self, addr, quad):
+  def getValue(self, addr):
     try:
-      ret = self.memory[int(addr)]
-      return ret.value
+      if re.match(r'\(\d+,\)', addr):
+        ptr = addr[1:-2]
+        ret = self.memory[self.getValue(ptr)]
+        return ret.value
+      else:
+        ret = self.memory[int(addr)]
+        return ret.value
     except:
-      raise Exception(f"Value doesn't exist in memory?! -> ({int(addr)}) from {quad}")
+      raise Exception(f"Value doesn't exist in memory?! -> ({addr})")
 
   # Set a value and save it in memory
   def setValue(self, value, addr):
-    self.memory[int(addr)] = Address(value, None)
+    if re.match(r'\(\d+,\)', addr):
+      ptr = addr[1:-2]
+      self.memory[self.getValue(ptr)] = Address(value, None)
+    else:
+      self.memory[int(addr)] = Address(value, None)
 
   # Get type by address
   def getTypeByAddress(self, addr):
@@ -128,14 +135,14 @@ class HonkVM:
       ## - Let it begin. The super-switch case
       # Dual-op operation
       if op in ['+', '-', '/', '*', '==', '!=', '<', '<=', '>', '>=']:
-        left = self.getValue(quad[1], quad)
-        right = self.getValue(quad[2], quad)
+        left = self.getValue(quad[1])
+        right = self.getValue(quad[2])
         result = eval(f'{left} {op} {right}')
         self.setValue(result, quad[3])
         self._debugMsg(ip, f'{left} {op} {right} = {result} -> ({quad[3]})')
       # Assignment
       elif op == '=':
-        value = self.getValue(quad[1], quad)
+        value = self.getValue(quad[1])
         self.setValue(value, quad[3])
         self._debugMsg(ip, f'{value} -> ({quad[3]})')
       # Go to #
@@ -145,7 +152,7 @@ class HonkVM:
         continue
       # Go to # if false
       elif op == 'GoToF':
-        boolean = self.getValue(quad[1], quad)
+        boolean = self.getValue(quad[1])
         if boolean:
           self._debugMsg(ip, f'Denied jump because true')
         else:
@@ -160,8 +167,8 @@ class HonkVM:
           self._debugMsg(ip, f'Printing string: {string}')
           print(string)
         else:
-          value = self.getValue(operand, quad)
-          self._debugMsg(ip, f'Printing value: {value} <- ({operand})')
+          value = self.getValue(operand)
+          self._debugMsg(ip, f'Printing value: ({operand}) -> {value}')
           print(str(value))
       # Read input
       elif op == 'READ':
@@ -195,12 +202,18 @@ class HonkVM:
             break
       # Verify matrix access dimension
       elif op == 'VERIFY':
-        index = self.getValue(quad[1], quad)
+        index = self.getValue(quad[1])
         limit = int(quad[3])
         self._debugMsg(ip, f'Verifying that {index} < {limit}...')
 
         if index >= limit:
           raise Exception(f'{index} is above the array\'s range of {limit}')
+      # Add a variable's base address to produce a pointer
+      elif op == '+->':
+        offset = self.getValue(quad[1])
+        base = int(quad[2])
+        self._debugMsg(ip, f'Creating pointer {offset} + {base} -> (({quad[3]}))')
+        self.setValue(offset + base, quad[3])
       # Program End
       elif op == 'END':
         break

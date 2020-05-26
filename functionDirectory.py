@@ -139,13 +139,13 @@ class FunctionDirectory():
   # Returns desired variable
   def getVar(self, name):
     ret = None
-    # Priority: Local -> Global -> Constants
+    # Priority: Local -> Global
     if name in self.directory[self.currentFunc].varTable:
       ret = self.directory[self.currentFunc].getVar(name)
     elif name in self.directory[self.globalFunc].varTable:
       ret = self.directory[self.globalFunc].getVar(name)
     else:     # Else, raise an error
-      raise Exception(f'Variable "{name} does not exist!')
+      raise Exception(f'Variable {name} does not exist!')
 
     return ret
 
