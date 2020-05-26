@@ -327,10 +327,10 @@ class QuadManager:
 
   # Get a constant if it exists, otherwise create one and return it
   def upsertCte(self, value, vartype):
-    if not self.funcDir.cteExists(value):
+    if not self.funcDir.cteExists(value, vartype):
       vAddr = self.vDir.generateVirtualAddress('cte', vartype)
       self.funcDir.addCte(value, vartype, vAddr)
-    return self.funcDir.getCte(value)
+    return self.funcDir.getCte(value, vartype)
 
   # Print all quads
   def printQuads(self):

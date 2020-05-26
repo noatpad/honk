@@ -122,12 +122,12 @@ class HonkVM:
 
   ## EXECUTION FUNCTIONS
   # Get type based on a memory range's address
-  def getTypeByRange(self, addr, range):
-    if addr < range[1]:
+  def getTypeByRange(self, addr, memRange):
+    if addr < memRange[1]:
       return 'int'
-    elif addr < range[2]:
+    elif addr < memRange[2]:
       return 'float'
-    elif addr < range[3]:
+    elif addr < memRange[3]:
       return 'char'
     else:
       return 'bool'
@@ -166,7 +166,6 @@ class HonkVM:
 
   # Set a value and save it in memory
   def setValue(self, value, addr):
-    print(addr)
     if re.match(r'\(\d+,\)', addr):
       ptr = addr[1:-2]
       self.setValue(value, str(self.getValue(ptr)))

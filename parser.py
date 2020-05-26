@@ -412,8 +412,8 @@ def p_cte(p):
     t = 'bool'
 
   vAddr = None
-  if funcDir.cteExists(p[1]):
-    vAddr = funcDir.getCte(p[1]).vAddr
+  if funcDir.cteExists(p[1], t):
+    vAddr = funcDir.getCte(p[1], t).vAddr
   else:
     vAddr = quads.vDir.generateVirtualAddress('cte', t)
     funcDir.addCte(p[1], t, vAddr)
