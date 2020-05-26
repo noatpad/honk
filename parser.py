@@ -65,7 +65,7 @@ def p_variable_declare(p):
   "variable_declare : ID"
   var = p[1]
   if funcDir.varAvailable(var):
-    funcDir.addVar(var[0], quads.vDir.generateVirtualAddress(funcDir.currentFunc, funcDir.currentType))
+    funcDir.addVar(var, quads.vDir.generateVirtualAddress(funcDir.currentFunc, funcDir.currentType))
     funcDir.setVarHelper(var)
   else:
     s_error(f'Variable "{var}" already exists!"')

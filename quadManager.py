@@ -271,7 +271,6 @@ class QuadManager:
     self.popOperator()
 
   def addBaseAddressQuad(self):
-    self.debugStep()
     self.sDims.pop()
     offset = self.sOperands.pop()
     self.sTypes.pop()
