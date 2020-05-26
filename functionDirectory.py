@@ -183,7 +183,7 @@ class FunctionDirectory():
 
   # Get ERA of function
   def getEra(self, func):
-    return self.directory[self.currentFunc].era
+    return self.directory[func].era
 
   ## PUSH/ADD
   # Adds function to the directory

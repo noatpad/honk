@@ -288,15 +288,6 @@ class QuadManager:
 
     self.tempCount += 1
 
-  # Append EndFunc quad
-  def addEndFuncQuad(self):
-    if self.returnCount == 0 and self.funcDir.getCurrentFuncReturnType() != 'void':
-      raise Exception("This function is missing a return statement!")
-
-    self.funcDir.setEra(self.vDir.getEra())
-    self.resetFuncCounters()
-    self.addQuad(('EndFunc', None, None, None))
-
   # Append PARAM Quad
   def addParamQuad(self, target_param, k):
     param = self.sOperands.pop()
@@ -308,11 +299,20 @@ class QuadManager:
 
   # Append ERA quad
   def addEraQuad(self, func):
-    self.addQuad(('ERA', None, None, self.funcDir.getEra(func)))
+    self.addQuad(('ERA', None, None, func))
 
   # Append GOSUB quad
   def addGoSubQuad(self, func, qs):
     self.addQuad(('GoSub', func, None, qs))
+
+  # Append EndFunc quad
+  def addEndFuncQuad(self):
+    if self.returnCount == 0 and self.funcDir.getCurrentFuncReturnType() != 'void':
+      raise Exception("This function is missing a return statement!")
+
+    self.funcDir.setEra(self.vDir.getEra())
+    self.resetFuncCounters()
+    self.addQuad(('EndFunc', None, None, None))
 
   # Append END Quad
   def addEndQuad(self):
@@ -354,6 +354,7 @@ class QuadManager:
     print("\t - - - DEBUG END - - - ")
 
   ## FUNCTIONS (BUILDING)
+  # Build .o file
   def build(self):
     filename = 'quack.o'
 
@@ -361,14 +362,28 @@ class QuadManager:
       print(f'> Building {filename}...')
 
     f = open(filename, 'w')
+    # Write ranges
     f.write('-> RANGES START\n')
     for r in self.vDir.getRanges():
       f.write(f'{r[0]}\t{r[1]}\t{r[2]}\t{r[3]}\t{r[4]}\n')
     f.write('->| RANGES END\n')
+    # Write constants
     f.write('-> CTES START\n')
     for cte in self.funcDir.cteTable.values():
       f.write(f'{cte.value}\t{cte.vartype}\t{cte.vAddr}\n')
     f.write('->| CTES END\n')
+    # Write ERAs
+    f.write('-> ERAS START\n')
+    for func in self.funcDir.directory.values():
+      # Skip global since it has no ERA
+      if func.name == 'global':
+        continue
+      era = self.funcDir.getEra(func.name)
+      localCounts = '\t'.join([str(x) for x in era[0]])
+      tempCounts = '\t'.join([str(x) for x in era[1]])
+      f.write(f'{func.name}\t{localCounts}\t{tempCounts}\n')
+    f.write('->| ERAS END\n')
+    # Write quads
     f.write('-> QUADS START\n')
     for q in self.quads:
       f.write(f'{q[0]}\t{q[1]}\t{q[2]}\t{q[3]}\n')

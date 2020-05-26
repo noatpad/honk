@@ -146,8 +146,8 @@ def p_found_func_start(p):
 
 def p_found_func_end(p):
   "found_func_end : empty"
-  funcDir.deleteVarTable()
   quads.addEndFuncQuad()
+  funcDir.deleteVarTable()
 
 # PRINCIPAL
 def p_principal(p):

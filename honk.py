@@ -48,7 +48,28 @@ class HonkVM:
       data = line.split('\t')
       self.memory[int(data[2])] = Address(int(data[0]), data[1])
 
-      self._debugMsg('Init', f'{int(data[0])} -> ({int(data[2])})')
+      self._debugMsg('Init', f'{data[0]} -> ({data[2]})')
+
+    # Prepare ERAs
+    self.eras = dict()
+
+    # Get and set ERAs
+    if lines.popleft() != '-> ERAS START':
+      self._ded()
+
+    while True:
+      line = lines.popleft()
+
+      if line == '->| ERAS END':
+        break
+
+      data = line.split('\t')
+      func = data[0]
+      local = self._stringsToNumbers(data[1:5])
+      temp = self._stringsToNumbers(data[5:9])
+      self.eras[func] = [local, temp]
+
+      self._debugMsg('Init', f'ERA - {func} -> {[local, temp]}')
 
     # Get and set quads
     self.quads = deque()
@@ -128,6 +149,7 @@ class HonkVM:
   def execute(self):
     ip = 0
 
+    # TODO: Implement matrix operations
     while True:
       quad = self.quads[ip]
       op = quad[0]
@@ -214,6 +236,11 @@ class HonkVM:
         base = int(quad[2])
         self._debugMsg(ip, f'Creating pointer {offset} + {base} -> (({quad[3]}))')
         self.setValue(offset + base, quad[3])
+      # elif op == 'ERA':
+      # elif op == 'GoSub':
+      # elif op == 'PARAM':
+      # elif op == 'RETURN':
+      # elif op == 'EndFunc':
       # Program End
       elif op == 'END':
         break
