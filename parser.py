@@ -79,10 +79,8 @@ def p_var_dims(p):
               | dim"""
   if len(p) == 3:
     p[0] = p[1] * p[2]
-    funcDir.setMDimToVar(funcDir.varHelper, [p[2], 1])
   else:
     p[0] = p[1]
-    funcDir.setMDimToVar(funcDir.varHelper, [1])
 
   quads.vDir.makeSpaceForArray(funcDir.currentFunc, funcDir.currentType, p[0] - 1)
 
