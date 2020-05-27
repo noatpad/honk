@@ -143,16 +143,33 @@ class QuadManager:
   # Append RETURN quadruple
   def addReturnQuad(self):
     vartype = self.sTypes.pop()
-    returntype = self.funcDir.getCurrentFuncReturnType()
+    return_type = self.funcDir.getCurrentFuncReturnType()
 
-    if returntype is "void":
+    if return_type is "void":
       raise Exception("There can't be return statements in non-void functions!")
-    elif vartype != returntype:
-      raise Exception(f"Returned variable doesn't match return type! -> {vartype} != {returntype}")
+    elif vartype != return_type:
+      raise Exception(f"Returned variable doesn't match return type! -> {vartype} != {return_type}")
+
+    # NOTE: This might cause problems if a variable has the same name as a function, since they'll be considered the same
+    # if not self.funcDir.varExists(self.funcDir.currentFunc):
+      # self.funcDir.addVar(self.funcDir.currentFunc, self.vDir.generateVirtualAddress(self.funcDir.currentFunc, return_type))
+    # return_addr = self.funcDir.getVAddr(self.funcDir.currentFunc)
+    if self.funcDir.getCurrentFuncReturnAddr() is None:
+      self.funcDir.setReturnAddr(self.vDir.generateVirtualAddress(self.funcDir.currentFunc, return_type))
+      if self.debug:
+        print(f'\t\t\t\t\t! Set the function\'s return address to ({self.funcDir.getCurrentFuncReturnAddr()})')
+    return_addr = self.funcDir.getCurrentFuncReturnAddr()
 
     var = self.sOperands.pop()
-    self.addQuad(("RETURN", None, None, self.funcDir.getVAddr(var)))
+    self.addQuad(('=', self.funcDir.getVAddr(var), None, return_addr))
+    self.addQuad(('RETURN', None, None, return_addr))
     self.returnCount += 1
+
+    # var = self.sOperands.pop()
+    # self.addQuad(("RETURN", None, None, self.funcDir.getVAddr(var)))
+    # self.returnCount += 1
+
+
 
   # Append READ quadruple
   def addReadQuad(self):
@@ -288,6 +305,10 @@ class QuadManager:
 
     self.tempCount += 1
 
+  # Append ERA quad
+  def addEraQuad(self, func):
+    self.addQuad(('ERA', None, None, func))
+
   # Append PARAM Quad
   def addParamQuad(self, target_param, k):
     param = self.sOperands.pop()
@@ -297,13 +318,9 @@ class QuadManager:
     else:
       raise Exception(f'Wrong param type! {param_type} {target_param}')
 
-  # Append ERA quad
-  def addEraQuad(self, func):
-    self.addQuad(('ERA', None, None, func))
-
   # Append GOSUB quad
   def addGoSubQuad(self, func, qs):
-    self.addQuad(('GoSub', func, None, qs))
+    self.addQuad(('GoSub', None, None, qs))
 
   # Append EndFunc quad
   def addEndFuncQuad(self):
@@ -313,6 +330,27 @@ class QuadManager:
     self.funcDir.setEra(self.vDir.getEra())
     self.resetFuncCounters()
     self.addQuad(('EndFunc', None, None, None))
+
+  # Append an assignment quad for non-void function
+  def addAssignFuncQuad(self):
+    func = self.popFunction()
+    return_type = self.funcDir.getReturnTypeOfFunc(func)
+    if return_type == 'void':   # Error out if the function is void
+      raise Exception(f'This function is void and cannot be used as an expression! -> {func}')
+
+    result = self.vDir.generateVirtualAddress('temp', return_type)
+    self.addQuad(('=>', None, None, result))
+    self.sOperands.append(result)
+    self.sTypes.append(return_type)
+
+    if self.debug:
+      print(f'\t\t\t\t\t> RET: t{self.tempCount} - {return_type} -> {result}')
+
+    self.tempCount += 1
+
+    # quads.pushVar(func, funcDir.getReturnTypeOfFunc(func))
+    # print(func)
+    # quads.debugStep()
 
   # Append END Quad
   def addEndQuad(self):
@@ -350,7 +388,7 @@ class QuadManager:
     print("\tsDims ->", list(self.sDims))
     print("\t- CTES")
     for c in self.funcDir.cteTable.values():
-      print(c.value, c.vartype, c.vAddr)
+      print("\t", c.value, c.vartype, c.vAddr)
     print("\t - - - DEBUG END - - - ")
 
   ## FUNCTIONS (BUILDING)

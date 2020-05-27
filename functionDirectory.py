@@ -24,6 +24,7 @@ class Function():
     self.debug = debug
     self.name = name
     self.returnType = returnType
+    self.returnAddr = None
     self.quadStart = None
     self.varTable = None
     self.paramTable = []
@@ -38,7 +39,15 @@ class Function():
   def getDimensionsOfVar(self, name):
     return self.varTable[name].dimensions
 
+  # Get return address for function
+  def getReturnAddr(self):
+    return self.returnAddr
+
   ## SETTERS
+  # Set return address for function
+  def setReturnAddr(self, addr):
+    self.returnAddr = addr
+
   # Set start of quad for function
   def setQuadStart(self, qs):
     self.quadStart = qs
@@ -112,11 +121,15 @@ class FunctionDirectory():
   def setVarHelper(self, var):
     self.varHelper = var
 
-  # Set start of quad for function
+  # Set return address for current function
+  def setReturnAddr(self, addr):
+    self.directory[self.currentFunc].setReturnAddr(addr)
+
+  # Set start of quad for current function
   def setQuadStart(self, qs):
     self.directory[self.currentFunc].setQuadStart(qs)
 
-  # Set "era" for function
+  # Set "era" for current function
   def setEra(self, era):
     self.directory[self.currentFunc].setEra(era)
 
@@ -175,9 +188,17 @@ class FunctionDirectory():
   def getReturnTypeOfFunc(self, func):
     return self.directory[func].returnType
 
-  # Get current function's return type
+  # Get the current function's return type
   def getCurrentFuncReturnType(self):
     return self.directory[self.currentFunc].returnType
+
+  # Get a function's return address
+  def getReturnAddrOfFunc(self, func):
+    return self.directory[func].returnAddr
+
+  # Get the current function's return address
+  def getCurrentFuncReturnAddr(self):
+    return self.directory[self.currentFunc].returnAddr
 
   # Get ERA of function
   def getEra(self, func):

@@ -421,17 +421,15 @@ def p_cte(p):
 
 def p_expr_call_func(p):
   "expr_call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end"
-  func = quads.popFunction()
-  if quads.funcDir.getReturnTypeOfFunc(func) == 'void':
-    raise Exception("This function is void and cannot be used as an expression!")
+  quads.addAssignFuncQuad()
 
 ## CALL_FUNCTION
 def p_call_func(p):
   "call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end ';'"
   func = quads.popFunction()
-  quads.pushVar('??', 'int')
+  # quads.pushVar('??', 'int')
   if quads.funcDir.getReturnTypeOfFunc(func) != 'void':
-    raise Exception("This function is non-void, therefore it can't be used outside of an expression!")
+    raise Exception(f"This function is non-void, therefore it can't be used outside of an expression! -> {func}")
 
 def p_found_call_func_name(p):
   """found_call_func_name : empty"""

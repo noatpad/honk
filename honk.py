@@ -2,7 +2,7 @@
 from collections import deque, defaultdict
 import re
 
-class Address:
+class Var:
   def __init__(self, value, vartype):
     self.value = value
     self.vartype = vartype
@@ -45,14 +45,11 @@ class HonkVM:
     # Prepare memory
     self.memory = dict()
 
+    # NOTE: Locals and temps are in their own "stacks" for function calls
     self.Globals = [None] * (self.globalRanges[4] - self.globalRanges[0])
-    self.Locals = [None] * (self.localRanges[4] - self.localRanges[0])
-    self.Temps = [None] * (self.tempRanges[4] - self.tempRanges[0])
+    self.Locals = [[None] * (self.localRanges[4] - self.localRanges[0])]
+    self.Temps = [[None] * (self.tempRanges[4] - self.tempRanges[0])]
     self.Ctes = [None] * (self.cteRanges[4] - self.cteRanges[0])
-    self.GlobalCount = 0
-    self.LocalCount = 0
-    self.TempCount = 0
-    self.CteCount = 0
 
     # Get and set constants
     if lines.popleft() != '-> CTES START':
@@ -65,11 +62,11 @@ class HonkVM:
         break
 
       data = line.split('\t')
-      # self.memory[int(data[2])] = Address(int(data[0]), data[1])
+      # self.memory[int(data[2])] = Var(int(data[0]), data[1])
       # self._debugMsg('Init', f'{data[0]} -> ({data[2]})')
 
       addr = int(data[2]) - self.cteRanges[0]
-      self.Ctes[addr] = Address(data[0], data[1])
+      self.Ctes[addr] = Var(data[0], data[1])
       self._debugMsg('Init', f'{data[0]} -> ({data[2]})')
 
     # Prepare ERAs
@@ -107,6 +104,10 @@ class HonkVM:
 
       self.quads.append(line.split('\t'))
 
+      # Prepare function call and return stack
+      self.sCalls = deque()
+      self.sReturns = deque()
+
   # Covert array of strings into ints
   def _stringsToNumbers(self, arr):
     return [int(i) for i in arr]
@@ -132,8 +133,8 @@ class HonkVM:
     else:
       return 'bool'
 
-  # Get a value from an address
-  def getValue(self, addr):
+  # Get a raw address
+  def getVar(self, addr):
     try:
       if re.match(r'\(\d+,\)', addr):
         ptr = addr[1:-2]
@@ -144,15 +145,39 @@ class HonkVM:
         raise Exception(f'Getting from out of bounds! -> ({addr})')
 
       if addr < self.globalRanges[4]:
-        return self.Globals[addr - self.globalRanges[0]].getActualValue()
+        return self.Globals[addr - self.globalRanges[0]]
       elif addr < self.localRanges[4]:
-        return self.Locals[addr - self.localRanges[0]].getActualValue()
+        return self.Locals[-1][addr - self.localRanges[0]]
       elif addr < self.tempRanges[4]:
-        return self.Temps[addr - self.tempRanges[0]].getActualValue()
+        return self.Temps[-1][addr - self.tempRanges[0]]
       else:
-        return self.Ctes[addr - self.cteRanges[0]].getActualValue()
+        return self.Ctes[addr - self.cteRanges[0]]
     except:
-      raise Exception(f"Value doesn't exist in memory?! -> ({addr})")
+      raise Exception(f"Var is not assigned in memory?! -> ({addr})")
+
+  # Get a value from an address
+  def getValue(self, addr):
+    return self.getVar(addr).getActualValue()
+    # try:
+    #   if re.match(r'\(\d+,\)', addr):
+    #     ptr = addr[1:-2]
+    #     return self.getValue(str(self.getValue(ptr)))
+
+    #   addr = int(addr)
+    #   if addr < self.globalRanges[0] or addr >= self.cteRanges[4]:
+    #     raise Exception(f'Getting from out of bounds! -> ({addr})')
+
+    #   if addr < self.globalRanges[4]:
+    #     return self.Globals[addr - self.globalRanges[0]].getActualValue()
+    #   elif addr < self.localRanges[4]:
+    #     return self.Locals[-1][addr - self.localRanges[0]].getActualValue()
+    #   elif addr < self.tempRanges[4]:
+    #     return self.Temps[-1][addr - self.tempRanges[0]].getActualValue()
+    #   else:
+    #     return self.Ctes[addr - self.cteRanges[0]].getActualValue()
+    # except:
+    #   raise Exception(f"Value doesn't exist in memory?! -> ({addr})")
+
     # try:
     #   if re.match(r'\(\d+,\)', addr):
     #     ptr = addr[1:-2]
@@ -176,22 +201,22 @@ class HonkVM:
 
       elif addr < self.globalRanges[4]:
         rangeAddr = addr - self.globalRanges[0]
-        self.Globals[rangeAddr] = Address(value, self.getTypeByRange(addr, self.globalRanges))
+        self.Globals[rangeAddr] = Var(value, self.getTypeByRange(addr, self.globalRanges))
       elif addr < self.localRanges[4]:
         rangeAddr = addr - self.localRanges[0]
-        self.Locals[rangeAddr] = Address(value, self.getTypeByRange(addr, self.localRanges))
+        self.Locals[-1][rangeAddr] = Var(value, self.getTypeByRange(addr, self.localRanges))
       elif addr < self.tempRanges[4]:
         rangeAddr = addr - self.tempRanges[0]
-        self.Temps[rangeAddr] = Address(value, self.getTypeByRange(addr, self.tempRanges))
+        self.Temps[-1][rangeAddr] = Var(value, self.getTypeByRange(addr, self.tempRanges))
       else:
         rangeAddr = addr - self.cteRanges[0]
-        self.Ctes[rangeAddr] = Address(value, self.getTypeByRange(addr, self.cteRanges))
+        self.Ctes[rangeAddr] = Var(value, self.getTypeByRange(addr, self.cteRanges))
 
     # if re.match(r'\(\d+,\)', addr):
     #   ptr = addr[1:-2]
-    #   self.memory[self.getValue(ptr)] = Address(value, None)
+    #   self.memory[self.getValue(ptr)] = Var(value, None)
     # else:
-    #   self.memory[int(addr)] = Address(value, None)
+    #   self.memory[int(addr)] = Var(value, None)
 
   # Get type by address
   def getTypeByAddress(self, addr):
@@ -217,6 +242,20 @@ class HonkVM:
       return 'bool'
 
     raise Exception(f'How did we get here?? -> ({addr})')
+
+  # Allocate memory for function call
+  def prepareERA(self, func):
+    eraVals = self.eras[func]
+    localAux = [None] * sum(eraVals[0])
+    tempAux = [None] * sum(eraVals[1])
+    self.Locals.append(localAux)
+    self.Temps.append(tempAux)
+
+  # Pop out of function and return state as previously saved
+  def popOutOfFunction(self):
+    self.Locals.pop()
+    self.Temps.pop()
+    return self.sCalls.pop()
 
   # Execute virtual machine
   def execute(self):
@@ -309,11 +348,36 @@ class HonkVM:
         base = int(quad[2])
         self._debugMsg(ip, f'Creating pointer {offset} + {base} -> (({quad[3]}))')
         self.setValue(offset + base, quad[3])
-      # elif op == 'ERA':
-      # elif op == 'GoSub':
-      # elif op == 'PARAM':
-      # elif op == 'RETURN':
-      # elif op == 'EndFunc':
+      # ERA Preparation
+      elif op == 'ERA':
+        self.prepareERA(quad[3])
+        self._debugMsg(ip, f'Preparing ERA for function -> {quad[3]}')
+      # Send parameter to function call
+      elif op == 'PARAM':
+        param = self.getVar(quad[1])
+        k = int(quad[3])
+        self._debugMsg(ip, f'Assigning value from ({quad[1]}) as parameter #{k}')
+        self.Locals[-1][k] = param
+      # Go to function
+      elif op == 'GoSub':
+        self.sCalls.append(ip)
+        ip = int(quad[3])
+        self._debugMsg(self.sCalls[-1], f'Jump to function: {self.sCalls[-1]} -> {ip}')
+        continue
+      # Pop back to original function after RETURN
+      elif op == 'RETURN':
+        self._debugMsg(ip, f'Return found! -> ({quad[3]}) Popping back! {ip} -> {self.sCalls[-1] + 1}')
+        self.sReturns.append(self.getValue(quad[3]))
+        ip = self.popOutOfFunction()
+      # Special quad to complete RETURN functionality
+      elif op == '=>':
+        value = self.sReturns.pop()
+        self.setValue(value, quad[3])
+        self._debugMsg(ip, f'Assigned return value of {value} to address ({quad[3]})')
+      # Pop back to original function after end of function
+      elif op == 'EndFunc':
+        self._debugMsg(ip, f'End of function found! Popping back! {ip} -> {self.sCalls[-1] + 1}')
+        ip = self.popOutOfFunction()
       # Program End
       elif op == 'END':
         break
