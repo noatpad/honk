@@ -139,7 +139,7 @@ class HonkVM:
     try:
       if re.match(r'\(\d+,\)', addr):
         ptr = addr[1:-2]
-        return self.getValue(str(self.getValue(ptr)))
+        return self.getVar(str(self.getValue(ptr)))
 
       addr = int(addr)
       if addr < self.globalRanges[0] or addr >= self.cteRanges[4]:
@@ -158,7 +158,10 @@ class HonkVM:
 
   # Get a value from an address
   def getValue(self, addr):
-    return self.getVar(addr).getActualValue()
+    try:
+      return self.getVar(addr).getActualValue()
+    except AttributeError:
+      raise AttributeError(f"Var is not assigned in memory?! -> ({addr})")
 
   # Set a value and save it in memory
   def setValue(self, value, addr):
