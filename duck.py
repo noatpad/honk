@@ -46,7 +46,7 @@ try:
     for line in f:
       data += line
 except FileNotFoundError:
-  raise Exception('build.o does not exist!')
+  raise Exception('quack.o does not exist!')
 
 # Honk away
 honk(data, True)

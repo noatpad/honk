@@ -8,13 +8,11 @@ class Var:
     self.vartype = vartype
 
   def getActualValue(self):
-    if self.vartype == 'int':
+    if self.vartype == 'int':       # Return int value
       return int(self.value)
-    elif self.vartype == 'float':
+    elif self.vartype == 'float':   # Return float value
       return float(self.value)
-    elif self.vartype == 'bool':
-      return (self.value == 'True')
-    else:
+    else:                           # Return bool or char value
       return self.value
 
 class HonkVM:
