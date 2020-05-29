@@ -158,36 +158,6 @@ class HonkVM:
   # Get a value from an address
   def getValue(self, addr):
     return self.getVar(addr).getActualValue()
-    # try:
-    #   if re.match(r'\(\d+,\)', addr):
-    #     ptr = addr[1:-2]
-    #     return self.getValue(str(self.getValue(ptr)))
-
-    #   addr = int(addr)
-    #   if addr < self.globalRanges[0] or addr >= self.cteRanges[4]:
-    #     raise Exception(f'Getting from out of bounds! -> ({addr})')
-
-    #   if addr < self.globalRanges[4]:
-    #     return self.Globals[addr - self.globalRanges[0]].getActualValue()
-    #   elif addr < self.localRanges[4]:
-    #     return self.Locals[-1][addr - self.localRanges[0]].getActualValue()
-    #   elif addr < self.tempRanges[4]:
-    #     return self.Temps[-1][addr - self.tempRanges[0]].getActualValue()
-    #   else:
-    #     return self.Ctes[addr - self.cteRanges[0]].getActualValue()
-    # except:
-    #   raise Exception(f"Value doesn't exist in memory?! -> ({addr})")
-
-    # try:
-    #   if re.match(r'\(\d+,\)', addr):
-    #     ptr = addr[1:-2]
-    #     ret = self.memory[self.getValue(ptr)]
-    #     return ret.value
-    #   else:
-    #     ret = self.memory[int(addr)]
-    #     return ret.value
-    # except:
-    #   raise Exception(f"Value doesn't exist in memory?! -> ({addr})")
 
   # Set a value and save it in memory
   def setValue(self, value, addr):
@@ -211,12 +181,6 @@ class HonkVM:
       else:
         rangeAddr = addr - self.cteRanges[0]
         self.Ctes[rangeAddr] = Var(value, self.getTypeByRange(addr, self.cteRanges))
-
-    # if re.match(r'\(\d+,\)', addr):
-    #   ptr = addr[1:-2]
-    #   self.memory[self.getValue(ptr)] = Var(value, None)
-    # else:
-    #   self.memory[int(addr)] = Var(value, None)
 
   # Get type by address
   def getTypeByAddress(self, addr):

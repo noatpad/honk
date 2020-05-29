@@ -1,0 +1,13 @@
+{
+  "ignore": [
+    ".git",
+    "node_modules/**/node_modules",
+    "*.o",
+    "ply/*",
+    "__pycache__/*"
+  ],
+  "execMap": {
+    "py": "python3"
+  },
+  "ext": "py,txt"
+}

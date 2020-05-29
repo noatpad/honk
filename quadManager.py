@@ -150,10 +150,6 @@ class QuadManager:
     elif vartype != return_type:
       raise Exception(f"Returned variable doesn't match return type! -> {vartype} != {return_type}")
 
-    # NOTE: This might cause problems if a variable has the same name as a function, since they'll be considered the same
-    # if not self.funcDir.varExists(self.funcDir.currentFunc):
-      # self.funcDir.addVar(self.funcDir.currentFunc, self.vDir.generateVirtualAddress(self.funcDir.currentFunc, return_type))
-    # return_addr = self.funcDir.getVAddr(self.funcDir.currentFunc)
     if self.funcDir.getCurrentFuncReturnAddr() is None:
       self.funcDir.setReturnAddr(self.vDir.generateVirtualAddress(self.funcDir.currentFunc, return_type))
       if self.debug:
@@ -164,12 +160,6 @@ class QuadManager:
     self.addQuad(('=', self.funcDir.getVAddr(var), None, return_addr))
     self.addQuad(('RETURN', None, None, return_addr))
     self.returnCount += 1
-
-    # var = self.sOperands.pop()
-    # self.addQuad(("RETURN", None, None, self.funcDir.getVAddr(var)))
-    # self.returnCount += 1
-
-
 
   # Append READ quadruple
   def addReadQuad(self):
@@ -347,10 +337,6 @@ class QuadManager:
       print(f'\t\t\t\t\t> RET: t{self.tempCount} - {return_type} -> {result}')
 
     self.tempCount += 1
-
-    # quads.pushVar(func, funcDir.getReturnTypeOfFunc(func))
-    # print(func)
-    # quads.debugStep()
 
   # Append END Quad
   def addEndQuad(self):

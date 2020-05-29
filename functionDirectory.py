@@ -142,7 +142,6 @@ class FunctionDirectory():
     self.paramCount = 0
 
   ## GETTERS
-  # TODO: Make a centralized variable getter (some functions won't work locally)
   # Returns desired variable
   def getVar(self, name):
     ret = None
