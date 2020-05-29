@@ -117,7 +117,10 @@ class HonkVM:
   # Debugger message
   def _debugMsg(self, quad, msg):
     if self.debug:
-      print(f'{quad}: {msg}')
+      if quad == 'Init':
+        print(f'{quad}:\t{msg}')
+      else:
+        print(f'{quad}:\t{msg}')
 
   ## EXECUTION FUNCTIONS
   # Get type based on a memory range's address
