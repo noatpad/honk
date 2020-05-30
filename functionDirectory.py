@@ -157,15 +157,10 @@ class FunctionDirectory():
 
   # Returns virtual address of desired variable
   def getVAddr(self, name):
-    ret = None
-    if name in self.directory[self.currentFunc].varTable:
-      ret = self.directory[self.currentFunc].getVar(name)
-    elif name in self.directory[self.globalFunc].varTable:
-      ret = self.directory[self.globalFunc].getVar(name)
-    else:
-      return name   # NOTE: It's an address if it reaches here?
-
-    return ret.vAddr
+    try:      # Get vAddr of variables
+      return self.getVar(name).vAddr
+    except:   # If it reaches here, that means it's already an address
+      return name
 
   # Get constant
   def getCte(self, value, vartype):
@@ -173,7 +168,10 @@ class FunctionDirectory():
 
   # Get dimensions of a specified variable
   def getDimensionsOfVar(self, name):
-    return self.directory[self.currentFunc].getDimensionsOfVar(name)
+    try:
+      return self.getVar(name).dimensions
+    except:
+      raise Exception(f'Variable {name} does not exist!')
 
   # Get parameter of function
   def getParamOfFunc(self, func):
