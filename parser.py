@@ -100,7 +100,6 @@ def p_type(p):
   p[0] = p[1]
 
 # FUNCTIONS
-# TODO: Recursion?
 def p_functions(p):
   """functions : FUNCION func_type ID found_func_name '(' func_params ')' vars found_func_start '{' body '}' found_func_end functions
                | empty"""
@@ -344,8 +343,8 @@ def p_found_expr_duo_op(p):
 # TODO: Fix mono operator
 def p_expr_atom(p):
   """expr_atom : expr_group
-               | expr_var
-               | expr_call_func"""
+               | expr_call_func
+               | expr_var"""
   pass
 
 def p_expr_group(p):
@@ -427,16 +426,16 @@ def p_expr_call_func(p):
 def p_call_func(p):
   "call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end ';'"
   func = quads.popFunction()
-  # quads.pushVar('??', 'int')
   if quads.funcDir.getReturnTypeOfFunc(func) != 'void':
-    raise Exception(f"This function is non-void, therefore it can't be used outside of an expression! -> {func}")
+    raise Exception(f"This function is non-void, therefore it can't be used as an expression! -> {func}")
 
 def p_found_call_func_name(p):
-  """found_call_func_name : empty"""
+  "found_call_func_name : empty"
   func = p[-1]
   if funcDir.functionExists(func):
     quads.addEraQuad(func)
     quads.pushFunction(func)
+    quads.sOperators.append('(')
   else:
     raise Exception(f'Function {func}() does not exist!')
 
@@ -463,6 +462,7 @@ def p_found_call_func_end(p):
   if funcDir.verifyParamCount(func):
     funcDir.resetParamCount()
     quads.addGoSubQuad(func, funcDir.getQuadStartOfFunc(func))
+    quads.popOperator()
   else:
     raise Exception(f'Wrong number of parameters in {func}!')
 
