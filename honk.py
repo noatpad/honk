@@ -134,6 +134,40 @@ class HonkVM:
     else:
       return 'bool'
 
+  # Get type by address
+  def getTypeByAddress(self, addr):
+    addr = int(addr)
+    if addr < self.globalRanges[0] or addr >= self.localRanges[4]:
+      raise Exception(f'Accessing prohibited memory! -> ({addr})')
+
+    if addr < self.globalRanges[1]:
+      return 'int'
+    elif addr < self.globalRanges[2]:
+      return 'float'
+    elif addr < self.globalRanges[3]:
+      return 'char'
+    elif addr < self.globalRanges[4]:
+      return 'bool'
+    elif addr < self.localRanges[1]:
+      return 'int'
+    elif addr < self.localRanges[2]:
+      return 'float'
+    elif addr < self.localRanges[3]:
+      return 'char'
+    elif addr < self.localRanges[4]:
+      return 'bool'
+
+    raise Exception(f'How did we get here?? -> ({addr})')
+
+  # Get index of memory based on the closest memory bound for locals and temps
+  def getLocalIndexByAddress(self, addr, memRange):
+    for r in memRange[:-1]:
+      if addr >= r:
+        ret = addr - r
+      else:
+        return ret
+    return ret
+
   # Get a raw address
   def getVar(self, addr):
     try:
@@ -148,9 +182,19 @@ class HonkVM:
       if addr < self.globalRanges[4]:
         return self.Globals[addr - self.globalRanges[0]]
       elif addr < self.localRanges[4]:
-        return self.Locals[-1][addr - self.localRanges[0]]
+        rangeAddr = None
+        if len(self.Locals) == 1:
+          rangeAddr = addr - self.localRanges[0]
+        else:
+          rangeAddr = self.getLocalIndexByAddress(addr, self.localRanges)
+        return self.Locals[-1][rangeAddr]
       elif addr < self.tempRanges[4]:
-        return self.Temps[-1][addr - self.tempRanges[0]]
+        rangeAddr = None
+        if len(self.Temps) == 1:
+          rangeAddr = addr - self.tempRanges[0]
+        else:
+          rangeAddr = self.getLocalIndexByAddress(addr, self.tempRanges)
+        return self.Temps[-1][rangeAddr]
       else:
         return self.Ctes[addr - self.cteRanges[0]]
     except:
@@ -177,39 +221,22 @@ class HonkVM:
         rangeAddr = addr - self.globalRanges[0]
         self.Globals[rangeAddr] = Var(value, self.getTypeByRange(addr, self.globalRanges))
       elif addr < self.localRanges[4]:
-        rangeAddr = addr - self.localRanges[0]
+        rangeAddr = None
+        if len(self.Locals) == 1:
+          rangeAddr = addr - self.localRanges[0]
+        else:
+          rangeAddr = self.getLocalIndexByAddress(addr, self.localRanges)
         self.Locals[-1][rangeAddr] = Var(value, self.getTypeByRange(addr, self.localRanges))
       elif addr < self.tempRanges[4]:
-        rangeAddr = addr - self.tempRanges[0]
+        rangeAddr = None
+        if len(self.Temps) == 1:
+          rangeAddr = addr - self.tempRanges[0]
+        else:
+          rangeAddr = self.getLocalIndexByAddress(addr, self.tempRanges)
         self.Temps[-1][rangeAddr] = Var(value, self.getTypeByRange(addr, self.tempRanges))
       else:
         rangeAddr = addr - self.cteRanges[0]
         self.Ctes[rangeAddr] = Var(value, self.getTypeByRange(addr, self.cteRanges))
-
-  # Get type by address
-  def getTypeByAddress(self, addr):
-    addr = int(addr)
-    if addr < self.globalRanges[0] or addr >= self.localRanges[4]:
-      raise Exception(f'Accessing prohibited memory! -> ({addr})')
-
-    if addr < self.globalRanges[1]:
-      return 'int'
-    elif addr < self.globalRanges[2]:
-      return 'float'
-    elif addr < self.globalRanges[3]:
-      return 'char'
-    elif addr < self.globalRanges[4]:
-      return 'bool'
-    elif addr < self.localRanges[1]:
-      return 'int'
-    elif addr < self.localRanges[2]:
-      return 'float'
-    elif addr < self.localRanges[3]:
-      return 'char'
-    elif addr < self.localRanges[4]:
-      return 'bool'
-
-    raise Exception(f'How did we get here?? -> ({addr})')
 
   # Allocate memory for function call
   def prepareERA(self, func):
