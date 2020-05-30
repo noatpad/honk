@@ -19,7 +19,6 @@ dual_cube = {
       '!=': 'bool'
     },
     'float': {
-      '=': 'int',
       '+': 'float',
       '-': 'float',
       '*': 'float',
