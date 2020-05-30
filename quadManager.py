@@ -110,31 +110,40 @@ class QuadManager:
     operator = self.sOperators.pop()
 
     result_type = getDuoResultType(left.vartype, right.vartype, operator)
-    if result_type:
-      self.addQuad((operator, right.vAddr, None, left.vAddr))
-    else:
+    if not result_type:
       raise Exception(f'Type mismatch! {left.vartype} {operator} {right.vartype}')
+
+    if not self.areCompatibleDims(left.dims, right.dims):
+      raise Exception(f'Dimension mismatch! {left.dims} != {right.dims}')
+
+    self.addQuad((operator, right.vAddr, None, left.vAddr))
 
   # Append dual-operand operation quadruple
   def addDualOpQuad(self, ops):
-    if self.sOperators and self.sOperators[-1] in ops:
-      right = self.sVars.pop()
-      left = self.sVars.pop()
-      operator = self.sOperators.pop()
+    # If operators stack is empty, stop here
+    if not self.sOperators or self.sOperators[-1] not in ops:
+      return
 
-      result_type = getDuoResultType(left.vartype, right.vartype, operator)
-      if result_type:
-        result = self.vDir.generateVirtualAddress('temp', result_type)
-        self.addQuad((operator, left.vAddr, right.vAddr, result))
-        # TODO: Add validation and operations for lists and matrixes
-        self.pushTemp(result, result_type, left.dims)
+    right = self.sVars.pop()
+    left = self.sVars.pop()
+    operator = self.sOperators.pop()
 
-        if self.debug:
-          print(f'\t\t\t\t\t> TMP: t{self.tempCount} - {result_type} -> {result}')
+    result_type = getDuoResultType(left.vartype, right.vartype, operator)
+    if not result_type:
+      raise Exception(f'Type mismatch! {left.vartype} {operator} {right.vartype}')
 
-        self.tempCount += 1
-      else:
-        raise Exception(f'Type mismatch! {left.vartype} {operator} {right.vartype}')
+    if not self.areCompatibleDims(left.dims, right.dims):
+      raise Exception(f'Dimension mismatch! {left.dims} != {right.dims}')
+
+    result = self.vDir.generateVirtualAddress('temp', result_type)
+    self.addQuad((operator, left.vAddr, right.vAddr, result))
+    self.pushTemp(result, result_type, left.dims)
+
+    if self.debug:
+      print(f'\t\t\t\t\t> TMP: t{self.tempCount} - {result_type} -> {result}')
+
+    self.tempCount += 1
+
 
   # TODO: Add mono-operand operator for matrixes ($, !, ?)
 
@@ -264,20 +273,22 @@ class QuadManager:
       self.pushCte(mul)
       self.sOperators.append('*')
       self.addDualOpQuad(['*'])
-    elif len(dims) == 2:     # NOTE: Hacky removal of useless constant for second dimension
-      self.sVars.pop()
+    # Only do the following if in the second dimension
+    elif len(dims) == 2:
+      self.sOperators.append('+')
+      self.addDualOpQuad(['+'])
 
     self.sOperators.pop()
 
   def addBaseAddressQuad(self):
-    self.sDims.pop()
+    depth = self.sDims.pop()[1]
     offset = self.sVars.pop()
     arr = self.sVars.pop()
     result_type = arr.vartype
 
     result = self.vDir.generateVirtualAddress('temp', result_type)
     self.addQuad(('+->', offset.vAddr, arr.vAddr, result))
-    self.pushTemp((result,), result_type, arr.dims)
+    self.pushTemp((result,), result_type, arr.dims[depth:])
 
     if self.debug:
       print(f'\t\t\t\t\t> PTR: t{self.tempCount} - {result_type} -> ({result})')
@@ -343,6 +354,16 @@ class QuadManager:
       vAddr = self.vDir.generateVirtualAddress('cte', vartype)
       self.funcDir.addCte(value, vartype, vAddr)
     return self.funcDir.getCte(value, vartype)
+
+  # Check if two variables are "compatible" in dimensions
+  def areCompatibleDims(self, left_dims, right_dims):
+    if len(left_dims) == 0 and len(right_dims) == 0:
+      return True
+    elif len(left_dims) == 1 and len(right_dims) == 1:
+      return left_dims[0] == right_dims[0]
+    elif len(left_dims) == 2 and len(right_dims) == 2:
+      return left_dims[0] == right_dims[0] and left_dims[1] == right_dims[1]
+    return False
 
   # Print all quads
   def printQuads(self):
