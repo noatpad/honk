@@ -367,7 +367,7 @@ def p_expr_var_name(p):
   "expr_var_name : ID"
   var = funcDir.getVar(p[1])
   funcDir.setVarHelper(var.name)
-  quads.pushVar(var.name, var.vartype)
+  quads.pushVar(var)
 
 def p_expr_var_no_dims(p):
   "expr_var_dims : empty"
@@ -410,13 +410,16 @@ def p_cte(p):
   elif (type(p[1] is bool)):
     t = 'bool'
 
-  vAddr = None
-  if funcDir.cteExists(p[1], t):
-    vAddr = funcDir.getCte(p[1], t).vAddr
-  else:
-    vAddr = quads.vDir.generateVirtualAddress('cte', t)
-    funcDir.addCte(p[1], t, vAddr)
-  quads.pushVar(vAddr, t)
+  cte = quads.upsertCte(p[1], t)
+  quads.pushCte(cte)
+
+  # vAddr = None
+  # if funcDir.cteExists(p[1], t):
+  #   vAddr = funcDir.getCte(p[1], t).vAddr
+  # else:
+  #   vAddr = quads.vDir.generateVirtualAddress('cte', t)
+  #   funcDir.addCte(p[1], t, vAddr)
+  # quads.pushVar(vAddr, t)
 
 def p_expr_call_func(p):
   "expr_call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end"

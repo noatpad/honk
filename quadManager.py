@@ -3,15 +3,21 @@ from collections import deque
 from semanticCube import getDuoResultType
 from virtualDirectory import VirtualDirectory
 
+class QVar:
+  def __init__(self, name, vAddr, vartype, dims):
+    self.name = name
+    self.vAddr = vAddr
+    self.vartype = vartype
+    self.dims = dims
+
 class QuadManager:
   def __init__(self, funcDir, debug):
     self.debug = debug
     self.funcDir = funcDir
     self.vDir = VirtualDirectory()
     self.quads = deque()
-    self.sOperands = deque()
+    self.sVars = deque()
     self.sOperators = deque()
-    self.sTypes = deque()
     self.sJumps = deque()
     self.sFuncs = deque()
     self.sDims = deque()
@@ -21,14 +27,6 @@ class QuadManager:
     self.dimCount = 0
 
   ## GETTERS
-  # Get operand from top of stack
-  def getTopOperand(self):
-    return self.sOperands[-1]
-
-  # Get type from top of stack
-  def getTopType(self):
-    return self.sTypes[-1]
-
   # Get function from top of stack
   def getTopFunction(self):
     return self.sFuncs[-1]
@@ -42,10 +40,20 @@ class QuadManager:
     return self.tempCount
 
   ## PUSH
-  # Push variable name and type to their respective stacks
-  def pushVar(self, name, vartype):
-    self.sOperands.append(name)
-    self.sTypes.append(vartype)
+  # Push variable to var stack
+  def pushVar(self, var):
+    qvar = QVar(var.name, var.vAddr, var.vartype, var.dims)
+    self.sVars.append(qvar)
+
+  # Push constant to var stack
+  def pushCte(self, cte):
+    qvar = QVar(cte.value, cte.vAddr, cte.vartype, [])
+    self.sVars.append(qvar)
+
+  # Push temporary value to var stack
+  def pushTemp(self, vAddr, vartype, dims):
+    qvar = QVar(f't{self.tempCount}', vAddr, vartype, dims)
+    self.sVars.append(qvar)
 
   # Push operator to stack
   def pushOperator(self, op):
@@ -63,14 +71,6 @@ class QuadManager:
   # Pop operator from stack
   def popOperator(self):
     return self.sOperators.pop()
-
-  # Pop operand from stack
-  def popOperand(self):
-    return self.sOperands.pop()
-
-  # Pop type from stack
-  def popType(self):
-    return self.sTypes.pop()
 
   ## GENERAL QUAD FUNCTIONS
   # General function to add quads
@@ -105,50 +105,48 @@ class QuadManager:
 
   # Append assignment quadruple
   def addAssignQuad(self):
-    right_op = self.sOperands.pop()
-    right_type = self.sTypes.pop()
-    left_op = self.sOperands.pop()
-    left_type = self.sTypes.pop()
+    right = self.sVars.pop()
+    left = self.sVars.pop()
     operator = self.sOperators.pop()
 
-    result_type = getDuoResultType(left_type, right_type, operator)
+    result_type = getDuoResultType(left.vartype, right.vartype, operator)
     if result_type:
-      self.addQuad((operator, self.funcDir.getVAddr(right_op), None, self.funcDir.getVAddr(left_op)))
+      self.addQuad((operator, right.vAddr, None, left.vAddr))
     else:
-      raise Exception(f'Type mismatch! {left_type} {operator} {right_type}')
+      raise Exception(f'Type mismatch! {left.vartype} {operator} {right.vartype}')
 
   # Append dual-operand operation quadruple
   def addDualOpQuad(self, ops):
     if self.sOperators and self.sOperators[-1] in ops:
-      right_op = self.sOperands.pop()
-      right_type = self.sTypes.pop()
-      left_op = self.sOperands.pop()
-      left_type = self.sTypes.pop()
+      right = self.sVars.pop()
+      left = self.sVars.pop()
       operator = self.sOperators.pop()
 
-      result_type = getDuoResultType(left_type, right_type, operator)
+      result_type = getDuoResultType(left.vartype, right.vartype, operator)
       if result_type:
         result = self.vDir.generateVirtualAddress('temp', result_type)
-        self.addQuad((operator, self.funcDir.getVAddr(left_op), self.funcDir.getVAddr(right_op), result))
-        self.sOperands.append(result)
-        self.sTypes.append(result_type)
+        self.addQuad((operator, left.vAddr, right.vAddr, result))
+        # TODO: Add validation and operations for lists and matrixes
+        self.pushTemp(result, result_type, left.dims)
 
         if self.debug:
           print(f'\t\t\t\t\t> TMP: t{self.tempCount} - {result_type} -> {result}')
 
         self.tempCount += 1
       else:
-        raise Exception(f'Type mismatch! {left_type} {operator} {right_type}')
+        raise Exception(f'Type mismatch! {left.vartype} {operator} {right.vartype}')
+
+  # TODO: Add mono-operand operator for matrixes ($, !, ?)
 
   # Append RETURN quadruple
   def addReturnQuad(self):
-    vartype = self.sTypes.pop()
+    var = self.sVars.pop()
     return_type = self.funcDir.getCurrentFuncReturnType()
 
     if return_type is "void":
       raise Exception("There can't be return statements in non-void functions!")
-    elif vartype != return_type:
-      raise Exception(f"Returned variable doesn't match return type! -> {vartype} != {return_type}")
+    elif var.vartype != return_type:
+      raise Exception(f"Returned variable doesn't match return type! -> {var.vartype} != {return_type}")
 
     if self.funcDir.getCurrentFuncReturnAddr() is None:
       self.funcDir.setReturnAddr(self.vDir.generateVirtualAddress(self.funcDir.currentFunc, return_type))
@@ -156,35 +154,31 @@ class QuadManager:
         print(f'\t\t\t\t\t! Set the function\'s return address to ({self.funcDir.getCurrentFuncReturnAddr()})')
     return_addr = self.funcDir.getCurrentFuncReturnAddr()
 
-    var = self.sOperands.pop()
-    self.addQuad(('=', self.funcDir.getVAddr(var), None, return_addr))
+    self.addQuad(('=', var.vAddr, None, return_addr))
     self.addQuad(('RETURN', None, None, return_addr))
     self.returnCount += 1
 
   # Append READ quadruple
   def addReadQuad(self):
-    var = self.sOperands.pop()
-    self.sTypes.pop()
-    self.addQuad(('READ', None, None, self.funcDir.getVAddr(var)))
+    var = self.sVars.pop()
+    self.addQuad(('READ', None, None, var.vAddr))
 
   # Append PRINT quadruple
   def addPrintQuad(self, string):
     if string:
       self.addQuad(('PRINT', None, None, string))
     else:
-      var = self.sOperands.pop()
-      self.sTypes.pop()
-      self.addQuad(('PRINT', None, None, self.funcDir.getVAddr(var)))
+      var = self.sVars.pop()
+      self.addQuad(('PRINT', None, None, var.vAddr))
 
   # Append quadruple for `if` statement
   def addIfQuad(self):
-    result_type = self.sTypes.pop()
-    if result_type == 'bool':
-      result = self.sOperands.pop()
-      self.addQuad(('GoToF', result, None, None))
+    result = self.sVars.pop()
+    if result.vartype == 'bool':
+      self.addQuad(('GoToF', result.vAddr, None, None))
       self.sJumps.append(self.quadCount - 1)
     else:
-      raise Exception(f'Type mismatch! {result_type} != bool')
+      raise Exception(f'Type mismatch! {result.vartype} != bool')
 
   # Prepare and append quadruple for `else` statement
   def addElseQuad(self):
@@ -205,13 +199,12 @@ class QuadManager:
   # Append quadruple for `while` block
   # NOTE: It's practically identical to addIfQuad()
   def addLoopCondQuad(self):
-    result_type = self.sTypes.pop()
-    if result_type == 'bool':
-      result = self.sOperands.pop()
-      self.addQuad(('GoToF', result, None, None))
+    result = self.sVars.pop()
+    if result.vartype == 'bool':
+      self.addQuad(('GoToF', result.vAddr, None, None))
       self.sJumps.append(self.quadCount - 1)
     else:
-      raise Exception(f'Type mismatch! {result_type} != bool')
+      raise Exception(f'Type mismatch! {result.vartype} != bool')
 
   # Complete quadruple for `while` block
   def completeLoopQuad(self):
@@ -225,9 +218,10 @@ class QuadManager:
     if not self.funcDir.varExists(var):
       self.funcDir.setCurrentType('int')
       self.funcDir.addVar(var, self.vDir.generateVirtualAddress('temp', 'int'))
-      self.pushVar(var, 'int')
-      self.pushVar(var, 'int')
-      self.pushVar(var, 'int')
+      iter_var = self.funcDir.getVar(var)
+      self.pushVar(iter_var)
+      self.pushVar(iter_var)
+      self.pushVar(iter_var)
     else:
       raise Exception(f'Variable "{var}" already exists!"')
 
@@ -248,47 +242,42 @@ class QuadManager:
     # Get constant of 1
     one = self.upsertCte(1, 'int')
 
-    self.pushVar(self.getTopOperand(), self.getTopType())
-    self.pushVar(self.getTopOperand(), self.getTopType())
-    self.pushVar(one.vAddr, one.vartype)
+    self.pushVar(self.sVars[-1])
+    self.pushVar(self.sVars[-1])
+    self.pushCte(one)
     self.pushOperator('=')
     self.pushOperator('+')
     self.addDualOpQuad(['+'])
     self.addAssignQuad()
     self.completeLoopQuad()
-    self.popOperand()
-    self.popType()
+    self.sVars.pop()
 
   # Add necessary quads for array access
   def addArrQuads(self):
     aux = self.sDims[-1]
     dims = self.funcDir.getDimensionsOfVar(aux[0])
-    self.addQuad(('VERIFY', self.sOperands[-1], None, dims[aux[1] - 1]))
+    self.addQuad(('VERIFY', self.sVars[-1].vAddr, None, dims[aux[1] - 1]))
 
     # Only do the following for first dimension and if a second dimension exists
     if len(dims) - aux[1] == 1:
       mul = self.upsertCte(dims[1], 'int')
-      self.pushVar(mul.vAddr, mul.vartype)
+      self.pushCte(mul)
       self.sOperators.append('*')
       self.addDualOpQuad(['*'])
     elif len(dims) == 2:     # NOTE: Hacky removal of useless constant for second dimension
-      self.sOperands.pop()
-      self.sTypes.pop()
+      self.sVars.pop()
 
-    self.popOperator()
+    self.sOperators.pop()
 
   def addBaseAddressQuad(self):
     self.sDims.pop()
-    offset = self.sOperands.pop()
-    self.sTypes.pop()
-    arr = self.sOperands.pop()
-    result_type = self.sTypes.pop()
-    base = self.funcDir.getVAddr(arr)
+    offset = self.sVars.pop()
+    arr = self.sVars.pop()
+    result_type = arr.vartype
 
     result = self.vDir.generateVirtualAddress('temp', result_type)
-    self.addQuad(('+->', offset, base, result))
-    self.sOperands.append((result,))
-    self.sTypes.append(result_type)
+    self.addQuad(('+->', offset.vAddr, arr.vAddr, result))
+    self.pushTemp((result,), result_type, arr.dims)
 
     if self.debug:
       print(f'\t\t\t\t\t> PTR: t{self.tempCount} - {result_type} -> ({result})')
@@ -301,12 +290,11 @@ class QuadManager:
 
   # Append PARAM Quad
   def addParamQuad(self, target_param, k):
-    param = self.sOperands.pop()
-    param_type = self.sTypes.pop()
-    if param_type == target_param:
-      self.addQuad(('PARAM', self.funcDir.getVAddr(param), None, k))
+    param = self.sVars.pop()
+    if param.vartype == target_param:
+      self.addQuad(('PARAM', param.vAddr, None, k))
     else:
-      raise Exception(f'Wrong param type! {param_type} {target_param}')
+      raise Exception(f'Wrong param type! {param.vartype} {target_param}')
 
   # Append GOSUB quad
   def addGoSubQuad(self, func, qs):
@@ -330,8 +318,8 @@ class QuadManager:
 
     result = self.vDir.generateVirtualAddress('temp', return_type)
     self.addQuad(('=>', None, None, result))
-    self.sOperands.append(result)
-    self.sTypes.append(return_type)
+    # NOTE: Functions can only return atomic variables, not arrays/matrixes
+    self.pushTemp(result, return_type, [])
 
     if self.debug:
       print(f'\t\t\t\t\t> RET: t{self.tempCount} - {return_type} -> {result}')
@@ -365,16 +353,29 @@ class QuadManager:
 
   # Debug function
   def debugStep(self):
+    operands = []
+    vAddrs = []
+    types = []
+    dims = []
+    for v in self.sVars:
+      operands.append(v.name)
+      vAddrs.append(v.vAddr)
+      types.append(v.vartype)
+      dims.append(v.dims)
+
     print("\t - - - DEBUG - - - ")
-    print("\tsOperands ->", list(self.sOperands))
-    print("\tsOperators ->", list(self.sOperators))
-    print("\tsTypes ->", list(self.sTypes))
-    print("\tsJumps ->", list(self.sJumps))
-    print("\tsFuncs ->", list(self.sJumps))
-    print("\tsDims ->", list(self.sDims))
-    print("\t- CTES")
+    print("\t sOperators ->", list(self.sOperators))
+    print("\t sVars:")
+    print("\t  operands ->", operands)
+    print("\t  vAddrs ->", vAddrs)
+    print("\t  types ->", types)
+    print("\t  dims ->", dims)
+    print("\t sJumps ->", list(self.sJumps))
+    print("\t sFuncs ->", list(self.sJumps))
+    print("\t sDims ->", list(self.sDims))
+    print("\t - CTES")
     for c in self.funcDir.cteTable.values():
-      print("\t", c.value, c.vartype, c.vAddr)
+      print("\t ", c.value, c.vartype, c.vAddr)
     print("\t - - - DEBUG END - - - ")
 
   ## FUNCTIONS (BUILDING)

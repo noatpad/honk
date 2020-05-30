@@ -14,7 +14,7 @@ class Var():
   def __init__(self, name, vartype, vAddr):
     self.name = name
     self.vartype = vartype
-    self.dimensions = []
+    self.dims = []
     self.vAddr = vAddr
 
 
@@ -37,7 +37,7 @@ class Function():
 
   # Get dimensions of a specified variable
   def getDimensionsOfVar(self, name):
-    return self.varTable[name].dimensions
+    return self.varTable[name].dims
 
   # Get return address for function
   def getReturnAddr(self):
@@ -67,16 +67,16 @@ class Function():
 
   # Add dimension to var
   def addDimensionToVar(self, var, dim):
-    self.varTable[var].dimensions.append(dim)
+    self.varTable[var].dims.append(dim)
 
     if self.debug:
       v = self.varTable[var]
       space = 1
-      for i in v.dimensions:
+      for i in v.dims:
         space *= i
       space += v.vAddr - 1
 
-      print(f'\t\t\t\t\t>> VAR: {v.name} - {v.vartype}{v.dimensions} -> {v.vAddr} - {space}')
+      print(f'\t\t\t\t\t>> VAR: {v.name} - {v.vartype}{v.dims} -> {v.vAddr} - {space}')
 
   # Add parameter
   def addParam(self, vartype):
@@ -169,7 +169,7 @@ class FunctionDirectory():
   # Get dimensions of a specified variable
   def getDimensionsOfVar(self, name):
     try:
-      return self.getVar(name).dimensions
+      return self.getVar(name).dims
     except:
       raise Exception(f'Variable {name} does not exist!')
 
