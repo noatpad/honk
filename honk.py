@@ -102,9 +102,11 @@ class HonkVM:
 
       self.quads.append(line.split('\t'))
 
-      # Prepare function call and return stack
+      # Prepare for function calls and return stack
       self.sCalls = deque()
       self.sReturns = deque()
+      self.localAux = [None]
+      self.tempAux = [None]
 
   # Covert array of strings into ints
   def _stringsToNumbers(self, arr):
@@ -241,10 +243,8 @@ class HonkVM:
   # Allocate memory for function call
   def prepareERA(self, func):
     eraVals = self.eras[func]
-    localAux = [None] * sum(eraVals[0])
-    tempAux = [None] * sum(eraVals[1])
-    self.Locals.append(localAux)
-    self.Temps.append(tempAux)
+    self.localAux = [None] * sum(eraVals[0])
+    self.tempAux = [None] * sum(eraVals[1])
 
   # Pop out of function and return state as previously saved
   def popOutOfFunction(self):
@@ -352,10 +352,13 @@ class HonkVM:
         param = self.getVar(quad[1])
         k = int(quad[3])
         self._debugMsg(ip, f'Assigning value from ({quad[1]}) as parameter #{k}')
-        self.Locals[-1][k] = param
+        # self.Locals[-1][k] = param
+        self.localAux[k] = param
       # Go to function
       elif op == 'GoSub':
         self.sCalls.append(ip)
+        self.Locals.append(self.localAux)
+        self.Temps.append(self.tempAux)
         ip = int(quad[3])
         self._debugMsg(self.sCalls[-1], f'Jump to function: {self.sCalls[-1]} -> {ip}')
         continue
