@@ -335,8 +335,8 @@ class HonkVM:
         limit = int(quad[3])
         self._debugMsg(ip, f'Verifying that {index} < {limit}...')
 
-        if index >= limit:
-          raise Exception(f'{index} is above the array\'s range of {limit}')
+        if index < 0 or index >= limit:
+          raise Exception(f'{index} is out of bounds of range 0-{limit}')
       # Add a variable's base address to produce a pointer
       elif op == '+->':
         offset = self.getValue(quad[1])
