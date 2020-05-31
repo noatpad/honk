@@ -49,6 +49,9 @@ class HonkVM:
     self.Temps = [[None] * (self.tempRanges[4] - self.tempRanges[0])]
     self.Ctes = [None] * (self.cteRanges[4] - self.cteRanges[0])
 
+    self.LocalOffsets = [[0, 0, 0, 0]]
+    self.TempOffsets = [[0, 0, 0, 0]]
+
     # Get and set constants
     if lines.popleft() != '-> CTES START':
       self._ded()
@@ -60,8 +63,6 @@ class HonkVM:
         break
 
       data = line.split('\t')
-      # self.memory[int(data[2])] = Var(int(data[0]), data[1])
-      # self._debugMsg('Init', f'{data[0]} -> ({data[2]})')
 
       addr = int(data[2]) - self.cteRanges[0]
       self.Ctes[addr] = Var(data[0], data[1])
@@ -172,14 +173,16 @@ class HonkVM:
 
     raise Exception(f'How did we get here?? -> ({addr})')
 
-  # Get index of memory based on the closest memory bound for locals and temps
-  def getLocalIndexByAddress(self, addr, memRange):
+  # Get index of memory for locals and temporary values
+  def getLocalIndex(self, addr, memRange, offsets):
+    i = -1
     for r in memRange[:-1]:
       if addr >= r:
         ret = addr - r
-      else:
-        return ret
-    return ret
+        i += 1
+      if addr < r:
+        break
+    return ret + offsets[i]
 
   # Get a raw address
   def getVar(self, addr):
@@ -199,14 +202,14 @@ class HonkVM:
         if len(self.Locals) == 1:
           rangeAddr = addr - self.localRanges[0]
         else:
-          rangeAddr = self.getLocalIndexByAddress(addr, self.localRanges)
+          rangeAddr = self.getLocalIndex(addr, self.localRanges, self.LocalOffsets[-1])
         return self.Locals[-1][rangeAddr]
       elif addr < self.tempRanges[4]:
         rangeAddr = None
         if len(self.Temps) == 1:
           rangeAddr = addr - self.tempRanges[0]
         else:
-          rangeAddr = self.getLocalIndexByAddress(addr, self.tempRanges)
+          rangeAddr = self.getLocalIndex(addr, self.tempRanges, self.TempOffsets[-1])
         return self.Temps[-1][rangeAddr]
       else:
         return self.Ctes[addr - self.cteRanges[0]]
@@ -238,14 +241,14 @@ class HonkVM:
         if len(self.Locals) == 1:
           rangeAddr = addr - self.localRanges[0]
         else:
-          rangeAddr = self.getLocalIndexByAddress(addr, self.localRanges)
+          rangeAddr = self.getLocalIndex(addr, self.localRanges, self.LocalOffsets[-1])
         self.Locals[-1][rangeAddr] = Var(value, self.getTypeByRange(addr, self.localRanges))
       elif addr < self.tempRanges[4]:
         rangeAddr = None
         if len(self.Temps) == 1:
           rangeAddr = addr - self.tempRanges[0]
         else:
-          rangeAddr = self.getLocalIndexByAddress(addr, self.tempRanges)
+          rangeAddr = self.getLocalIndex(addr, self.tempRanges, self.TempOffsets[-1])
         self.Temps[-1][rangeAddr] = Var(value, self.getTypeByRange(addr, self.tempRanges))
       else:
         rangeAddr = addr - self.cteRanges[0]
@@ -255,12 +258,23 @@ class HonkVM:
   def prepareERA(self, func):
     eraVals = self.eras[func]
     self.localAux = [None] * sum(eraVals[0])
+    localEra = [0]
+    for e in eraVals[0][:-1]:
+      localEra.append(localEra[-1] + e)
+    self.LocalOffsets.append(localEra)
+
     self.tempAux = [None] * sum(eraVals[1])
+    tempEra = [0]
+    for e in eraVals[1][:-1]:
+      tempEra.append(tempEra[-1] + e)
+    self.TempOffsets.append(tempEra)
 
   # Pop out of function and return state as previously saved
   def popOutOfFunction(self):
     self.Locals.pop()
     self.Temps.pop()
+    self.LocalOffsets.pop()
+    self.TempOffsets.pop()
     return self.sCalls.pop()
 
   # Execute virtual machine
@@ -371,7 +385,6 @@ class HonkVM:
         param = self.getVar(quad[1])
         k = int(quad[3])
         self._debugMsg(ip, f'Assigning value from ({quad[1]}) as parameter #{k}')
-        # self.Locals[-1][k] = param
         self.localAux[k] = param
       # Go to function
       elif op == 'GoSub':
