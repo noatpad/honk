@@ -45,10 +45,6 @@ class VirtualDirectory:
     elif vartype == 'bool':
       v = 3
 
-    # Check for invalid bool
-    # if v == 3 and (scope in ['global', 'local', 'temp']):
-    #   raise Exception(f"Can't set {vartype} in {scope}!")
-
     # Update total counter
     self.totalCounter += space
 
@@ -82,4 +78,4 @@ class VirtualDirectory:
 
   # Make more room for array variables
   def makeSpaceForArray(self, scope, vartype, value):
-    self.setSpace(scope, vartype, value)
+    self.setSpace(scope, vartype, value - 1)

@@ -82,8 +82,8 @@ mono_table = {
   'int': {
     '-': 'int',
     '$': 'int',
-    '!': 'float',
-    '?': 'int'
+    '!': 'int',
+    '?': 'float'
   },
   'float': {
     '-': 'float',
@@ -102,7 +102,13 @@ mono_table = {
 # Returns result type of a dual-operand operation
 def getDuoResultType(left_type, right_type, operator):
   try:        # Return type from dual_cube
-    ret = dual_cube[left_type][right_type][operator]
-    return ret
+    return dual_cube[left_type][right_type][operator]
   except:     # If no entry exists for combination, return None
+    return None
+
+# Returns result type of a mono-operand operation
+def getMonoResultType(vartype, operator):
+  try:
+    return mono_table[vartype][operator]
+  except:
     return None

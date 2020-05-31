@@ -1,6 +1,7 @@
 
 from collections import deque, defaultdict
 import re
+import numpy as np
 
 class Var:
   def __init__(self, value, vartype):
@@ -103,11 +104,13 @@ class HonkVM:
 
       self.quads.append(line.split('\t'))
 
-      # Prepare for function calls and return stack
-      self.sCalls = deque()
-      self.sReturns = deque()
-      self.localAux = [None]
-      self.tempAux = [None]
+    # Prepare for function calls & matrix operations
+    self.sCalls = deque()
+    self.sReturns = deque()
+    self.localAux = [None]
+    self.tempAux = [None]
+
+    self.matHelper = [1, 1]
 
   # Covert array of strings into ints
   def _stringsToNumbers(self, arr):
@@ -126,6 +129,10 @@ class HonkVM:
         print(f'{quad}:\t{msg}')
 
   ## EXECUTION FUNCTIONS
+  # Get matrix iterator for batch processes when needed
+  def matIter(self):
+    return self.matHelper[0] * self.matHelper[1]
+
   # Check if address is a pointer (using regex)
   def isPointer(self, addr):
     return re.match(r'\(\d+,\)', str(addr))
@@ -185,13 +192,13 @@ class HonkVM:
     return ret + offsets[i]
 
   # Get a raw address
-  def getVar(self, addr):
+  def getVar(self, addr, matOffset=0):
     try:
       if self.isPointer(addr):
         ptr = addr[1:-2]
-        return self.getVar(self.getValue(ptr))
+        return self.getVar(self.getValue(ptr), matOffset)
 
-      addr = int(addr)
+      addr = int(addr) + matOffset
       if addr < self.globalRanges[0] or addr >= self.cteRanges[4]:
         raise Exception(f'Getting from out of bounds! -> ({addr})')
 
@@ -217,19 +224,19 @@ class HonkVM:
       raise Exception(f"Var is not assigned in memory?! -> ({addr})")
 
   # Get a value from an address
-  def getValue(self, addr):
+  def getValue(self, addr, matOffset=0):
     try:
-      return self.getVar(addr).getActualValue()
+      return self.getVar(addr, matOffset).getActualValue()
     except AttributeError:
       raise AttributeError(f"Var is not assigned in memory?! -> ({addr})")
 
   # Set a value and save it in memory
-  def setValue(self, value, addr):
+  def setValue(self, value, addr, matOffset=0):
     if self.isPointer(addr):
       ptr = addr[1:-2]
-      self.setValue(value, self.getValue(ptr))
+      self.setValue(value, self.getValue(ptr, matOffset))
     else:
-      addr = int(addr)
+      addr = int(addr) + matOffset
       if addr < self.globalRanges[0] or addr >= self.tempRanges[4]:
         return Exception(f'Setting in invalid memory! -> ({addr})')
 
@@ -253,6 +260,20 @@ class HonkVM:
       else:
         rangeAddr = addr - self.cteRanges[0]
         self.Ctes[rangeAddr] = Var(value, self.getTypeByRange(addr, self.cteRanges))
+
+  # Reconstruct a matrix for matrix operations
+  def constructMatrix(self, addr):
+    addr = int(addr)
+    rows = self.matHelper[0]
+    cols = self.matHelper[1]
+
+    ret = []
+    for i in range(rows):
+      tmp = []
+      for j in range(cols):
+        tmp.append(self.getValue(addr + (i * cols) + j))
+      ret.append(tmp)
+    return ret
 
   # Allocate memory for function call
   def prepareERA(self, func):
@@ -281,7 +302,6 @@ class HonkVM:
   def execute(self):
     ip = 0
 
-    # TODO: Implement matrix operations
     while True:
       quad = self.quads[ip]
       op = quad[0]
@@ -302,16 +322,67 @@ class HonkVM:
 
         self.setValue(result, quad[3])
         self._debugMsg(ip, f'{left} {op} {right} = {result} -> ({quad[3]})')
-      # Assignment
+
+      # Matrix Determinant
+      elif op == '$':
+        mat = self.constructMatrix(quad[1])
+        det = np.linalg.det(np.array(mat))
+        self.setValue(det, quad[3])
+        self._debugMsg(ip, f'Stored determinant value -> ({quad[3]})')
+        self.matHelper = [1, 1]
+
+      # Matrix Transpose
+      elif op == '!':
+        mat = self.constructMatrix(quad[1])
+        trans = np.array(mat).transpose().tolist()
+        flat = [leaf for tree in trans for leaf in tree]
+
+        addr = int(quad[3])
+        length = self.matHelper[0] * self.matHelper[1]
+        for i in range(length):
+          self.setValue(flat[i], addr, i)
+
+        self._debugMsg(ip, f'Transposed matrix -> ({quad[3]})')
+
+      # Matrix Inversion
+      elif op == '?':
+        mat = self.constructMatrix(quad[1])
+        try:
+          inv = np.linalg.inv(np.array(mat))
+          flat = [leaf for tree in inv for leaf in tree]
+
+          addr = int(quad[3])
+          length = self.matHelper[0] * self.matHelper[1]
+          for i in range(length):
+            self.setValue(flat[i], addr, i)
+
+          self._debugMsg(ip, f'Inverted matrix -> ({quad[3]})')
+        except:
+          raise Exception(f'This matrix can\'t be inverted! -> ({quad[1]})')
+
+      # Assignment - Batch-compatible
       elif op == '=':
-        value = self.getValue(quad[1])
-        self.setValue(value, quad[3])
-        self._debugMsg(ip, f'{value} -> ({quad[3]})')
+        for i in range(self.matIter()):
+          value = self.getValue(quad[1], i)
+          self.setValue(value, quad[3], i)
+          self._debugMsg(ip, f'{value} -> ({quad[3]}{f" + {i}" if i else ""})')
+        self.matHelper = [1, 1]
+
+      # Matrix flag
+      elif op == 'MAT':
+        rows = int(quad[1])
+        cols = int(quad[2])
+        self.matHelper = (rows, cols)
+
+        if self.debug:
+          self._debugMsg(ip, f'Preparing for matrix of size [{rows}][{cols}]')
+
       # Go to #
       elif op == 'GoTo':
         self._debugMsg(ip, f'Jump -> {quad[3]}')
         ip = int(quad[3])
         continue
+
       # Go to # if false
       elif op == 'GoToF':
         boolean = self.getValue(quad[1])
@@ -321,6 +392,7 @@ class HonkVM:
           self._debugMsg(ip, f'Allowed jump -> {quad[3]}')
           ip = int(quad[3])
           continue
+
       # Print
       elif op == 'PRINT':
         operand = quad[3]
@@ -332,6 +404,7 @@ class HonkVM:
           value = self.getValue(operand)
           self._debugMsg(ip, f'Printing value: ({operand}) -> {value}')
           print(str(value))
+
       # Read input
       elif op == 'READ':
         addr = quad[3]
@@ -362,6 +435,7 @@ class HonkVM:
           else:
             self.setValue(value, addr)
             break
+
       # Verify matrix access dimension
       elif op == 'VERIFY':
         index = self.getValue(quad[1])
@@ -370,22 +444,26 @@ class HonkVM:
 
         if index < 0 or index >= limit:
           raise Exception(f'{index} is out of bounds of range 0-{limit}')
+
       # Add a variable's base address to produce a pointer
       elif op == '+->':
         offset = self.getValue(quad[1])
         base = int(quad[2])
         self._debugMsg(ip, f'Creating pointer {offset} + {base} -> (({quad[3]}))')
         self.setValue(offset + base, quad[3])
+
       # ERA Preparation
       elif op == 'ERA':
         self.prepareERA(quad[3])
         self._debugMsg(ip, f'Preparing ERA for function -> {quad[3]}')
+
       # Send parameter to function call
       elif op == 'PARAM':
         param = self.getVar(quad[1])
         k = int(quad[3])
         self._debugMsg(ip, f'Assigning value from ({quad[1]}) as parameter #{k}')
         self.localAux[k] = param
+
       # Go to function
       elif op == 'GoSub':
         self.sCalls.append(ip)
@@ -394,20 +472,24 @@ class HonkVM:
         ip = int(quad[3])
         self._debugMsg(self.sCalls[-1], f'Jump to function: {self.sCalls[-1]} -> {ip}')
         continue
+
       # Pop back to original function after RETURN
       elif op == 'RETURN':
         self._debugMsg(ip, f'Return found! -> ({quad[3]}) Popping back! {ip} -> {self.sCalls[-1] + 1}')
         self.sReturns.append(self.getValue(quad[3]))
         ip = self.popOutOfFunction()
+
       # Special quad to complete RETURN functionality
       elif op == '=>':
         value = self.sReturns.pop()
         self.setValue(value, quad[3])
         self._debugMsg(ip, f'Assigned return value of {value} to address ({quad[3]})')
+
       # Pop back to original function after end of function
       elif op == 'EndFunc':
         self._debugMsg(ip, f'End of function found! Popping back! {ip} -> {self.sCalls[-1] + 1}')
         ip = self.popOutOfFunction()
+
       # Program End
       elif op == 'END':
         break

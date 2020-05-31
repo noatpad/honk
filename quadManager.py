@@ -1,6 +1,6 @@
 
 from collections import deque
-from semanticCube import getDuoResultType
+from semanticCube import getDuoResultType, getMonoResultType
 from virtualDirectory import VirtualDirectory
 
 class QVar:
@@ -119,6 +119,7 @@ class QuadManager:
     self.addQuad((operator, right.vAddr, None, left.vAddr))
 
   # Append dual-operand operation quadruple
+  # TODO: Use MAT quad to do batch operations!
   def addDualOpQuad(self, ops):
     # If operators stack is empty, stop here
     if not self.sOperators or self.sOperators[-1] not in ops:
@@ -144,8 +145,52 @@ class QuadManager:
 
     self.tempCount += 1
 
+  def addMonoOpQuad(self, operator):
+    mat = self.sVars.pop()
+    if len(mat.dims) != 2:
+      raise Exception(f'{mat.name} must be a matrix to use the {operator} operator!')
 
-  # TODO: Add mono-operand operator for matrixes ($, !, ?)
+    result_type = getMonoResultType(mat.vartype, operator)
+    if not result_type:
+      raise Exception(f'Type mismatch! {mat.vartype} {operator}')
+
+    # Error out if ['$', '?'] operator and not a square matrix
+    if operator in ['$', '?'] and mat.dims[0] != mat.dims[1]:
+      raise Exception(f'{mat.name} must be a square matrix to use the {operator} operator!')
+
+    # Prepare matrix for operation
+    self.addMatQuad(mat.dims)
+
+    result_dims = mat.dims
+    if operator == '$':     # '$' yields a single value
+      result_dims = []
+    elif operator == '!':   # '!' swaps the dimensions
+      result_dims = [mat.dims[1], mat.dims[0]]
+
+    result = self.vDir.generateVirtualAddress('temp', result_type)
+    if self.debug:
+      print(f'\t\t\t\t\t> TMP: t{self.tempCount} - {result_type} -> {result}')
+
+    if result_dims:
+      self.vDir.makeSpaceForArray('temp', result_type, result_dims[0] * result_dims[1])
+      if self.debug:
+        print(f'\t\t\t\t\t>> TMP: t{self.tempCount} - {result_type}{result_dims} -> {result} - {result + result_dims[0] * result_dims[1] - 1}')
+
+    self.addQuad((operator, mat.vAddr, None, result))
+    self.pushTemp(result, result_type, result_dims)
+    self.tempCount += 1
+
+  # Append MAT quadruple
+  def addMatQuad(self, dims):
+    rows = dims[0]
+    cols = 1
+    if len(dims) == 2:
+      cols = dims[1]
+
+    if self.debug:
+      print(f'\t\t\t\t\t! Preparing for matrix of [{rows}][{cols}]')
+
+    self.addQuad(('MAT', rows, cols, None))
 
   # Append RETURN quadruple
   def addReturnQuad(self):

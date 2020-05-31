@@ -82,7 +82,7 @@ def p_var_dims(p):
   else:
     p[0] = p[1]
 
-  quads.vDir.makeSpaceForArray(funcDir.currentFunc, funcDir.currentType, p[0] - 1)
+  quads.vDir.makeSpaceForArray(funcDir.currentFunc, funcDir.currentType, p[0])
 
 
 def p_var_dim(p):
@@ -322,7 +322,7 @@ def p_found_expr_arith(p):
   quads.addDualOpQuad(['+', '-'])
 
 def p_expr_factor(p):
-  "expr_factor : expr_atom found_expr_factor expr_factor2"
+  "expr_factor : expr_mono found_expr_factor expr_factor2"
   pass
 
 def p_expr_factor2(p):
@@ -340,7 +340,20 @@ def p_found_expr_duo_op(p):
   "found_expr_duo_op : empty"
   quads.pushOperator(p[-1])
 
-# TODO: Fix mono operator
+def p_expr_mono(p):
+  "expr_mono : expr_atom expr_mono_op"
+  pass
+
+def p_expr_mono_op(p):
+  """expr_mono_op : '!'
+                  | '$'
+                  | '?'"""
+  quads.addMonoOpQuad(p[1])
+
+def p_expr_mono_none(p):
+  "expr_mono_op : empty"
+  pass
+
 def p_expr_atom(p):
   """expr_atom : expr_group
                | expr_call_func
@@ -350,14 +363,6 @@ def p_expr_atom(p):
 def p_expr_group(p):
   "expr_group : '(' found_expr_duo_op expr ')'"
   quads.popOperator()
-
-def p_expr_mono_op(p):
-  """expr_mono : '-'
-               | '!'
-               | '$'
-               | '?'
-               | empty"""
-  pass
 
 def p_expr_var(p):
   "expr_var : expr_var_name expr_var_dims"
@@ -412,14 +417,6 @@ def p_cte(p):
 
   cte = quads.upsertCte(p[1], t)
   quads.pushCte(cte)
-
-  # vAddr = None
-  # if funcDir.cteExists(p[1], t):
-  #   vAddr = funcDir.getCte(p[1], t).vAddr
-  # else:
-  #   vAddr = quads.vDir.generateVirtualAddress('cte', t)
-  #   funcDir.addCte(p[1], t, vAddr)
-  # quads.pushVar(vAddr, t)
 
 def p_expr_call_func(p):
   "expr_call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end"
