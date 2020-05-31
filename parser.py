@@ -268,7 +268,8 @@ def p_found_while_expr(p):
   quads.addLoopCondQuad()
 
 # EXPRESSION -> Order of operator precedence:
-# - Factors (*, /, %)
+# - Matrix operations ($, !, ?)
+# - Factors (*, /, %, .)
 # - Arithmetic (+, -)
 # - Comparison (==, !=, <, <=, >, >=)
 # - Logic (&, |)
@@ -280,19 +281,23 @@ def p_expr_logic(p):
   "expr_logic : expr_compare found_expr_logic expr_logic2"
   pass
 
+def p_found_expr_logic(p):
+  "found_expr_logic : empty"
+  quads.addDualOpQuad(['&', '|'])
+
 def p_expr_logic2(p):
   """expr_logic2 : '&' found_expr_duo_op expr_logic
                  | '|' found_expr_duo_op expr_logic
                  | empty"""
   pass
 
-def p_found_expr_logic(p):
-  "found_expr_logic : empty"
-  quads.addDualOpQuad(['&', '|'])
-
 def p_expr_compare(p):
   "expr_compare : expr_arith found_expr_compare expr_compare2"
   pass
+
+def p_found_expr_compare(p):
+  "found_expr_compare : empty"
+  quads.addDualOpQuad(['==', '!=', '<', '<=', '>', '>='])
 
 def p_expr_compare2(p):
   """expr_compare2 : IS_EQUAL found_expr_duo_op expr_compare
@@ -304,13 +309,13 @@ def p_expr_compare2(p):
                    | empty"""
   pass
 
-def p_found_expr_compare(p):
-  "found_expr_compare : empty"
-  quads.addDualOpQuad(['==', '!=', '<', '<=', '>', '>='])
-
 def p_expr_arith(p):
   "expr_arith : expr_factor found_expr_arith expr_arith2"
   pass
+
+def p_found_expr_arith(p):
+  "found_expr_arith : empty"
+  quads.addDualOpQuad(['+', '-'])
 
 def p_expr_arith2(p):
   """expr_arith2 : '+' found_expr_duo_op expr_arith
@@ -318,24 +323,21 @@ def p_expr_arith2(p):
                  | empty"""
   pass
 
-def p_found_expr_arith(p):
-  "found_expr_arith : empty"
-  quads.addDualOpQuad(['+', '-'])
-
 def p_expr_factor(p):
   "expr_factor : expr_mono found_expr_factor expr_factor2"
   pass
+
+def p_found_expr_factor(p):
+  "found_expr_factor : empty"
+  quads.addDualOpQuad(['*', '/', '%', '.'])
 
 def p_expr_factor2(p):
   """expr_factor2 : '*' found_expr_duo_op expr_factor
                   | '/' found_expr_duo_op expr_factor
                   | '%' found_expr_duo_op expr_factor
+                  | '.' found_expr_duo_op expr_factor
                   | empty"""
   pass
-
-def p_found_expr_factor(p):
-  "found_expr_factor : empty"
-  quads.addDualOpQuad(['*', '/', '%'])
 
 def p_found_expr_duo_op(p):
   "found_expr_duo_op : empty"

@@ -110,7 +110,7 @@ class HonkVM:
     self.localAux = [None]
     self.tempAux = [None]
 
-    self.matHelper = [1, 1]
+    self.matHelper = (1, 1)
 
   # Covert array of strings into ints
   def _stringsToNumbers(self, arr):
@@ -135,7 +135,7 @@ class HonkVM:
 
   # Simple helper function to reset matHelper to 1,1
   def resetMatHelper(self):
-    self.matHelper = [1, 1]
+    self.matHelper = (1, 1)
 
   # Check if address is a pointer (using regex)
   def isPointer(self, addr):
@@ -266,9 +266,9 @@ class HonkVM:
         self.Ctes[rangeAddr] = Var(value, self.getTypeByRange(addr, self.cteRanges))
 
   # Reconstruct a matrix for matrix operations
-  def constructMatrix(self, addr):
-    rows = self.matHelper[0]
-    cols = self.matHelper[1]
+  def constructMatrix(self, addr, offset=0):
+    rows = self.matHelper[0 + offset]
+    cols = self.matHelper[1 + offset]
 
     ret = []
     for i in range(rows):
@@ -347,12 +347,10 @@ class HonkVM:
         trans = np.array(mat).transpose().tolist()
         flat = [leaf for tree in trans for leaf in tree]
 
-        addr = int(quad[3])
-        length = self.matHelper[0] * self.matHelper[1]
-        for i in range(length):
-          self.setValue(flat[i], addr, i)
+        for i in range(len(flat)):
+          self.setValue(flat[i], quad[3], i)
 
-        self._debugMsg(ip, f'Transposed matrix -> ({quad[3]})')
+        self._debugMsg(ip, f'Transposed matrix -> ({quad[3]} - {int(quad[3]) + len(flat) - 1})')
 
       # Matrix Inversion
       elif op == '?':
@@ -361,23 +359,42 @@ class HonkVM:
           inv = np.linalg.inv(np.array(mat))
           flat = [leaf for tree in inv for leaf in tree]
 
-          addr = int(quad[3])
-          length = self.matHelper[0] * self.matHelper[1]
-          for i in range(length):
-            self.setValue(flat[i], addr, i)
+          for i in range(len(flat)):
+            self.setValue(flat[i], quad[3], i)
 
-          self._debugMsg(ip, f'Inverted matrix -> ({quad[3]})')
+          self._debugMsg(ip, f'Inverted matrix -> ({quad[3]} - {int(quad[3]) + len(flat) - 1})')
         except:
           raise Exception(f'This matrix can\'t be inverted! -> ({quad[1]})')
 
-      # Matrix flag
+      # Matrix helper
       elif op == 'MAT':
         rows = int(quad[1])
         cols = int(quad[2])
         self.matHelper = (rows, cols)
 
+        self._debugMsg(ip, f'Preparing for matrix of size [{rows}][{cols}]')
+
+      # Dot product
+      elif op == '·':
+        left = self.constructMatrix(quad[1])
+        right = self.constructMatrix(quad[2], 1)
+        dot = np.dot(np.array(left), np.array(right)).tolist()
+        flat = [leaf for tree in dot for leaf in tree]
+
+        for i in range(len(flat)):
+          self.setValue(flat[i], quad[3], i)
+
+        self._debugMsg(ip, f'Dot product -> ({quad[3]} - {int(quad[3]) + len(flat) - 1})')
+
+      # Matrix helper specialized for dot products
+      elif op == 'MAT·':
+        m = int(quad[1])
+        n = int(quad[2])
+        p = int(quad[3])
+        self.matHelper = (m, n, p)
+
         if self.debug:
-          self._debugMsg(ip, f'Preparing for matrix of size [{rows}][{cols}]')
+          self._debugMsg(ip, f'Preparing for dot product {m}x{n} · {n}x{p}')
 
       # Go to #
       elif op == 'GoTo':
@@ -519,7 +536,7 @@ class HonkVM:
         self._debugMsg(ip, f'! -> {quad}')
 
       ip += 1
-      if op != 'MAT':
+      if op not in ['MAT', 'MAT·']:
         self.resetMatHelper()
 
 # # # # # # # # # # # # # # # # # # # # # # #

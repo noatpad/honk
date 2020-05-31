@@ -121,10 +121,15 @@ class QuadManager:
 
     self.addQuad((operator, right.vAddr, None, left.vAddr))
 
-  # Append dual-operand operation quadruple
+  # Append dual-operand operation quad
   def addDualOpQuad(self, ops):
     # If operators stack is empty, stop here
     if not self.sOperators or self.sOperators[-1] not in ops:
+      return
+
+    # Special case for dot product operator ('.')
+    if self.sOperators[-1] == '.':
+      self.addDotProdQuad()
       return
 
     right = self.sVars.pop()
@@ -150,6 +155,7 @@ class QuadManager:
 
     self.tempCount += 1
 
+  # Append mono-operand operation quad
   def addMonoOpQuad(self, operator):
     mat = self.sVars.pop()
     if len(mat.dims) != 2:
@@ -180,6 +186,31 @@ class QuadManager:
 
     self.addMatQuad(mat.dims)
     self.addQuad((operator, mat.vAddr, None, result))
+    self.pushTemp(result, result_type, result_dims)
+    self.tempCount += 1
+
+  # Append dot product quads
+  def addDotProdQuad(self):
+    right = self.sVars.pop()
+    left = self.sVars.pop()
+    operator = self.sOperators.pop()
+
+    result_type = getDuoResultType(left.vartype, right.vartype, operator)
+    if not result_type:
+      raise Exception(f'Type mismatch! {left.vartype} {operator} {right.vartype}')
+
+    if (len(left.dims) != 2) or (len(right.dims) != 2) or (left.dims[1] != right.dims[0]):
+      raise Exception(f'Incompatible dimensions! {left.dims} {right.dims}')
+
+    result_dims = [left.dims[0], right.dims[1]]
+    result = self.vDir.generateVirtualAddress('temp', result_type)
+    self.vDir.makeSpaceForArray('temp', result_type, result_dims[0] * result_dims[1])
+
+    if self.debug:
+      print(f'\t\t\t\t\t! Preparing dot product for dims {left.dims} · {right.dims}')
+
+    self.addQuad(('MAT·', left.dims[0], left.dims[1], right.dims[1]))
+    self.addQuad(('·', left.vAddr, right.vAddr, result))
     self.pushTemp(result, result_type, result_dims)
     self.tempCount += 1
 
