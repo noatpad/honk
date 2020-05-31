@@ -125,9 +125,16 @@ class HonkVM:
         print(f'{quad}:\t{msg}')
 
   ## EXECUTION FUNCTIONS
+  # Check if address is a pointer (using regex)
+  def isPointer(self, addr):
+    return re.match(r'\(\d+,\)', str(addr))
+
   # Get type based on a memory range's address
   def getTypeByRange(self, addr, memRange):
-    if addr < memRange[1]:
+    if self.isPointer(addr):
+      ptr = addr[1:-2]
+      self.getTypeByRange(self.getValue(ptr), memRange)
+    elif addr < memRange[1]:
       return 'int'
     elif addr < memRange[2]:
       return 'float'
@@ -138,6 +145,10 @@ class HonkVM:
 
   # Get type by address
   def getTypeByAddress(self, addr):
+    if self.isPointer(addr):
+      ptr = addr[1:-2]
+      return self.getTypeByAddress(self.getValue(ptr))
+
     addr = int(addr)
     if addr < self.globalRanges[0] or addr >= self.localRanges[4]:
       raise Exception(f'Accessing prohibited memory! -> ({addr})')
@@ -173,9 +184,9 @@ class HonkVM:
   # Get a raw address
   def getVar(self, addr):
     try:
-      if re.match(r'\(\d+,\)', addr):
+      if self.isPointer(addr):
         ptr = addr[1:-2]
-        return self.getVar(str(self.getValue(ptr)))
+        return self.getVar(self.getValue(ptr))
 
       addr = int(addr)
       if addr < self.globalRanges[0] or addr >= self.cteRanges[4]:
@@ -211,9 +222,9 @@ class HonkVM:
 
   # Set a value and save it in memory
   def setValue(self, value, addr):
-    if re.match(r'\(\d+,\)', addr):
+    if self.isPointer(addr):
       ptr = addr[1:-2]
-      self.setValue(value, str(self.getValue(ptr)))
+      self.setValue(value, self.getValue(ptr))
     else:
       addr = int(addr)
       if addr < self.globalRanges[0] or addr >= self.tempRanges[4]:
