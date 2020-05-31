@@ -346,14 +346,15 @@ def p_expr_mono(p):
   pass
 
 def p_expr_mono_op(p):
-  """expr_mono_op : '!'
-                  | '$'
-                  | '?'"""
-  quads.addMonoOpQuad(p[1])
-
-def p_expr_mono_none(p):
-  "expr_mono_op : empty"
+  """expr_mono_op : '!' found_expr_mono_op expr_mono_op
+                  | '$' found_expr_mono_op expr_mono_op
+                  | '?' found_expr_mono_op expr_mono_op
+                  | empty"""
   pass
+
+def p_found_expr_mono_op(p):
+  "found_expr_mono_op : empty"
+  quads.addMonoOpQuad(p[-1])
 
 def p_expr_atom(p):
   """expr_atom : expr_group
