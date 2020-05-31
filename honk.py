@@ -263,10 +263,18 @@ class HonkVM:
 
       ## - Let it begin. The super-switch case
       # Dual-op operation
-      if op in ['+', '-', '/', '*', '==', '!=', '<', '<=', '>', '>=']:
+      if op in ['+', '-', '/', '*', '==', '!=', '<', '<=', '>', '>=', '&', '|']:
         left = self.getValue(quad[1])
         right = self.getValue(quad[2])
-        result = eval(f'{left} {op} {right}')
+
+        result = None
+        if op == '&':
+          result = eval(f'{left} and {right}')
+        elif op == '|':
+          result = eval(f'{left} or {right}')
+        else:
+          result = eval(f'{left} {op} {right}')
+
         self.setValue(result, quad[3])
         self._debugMsg(ip, f'{left} {op} {right} = {result} -> ({quad[3]})')
       # Assignment

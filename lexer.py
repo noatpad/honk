@@ -39,11 +39,6 @@ t_MORE_THAN_OR_EQUAL = r'>='
 t_STRING = r'\".+\"'
 
 # Function tokens
-def t_ID(t):
-  r'[a-zA-Z_][a-zA-Z0-9_]*'
-  t.type = reserved.get(t.value, 'ID')
-  return t
-
 def t_CTE_FLOAT(t):
   r'\-?\d+\.\d+'
   t.value = float(t.value)
@@ -62,6 +57,11 @@ def t_CTE_CHAR(t):
 def t_CTE_BOOL(t):
   r'(true|false)'
   t.value = (t.value == "true")
+  return t
+
+def t_ID(t):
+  r'[a-zA-Z_][a-zA-Z0-9_]*'
+  t.type = reserved.get(t.value, 'ID')
   return t
 
 # Ignored characters and tokens
