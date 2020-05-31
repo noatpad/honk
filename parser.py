@@ -149,6 +149,7 @@ def p_found_func_end(p):
   funcDir.deleteVarTable()
 
 # PRINCIPAL
+# TODO: Change to main()
 def p_principal(p):
   "main : PRINCIPAL"
   quads.completeMainQuad()

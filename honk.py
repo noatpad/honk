@@ -133,6 +133,10 @@ class HonkVM:
   def matIter(self):
     return self.matHelper[0] * self.matHelper[1]
 
+  # Simple helper function to reset matHelper to 1,1
+  def resetMatHelper(self):
+    self.matHelper = [1, 1]
+
   # Check if address is a pointer (using regex)
   def isPointer(self, addr):
     return re.match(r'\(\d+,\)', str(addr))
@@ -263,7 +267,6 @@ class HonkVM:
 
   # Reconstruct a matrix for matrix operations
   def constructMatrix(self, addr):
-    addr = int(addr)
     rows = self.matHelper[0]
     cols = self.matHelper[1]
 
@@ -271,7 +274,7 @@ class HonkVM:
     for i in range(rows):
       tmp = []
       for j in range(cols):
-        tmp.append(self.getValue(addr + (i * cols) + j))
+        tmp.append(self.getValue(addr, (i * cols) + j))
       ret.append(tmp)
     return ret
 
@@ -307,21 +310,31 @@ class HonkVM:
       op = quad[0]
 
       ## - Let it begin. The super-switch case
-      # Dual-op operation
+      # Dual-op operation - Batch-compatible
       if op in ['+', '-', '/', '*', '==', '!=', '<', '<=', '>', '>=', '&', '|']:
-        left = self.getValue(quad[1])
-        right = self.getValue(quad[2])
+        for i in range(self.matIter()):
+          left = self.getValue(quad[1], i)
+          right = self.getValue(quad[2], i)
 
-        result = None
-        if op == '&':
-          result = eval(f'{left} and {right}')
-        elif op == '|':
-          result = eval(f'{left} or {right}')
-        else:
-          result = eval(f'{left} {op} {right}')
+          result = None
+          if op == '&':
+            result = eval(f'{left} and {right}')
+          elif op == '|':
+            result = eval(f'{left} or {right}')
+          else:
+            result = eval(f'{left} {op} {right}')
 
-        self.setValue(result, quad[3])
-        self._debugMsg(ip, f'{left} {op} {right} = {result} -> ({quad[3]})')
+          self.setValue(result, quad[3], i)
+          self._debugMsg(ip, f'{left} {op} {right} = {result} -> ({quad[3]}{f" + {i}" if i else ""})')
+        self.resetMatHelper()
+
+      # Assignment - Batch-compatible
+      elif op == '=':
+        for i in range(self.matIter()):
+          value = self.getValue(quad[1], i)
+          self.setValue(value, quad[3], i)
+          self._debugMsg(ip, f'{value} -> ({quad[3]}{f" + {i}" if i else ""})')
+        self.resetMatHelper()
 
       # Matrix Determinant
       elif op == '$':
@@ -329,7 +342,7 @@ class HonkVM:
         det = np.linalg.det(np.array(mat))
         self.setValue(det, quad[3])
         self._debugMsg(ip, f'Stored determinant value -> ({quad[3]})')
-        self.matHelper = [1, 1]
+        self.resetMatHelper()
 
       # Matrix Transpose
       elif op == '!':
@@ -342,6 +355,7 @@ class HonkVM:
         for i in range(length):
           self.setValue(flat[i], addr, i)
 
+        self.resetMatHelper()
         self._debugMsg(ip, f'Transposed matrix -> ({quad[3]})')
 
       # Matrix Inversion
@@ -356,17 +370,10 @@ class HonkVM:
           for i in range(length):
             self.setValue(flat[i], addr, i)
 
+          self.resetMatHelper()
           self._debugMsg(ip, f'Inverted matrix -> ({quad[3]})')
         except:
           raise Exception(f'This matrix can\'t be inverted! -> ({quad[1]})')
-
-      # Assignment - Batch-compatible
-      elif op == '=':
-        for i in range(self.matIter()):
-          value = self.getValue(quad[1], i)
-          self.setValue(value, quad[3], i)
-          self._debugMsg(ip, f'{value} -> ({quad[3]}{f" + {i}" if i else ""})')
-        self.matHelper = [1, 1]
 
       # Matrix flag
       elif op == 'MAT':
@@ -383,9 +390,16 @@ class HonkVM:
         ip = int(quad[3])
         continue
 
-      # Go to # if false
+      # Go to # if false - Batch-compatible
       elif op == 'GoToF':
-        boolean = self.getValue(quad[1])
+        boolean = True
+        # If array/matrix, functions like an AND gate
+        for i in range(self.matIter()):
+          if not self.getValue(quad[1], i):
+            boolean = False
+            break
+        self.resetMatHelper()
+
         if boolean:
           self._debugMsg(ip, f'Denied jump because true')
         else:
@@ -393,7 +407,7 @@ class HonkVM:
           ip = int(quad[3])
           continue
 
-      # Print
+      # Print - Batch-compatible
       elif op == 'PRINT':
         operand = quad[3]
         if re.match(r'\".+\"', operand):
@@ -401,40 +415,54 @@ class HonkVM:
           self._debugMsg(ip, f'Printing string: {string}')
           print(string)
         else:
-          value = self.getValue(operand)
-          self._debugMsg(ip, f'Printing value: ({operand}) -> {value}')
-          print(str(value))
+          count = self.matIter()
+          if count == 1:
+            self._debugMsg(ip, f'Printing value: ({operand}) -> {value}')
+            value = self.getValue(operand)
+            print(str(value))
+          else:
+            self._debugMsg(ip, f'Printing array/matrix: ({operand} - {int(operand) + count - 1})')
+            mat = self.constructMatrix(operand)
 
-      # Read input
+            if len(mat) == 1:
+              print(mat[-1])
+            else:
+              print(mat)
+            self.resetMatHelper()
+
+      # Read input - Batch-compatible
       elif op == 'READ':
         addr = quad[3]
         input_type = self.getTypeByAddress(addr)
-        self._debugMsg(ip, f'Requesting input for ({addr}), type: {input_type}...')
+        for i in range(self.matIter()):
+          self._debugMsg(ip, f'Requesting input for ({addr}{f" + {i}" if i else ""}), type: {input_type}...')
 
-        # Repeat asking for input until correct
-        while True:
-          user_input = input("> ")
-          try:
-            value = None
-            if input_type == 'int':
-              value = int(user_input)
-            elif input_type == 'float':
-              value = float(user_input)
-            elif input_type == 'bool':
-              if value == 'True':
-                value = True
-              elif value == 'False':
-                value = False
-              else:
-                raise Exception("Invalid type!")
-            elif input_type == 'char':
-              value = user_input[0]
-          except:
-            print('! Invalid type! Try again...')
-            continue
-          else:
-            self.setValue(value, addr)
-            break
+          # Repeat asking for input until correct
+          while True:
+            user_input = input("> ")
+            try:
+              value = None
+              if input_type == 'int':
+                value = int(user_input)
+              elif input_type == 'float':
+                value = float(user_input)
+              elif input_type == 'bool':
+                if value == 'True':
+                  value = True
+                elif value == 'False':
+                  value = False
+                else:
+                  raise Exception("Invalid type!")
+              elif input_type == 'char':
+                value = user_input[0]
+            except:
+              print('! Invalid type! Try again...')
+              continue
+            else:
+              self.setValue(value, addr, i)
+              break
+
+        self.resetMatHelper()
 
       # Verify matrix access dimension
       elif op == 'VERIFY':
@@ -443,7 +471,7 @@ class HonkVM:
         self._debugMsg(ip, f'Verifying that {index} < {limit}...')
 
         if index < 0 or index >= limit:
-          raise Exception(f'{index} is out of bounds of range 0-{limit}')
+          raise Exception(f'{index} is out of bounds of range 0-{limit - 1}')
 
       # Add a variable's base address to produce a pointer
       elif op == '+->':
@@ -475,9 +503,11 @@ class HonkVM:
 
       # Pop back to original function after RETURN
       elif op == 'RETURN':
-        self._debugMsg(ip, f'Return found! -> ({quad[3]}) Popping back! {ip} -> {self.sCalls[-1] + 1}')
-        self.sReturns.append(self.getValue(quad[3]))
-        ip = self.popOutOfFunction()
+        for i in range(self.matIter()):
+          self._debugMsg(ip, f'Return found! -> ({quad[3]}{f" + {i}" if i else ""}) Popping back! {ip} -> {self.sCalls[-1] + 1}')
+          self.sReturns.append(self.getValue(quad[3]))
+          ip = self.popOutOfFunction()
+        self.resetMatHelper()
 
       # Special quad to complete RETURN functionality
       elif op == '=>':
@@ -492,6 +522,7 @@ class HonkVM:
 
       # Program End
       elif op == 'END':
+        self._debugMsg(ip, 'HONK! (BYE!)')
         break
       else:
         self._debugMsg(ip, f'! -> {quad}')

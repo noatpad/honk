@@ -116,10 +116,12 @@ class QuadManager:
     if not self.areCompatibleDims(left.dims, right.dims):
       raise Exception(f'Dimension mismatch! {left.dims} != {right.dims}')
 
+    if left.dims:
+      self.addMatQuad(left.dims)
+
     self.addQuad((operator, right.vAddr, None, left.vAddr))
 
   # Append dual-operand operation quadruple
-  # TODO: Use MAT quad to do batch operations!
   def addDualOpQuad(self, ops):
     # If operators stack is empty, stop here
     if not self.sOperators or self.sOperators[-1] not in ops:
@@ -135,6 +137,9 @@ class QuadManager:
 
     if not self.areCompatibleDims(left.dims, right.dims):
       raise Exception(f'Dimension mismatch! {left.dims} != {right.dims}')
+
+    if left.dims:
+      self.addMatQuad(left.dims)
 
     result = self.vDir.generateVirtualAddress('temp', result_type)
     self.addQuad((operator, left.vAddr, right.vAddr, result))
@@ -158,9 +163,6 @@ class QuadManager:
     if operator in ['$', '?'] and mat.dims[0] != mat.dims[1]:
       raise Exception(f'{mat.name} must be a square matrix to use the {operator} operator!')
 
-    # Prepare matrix for operation
-    self.addMatQuad(mat.dims)
-
     result_dims = mat.dims
     if operator == '$':     # '$' yields a single value
       result_dims = []
@@ -176,15 +178,18 @@ class QuadManager:
       if self.debug:
         print(f'\t\t\t\t\t>> TMP: t{self.tempCount} - {result_type}{result_dims} -> {result} - {result + result_dims[0] * result_dims[1] - 1}')
 
+    self.addMatQuad(mat.dims)
     self.addQuad((operator, mat.vAddr, None, result))
     self.pushTemp(result, result_type, result_dims)
     self.tempCount += 1
 
   # Append MAT quadruple
   def addMatQuad(self, dims):
-    rows = dims[0]
-    cols = 1
+    if len(dims) == 1:
+      rows = 1
+      cols = dims[0]
     if len(dims) == 2:
+      rows = dims[0]
       cols = dims[1]
 
     if self.debug:
@@ -201,6 +206,8 @@ class QuadManager:
       raise Exception("There can't be return statements in non-void functions!")
     elif var.vartype != return_type:
       raise Exception(f"Returned variable doesn't match return type! -> {var.vartype} != {return_type}")
+    if var.dims:    # NOTE: RETURN only allows atomic values
+      raise Exception(f"Functions can only return atomic values, not arrays nor matrixes! -> ({var.vAddr}) - {var.dims}")
 
     if self.funcDir.getCurrentFuncReturnAddr() is None:
       self.funcDir.setReturnAddr(self.vDir.generateVirtualAddress(self.funcDir.currentFunc, return_type))
@@ -215,19 +222,33 @@ class QuadManager:
   # Append READ quadruple
   def addReadQuad(self):
     var = self.sVars.pop()
+
+    if var.dims:
+      self.addMatQuad(var.dims)
+
     self.addQuad(('READ', None, None, var.vAddr))
 
   # Append PRINT quadruple
   def addPrintQuad(self, string):
+    # Strings simply use this case and stop here
     if string:
       self.addQuad(('PRINT', None, None, string))
-    else:
-      var = self.sVars.pop()
-      self.addQuad(('PRINT', None, None, var.vAddr))
+      return
+
+    var = self.sVars.pop()
+
+    if var.dims:
+      self.addMatQuad(var.dims)
+
+    self.addQuad(('PRINT', None, None, var.vAddr))
 
   # Append quadruple for `if` statement
   def addIfQuad(self):
     result = self.sVars.pop()
+
+    if result.dims:
+      self.addMatQuad(result.dims)
+
     if result.vartype == 'bool':
       self.addQuad(('GoToF', result.vAddr, None, None))
       self.sJumps.append(self.quadCount - 1)
@@ -254,6 +275,10 @@ class QuadManager:
   # NOTE: It's practically identical to addIfQuad()
   def addLoopCondQuad(self):
     result = self.sVars.pop()
+
+    if result.dims:
+      self.addMatQuad(result.dims)
+
     if result.vartype == 'bool':
       self.addQuad(('GoToF', result.vAddr, None, None))
       self.sJumps.append(self.quadCount - 1)
@@ -308,9 +333,13 @@ class QuadManager:
 
   # Add necessary quads for array access
   def addArrQuads(self):
+    var = self.sVars[-1]
+    if var.dims:
+      raise Exception(f'Array indexes must be an atomic value! -> ({var.vAddr}) - {var.dims}')
+
     aux = self.sDims[-1]
     dims = self.funcDir.getDimensionsOfVar(aux[0])
-    self.addQuad(('VERIFY', self.sVars[-1].vAddr, None, dims[aux[1] - 1]))
+    self.addQuad(('VERIFY', var.vAddr, None, dims[aux[1] - 1]))
 
     # Only do the following for first dimension and if a second dimension exists
     if len(dims) - aux[1] == 1:
@@ -329,8 +358,8 @@ class QuadManager:
     depth = self.sDims.pop()[1]
     offset = self.sVars.pop()
     arr = self.sVars.pop()
-    result_type = arr.vartype
 
+    result_type = arr.vartype
     result = self.vDir.generateVirtualAddress('temp', result_type)
     self.addQuad(('+->', offset.vAddr, arr.vAddr, result))
     self.pushTemp((result,), result_type, arr.dims[depth:])
@@ -347,6 +376,10 @@ class QuadManager:
   # Append PARAM Quad
   def addParamQuad(self, target_param, k):
     param = self.sVars.pop()
+
+    if param.dims:    # NOTE: Function parameters can only be atomic values
+      raise Exception(f'Function parameters must be atomic values -> ({param.vAddr}) - {param.dims}')
+
     if param.vartype == target_param:
       self.addQuad(('PARAM', param.vAddr, None, k))
     else:
@@ -374,8 +407,7 @@ class QuadManager:
 
     result = self.vDir.generateVirtualAddress('temp', return_type)
     self.addQuad(('=>', None, None, result))
-    # NOTE: Functions can only return atomic variables, not arrays/matrixes
-    self.pushTemp(result, return_type, [])
+    self.pushTemp(result, return_type, [])    # NOTE: Functions can only return atomic variables
 
     if self.debug:
       print(f'\t\t\t\t\t> RET: t{self.tempCount} - {return_type} -> {result}')

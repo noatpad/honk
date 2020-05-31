@@ -1,7 +1,6 @@
 
 class VirtualDirectory:
   def __init__(self):
-    # NOTE: Remember constants are distributed throughout the whole program
     # Virtual address ranges
     # (|| int || float || char || bool ||)
     self.globalRanges = (1000, 4000, 7000, 8000, 9000)
