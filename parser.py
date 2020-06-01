@@ -49,8 +49,8 @@ def p_found_var(p):
   funcDir.createVarTable()
 
 def p_var_declare(p):
-  """var_declare : type ':' var_name ';' var_declare
-                 | type ':' var_name ';'"""
+  """var_declare : type var_name ';' var_declare
+                 | type var_name ';'"""
   pass
 
 def p_var_name(p):
