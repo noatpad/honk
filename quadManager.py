@@ -233,23 +233,40 @@ class QuadManager:
   def addReturnQuad(self):
     var = self.sVars.pop()
     return_type = self.funcDir.getCurrentFuncReturnType()
+    return_dims = self.funcDir.getCurrentFuncReturnDims()
 
     if self.funcDir.currentFunc == self.funcDir.globalFunc:
       raise Exception("You can't have a return statement on main()!")
-    elif return_type is "void":
+
+    if return_type is "void":
       raise Exception("There can't be return statements in non-void functions!")
-    elif var.vartype != return_type:
+
+    if var.vartype != return_type:
       raise Exception(f"Returned variable doesn't match return type! -> {var.vartype} != {return_type}")
-    if var.dims:    # NOTE: RETURN only allows atomic values
-      raise Exception(f"Functions can only return atomic values, not arrays nor matrixes! -> ({var.vAddr}) - {var.dims}")
+
+    if var.dims != return_dims:
+      raise Exception(f"Returned variable doesn't match return dimensions! -> {var.dims} != {return_dims}")
 
     if self.funcDir.getCurrentFuncReturnAddr() is None:
       self.funcDir.setReturnAddr(self.vDir.generateVirtualAddress(self.funcDir.currentFunc, return_type))
-      if self.debug:
-        print(f'\t\t\t\t\t! Set the function\'s return address to ({self.funcDir.getCurrentFuncReturnAddr()})')
+      return_addr = self.funcDir.getCurrentFuncReturnAddr()
+      if return_dims:
+        space = self.funcDir.getCurrentFuncReturnSize()
+        self.vDir.makeSpaceForArray(self.funcDir.currentFunc, return_type, space)
+        if self.debug:
+          print(f'\t\t\t\t\t! Set the function\'s return address to ({return_addr} - {return_addr + space - 1})')
+      elif self.debug:
+        print(f'\t\t\t\t\t! Set the function\'s return address to ({return_addr})')
     return_addr = self.funcDir.getCurrentFuncReturnAddr()
 
+    if return_dims:
+      self.addMatQuad(return_dims)
+
     self.addQuad(('=', var.vAddr, None, return_addr))
+
+    if return_dims:
+      self.addMatQuad(return_dims)
+
     self.addQuad(('RETURN', None, None, return_addr))
     self.returnCount += 1
 
@@ -433,15 +450,24 @@ class QuadManager:
   def addAssignFuncQuad(self):
     func = self.popFunction()
     return_type = self.funcDir.getReturnTypeOfFunc(func)
+    return_dims = self.funcDir.getReturnDimsOfFunc(func)
     if return_type == 'void':   # Error out if the function is void
       raise Exception(f'This function is void and cannot be used as an expression! -> {func}')
 
     result = self.vDir.generateVirtualAddress('temp', return_type)
+    if return_dims:
+      space = self.funcDir.getReturnSizeOfFunc(func)
+      self.vDir.makeSpaceForArray('temp', return_type, space)
+      self.addMatQuad(return_dims)
+
     self.addQuad(('=>', None, None, result))
-    self.pushTemp(result, return_type, [])    # NOTE: Functions can only return atomic variables
+    self.pushTemp(result, return_type, return_dims)
 
     if self.debug:
-      print(f'\t\t\t\t\t> RET: t{self.tempCount} - {return_type} -> {result}')
+      if return_dims:
+        print(f'\t\t\t\t\t> RET: t{self.tempCount} - {return_type} -> {result} - {result + self.funcDir.getReturnSizeOfFunc(func) - 1}')
+      else:
+        print(f'\t\t\t\t\t> RET: t{self.tempCount} - {return_type} -> {result}')
 
     self.tempCount += 1
 

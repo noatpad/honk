@@ -26,6 +26,7 @@ class Function():
     self.name = name
     self.returnType = returnType
     self.returnAddr = None
+    self.returnDims = []
     self.quadStart = None
     self.varTable = None
     self.paramTable = []
@@ -44,14 +45,34 @@ class Function():
   def getReturnAddr(self):
     return self.returnAddr
 
+  # Get return dimensions for function
+  def getReturnDims(self):
+    return self.returnDims
+
   ## SETTERS
   # Set return address for function
   def setReturnAddr(self, addr):
     self.returnAddr = addr
 
+  # Set return dimensions for function
+  def setReturnDims(self, dims):
+    self.returnDims = dims
+
   # Set start of quad for function
   def setQuadStart(self, qs):
     self.quadStart = qs
+
+  def setVarDims(self, var, dims):
+    self.varTable[var].dims = dims
+
+    if self.debug:
+      v = self.varTable[var]
+      space = 1
+      for i in v.dims:
+        space *= i
+      space += v.vAddr - 1
+
+      print(f'\t\t\t\t\t>> VAR: {v.name} - {v.vartype}{v.dims} -> {v.vAddr} - {space}')
 
   # Set "era" (local and temporary counters)
   def setEra(self, era):
@@ -65,19 +86,6 @@ class Function():
     if self.debug:
       v = self.varTable[name]
       print(f'\t\t\t\t\t> VAR: {v.name} - {v.vartype} -> {v.vAddr}')
-
-  # Add dimension to var
-  def addDimensionToVar(self, var, dim):
-    self.varTable[var].dims.append(dim)
-
-    if self.debug:
-      v = self.varTable[var]
-      space = 1
-      for i in v.dims:
-        space *= i
-      space += v.vAddr - 1
-
-      print(f'\t\t\t\t\t>> VAR: {v.name} - {v.vartype}{v.dims} -> {v.vAddr} - {space}')
 
   # Add parameter
   def addParam(self, vartype):
@@ -122,9 +130,17 @@ class FunctionDirectory():
   def setVarHelper(self, var):
     self.varHelper = var
 
+  # Set dimensions for current var
+  def setVarDims(self, dims):
+    self.directory[self.currentFunc].setVarDims(self.varHelper, dims)
+
   # Set return address for current function
   def setReturnAddr(self, addr):
     self.directory[self.currentFunc].setReturnAddr(addr)
+
+  # Set return dims for current function
+  def setReturnDims(self, dims):
+    self.directory[self.currentFunc].setReturnDims(dims)
 
   # Set start of quad for current function
   def setQuadStart(self, qs):
@@ -186,17 +202,36 @@ class FunctionDirectory():
   def getReturnTypeOfFunc(self, func):
     return self.directory[func].returnType
 
-  # Get the current function's return type
-  def getCurrentFuncReturnType(self):
-    return self.directory[self.currentFunc].returnType
+  # Get a function's return dimensions
+  def getReturnDimsOfFunc(self, func):
+    return self.directory[func].returnDims
+
+  # Get a function's return dimension size
+  def getReturnSizeOfFunc(self, func):
+    space = 1
+    for d in self.directory[func].returnDims:
+      space *= d
+    return space
 
   # Get a function's return address
   def getReturnAddrOfFunc(self, func):
     return self.directory[func].returnAddr
 
+  # Get the current function's return type
+  def getCurrentFuncReturnType(self):
+    return self.getReturnTypeOfFunc(self.currentFunc)
+
+  # Get the current function's return dims
+  def getCurrentFuncReturnDims(self):
+    return self.getReturnDimsOfFunc(self.currentFunc)
+
+  # Get the current function's return dimension size
+  def getCurrentFuncReturnSize(self):
+    return self.getReturnSizeOfFunc(self.currentFunc)
+
   # Get the current function's return address
   def getCurrentFuncReturnAddr(self):
-    return self.directory[self.currentFunc].returnAddr
+    return self.getReturnAddrOfFunc(self.currentFunc)
 
   # Get ERA of function
   def getEra(self, func):

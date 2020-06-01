@@ -75,17 +75,13 @@ def p_var_dims(p):
   """var_dims : dim dim
               | dim"""
   if len(p) == 3:
+    funcDir.setVarDims([p[1], p[2]])
     p[0] = p[1] * p[2]
   else:
+    funcDir.setVarDims([p[1]])
     p[0] = p[1]
 
   quads.vDir.makeSpaceForArray(funcDir.currentFunc, funcDir.currentType, p[0])
-
-
-def p_var_dim(p):
-  "dim : '[' CTE_INT ']'"
-  funcDir.addDimensionToVar(funcDir.varHelper, p[2])
-  p[0] = p[2]
 
 # TYPE
 def p_type(p):
@@ -98,7 +94,7 @@ def p_type(p):
 
 # FUNCTIONS
 def p_functions(p):
-  """functions : FUNCTION func_type ID found_func_name '(' func_params ')' vars found_func_start '{' body '}' found_func_end functions
+  """functions : FUNCTION func_type ID found_func_name func_dims '(' func_params ')' vars found_func_start '{' body '}' found_func_end functions
                | empty"""
   pass
 
@@ -116,6 +112,24 @@ def p_found_func_name(p):
   else:
     funcDir.addFunction(func)
     funcDir.createVarTable()
+
+def p_func_no_dims(p):
+  "func_dims : empty"
+  pass
+
+def p_func_dims(p):
+  """func_dims : dim dim
+               | dim"""
+  if len(p) == 3:
+    funcDir.setReturnDims([p[1], p[2]])
+  else:
+    funcDir.setReturnDims([p[1]])
+
+def p_dim(p):
+  "dim : '[' CTE_INT ']'"
+  if p[2] <= 0:
+    s_error(f'Zero or negative indexes are not allowed! [{p[0]}]')
+  p[0] = p[2]
 
 def p_func_params(p):
   """func_params : func_param
@@ -472,8 +486,8 @@ def p_empty(p):
 
 # Error handling
 def p_error(p):
-  raise Exception(f'({p.lineno}:{p.lexpos}) Syntax error at "{p.value}"')
+  raise Exception(f'({p.lineno}) Syntax error at "{p.value}"')
 
 # Manual error (line number & position are kinda broken...)
 def s_error(msg):
-  raise Exception(f'{msg}')
+  raise Exception(msg)

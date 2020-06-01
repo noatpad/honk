@@ -510,18 +510,22 @@ class HonkVM:
         self._debugMsg(self.sCalls[-1], f'Jump to function: {self.sCalls[-1]} -> {ip}')
         continue
 
-      # Pop back to original function after RETURN
+      # Pop back to original function after RETURN - Batch-compatible
       elif op == 'RETURN':
+        ret = []
         for i in range(self.matIter()):
-          self._debugMsg(ip, f'Return found! -> ({quad[3]}{f" + {i}" if i else ""}) Popping back! {ip} -> {self.sCalls[-1] + 1}')
-          self.sReturns.append(self.getValue(quad[3]))
-          ip = self.popOutOfFunction()
+          self._debugMsg(ip, f'Return found! Assigning value -> ({quad[3]}{f" + {i}" if i else ""})')
+          ret.append(self.getValue(quad[3], i))
+        self.sReturns.append(ret)
+        self._debugMsg(ip, f'Popping back! {ip} -> {self.sCalls[-1] + 1}')
+        ip = self.popOutOfFunction()
 
-      # Special quad to complete RETURN functionality
+      # Special quad to complete RETURN functionality - Batch-compatible
       elif op == '=>':
-        value = self.sReturns.pop()
-        self.setValue(value, quad[3])
-        self._debugMsg(ip, f'Assigned return value of {value} to address ({quad[3]})')
+        ret = self.sReturns.pop()
+        for i in range(len(ret)):
+          self.setValue(ret[i], quad[3], i)
+          self._debugMsg(ip, f'Assigned return value of {value} to address ({quad[3]}{f" + {i}" if i else ""})')
 
       # Pop back to original function after end of function
       elif op == 'EndFunc':
