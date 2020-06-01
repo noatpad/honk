@@ -326,15 +326,12 @@ class QuadManager:
 
   # Add quads for when the iterator of a 'for' loop is found
   def addFromIteratorQuads(self, var):
-    if not self.funcDir.varExists(var):
-      self.funcDir.setCurrentType('int')
-      self.funcDir.addVar(var, self.vDir.generateVirtualAddress('temp', 'int'))
-      iter_var = self.funcDir.getVar(var)
-      self.pushVar(iter_var)
-      self.pushVar(iter_var)
-      self.pushVar(iter_var)
-    else:
-      raise Exception(f'Variable "{var}" already exists!"')
+    self.funcDir.setCurrentType('int')
+    self.funcDir.addVar(var, self.vDir.generateVirtualAddress('temp', 'int'))
+    iter_var = self.upsertVar(var, 'int')
+    self.pushVar(iter_var)
+    self.pushVar(iter_var)
+    self.pushVar(iter_var)
 
   # Add quads for a 'for' loop's initial assignment
   def addFromStartQuad(self):
@@ -456,6 +453,13 @@ class QuadManager:
     self.tempCount = 0
     self.returnCount = 0
     self.vDir.resetLocalCounters()
+
+  # Get a variable if it exists, otherwise create one and return it
+  def upsertVar(self, name, vartype):
+    if not self.funcDir.varExists(name):
+      vAddr = self.vDir.generateVirtualAddress(self.funcDir.currentFunc, vartype)
+      self.funcDir.addVar(name, vAddr)
+    return self.funcDir.getVar(name)
 
   # Get a constant if it exists, otherwise create one and return it
   def upsertCte(self, value, vartype):
