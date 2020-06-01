@@ -2,7 +2,7 @@
 # Python
 __pycache__/
 
-# Builds
+# Builds and testing
 *.zip
-*.txt
+tests/
 *.o
