@@ -4,5 +4,5 @@ __pycache__/
 
 # Builds and testing
 *.zip
-tests/
+*.txt
 *.o

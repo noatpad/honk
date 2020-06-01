@@ -1,40 +1,48 @@
 
+import config
 from sys import argv
 from os import path
+import argparse
 from ply import lex, yacc
+
+# CLI Arguments
+cli = argparse.ArgumentParser(description='h o n k')
+cli.add_argument('-t', '--tokens', help='Print tokens', action='store_true')
+cli.add_argument('-p', '--parser', help='Enable debug info for parsing', action='store_true')
+cli.add_argument('-v', '--vm', help='Enable debug info for virtual machine', action='store_true')
+cli.add_argument('file', help='Specify a file to run through')
+args = cli.parse_args()
+
+# Set configuration before importing lexer and parser
+config.objFilename = path.splitext(args.file)[0]
+config.debugParser = args.parser
+
+# Import the brains and machines
 import lexer, parser
 from honkVM import honk
 
-# Default variables
-filename = "test.txt"
-data = ''
-
-# Take 0-1 arguments from command line
-if len(argv) == 2:    # Pass a filename into the process
-  filename = argv[1]
-elif len(argv) > 2:
-  raise Exception("Command only takes 0 or 1 argument (filename)!")
-
 # Read file
+data = ''
 try:
-  with open(filename) as f:
+  with open(args.file) as f:
     for line in f:
       data += line
 except FileNotFoundError:
-  raise Exception(f'{filename} does not exist!')
+  raise Exception(f'{args.file} does not exist!')
 
 # Scan file
 ducklexer = lex.lex(module=lexer)
 ducklexer.input(data)
 
-# Print tokens
-# while True:
-#   token = ducklexer.token()
-#   if not token:
-#     break
-#   print(token)
+# Print tokens when allowed
+if args.tokens:
+  while True:
+    token = ducklexer.token()
+    if not token:
+      break
+    print(token)
 
-# Parse file and build .o file
+# Parse file and build .o file)
 duckparser = yacc.yacc(module=parser)
 resultQM = duckparser.parse(data)
 
@@ -42,11 +50,11 @@ resultQM = duckparser.parse(data)
 data = ''
 
 try:
-  with open('quack.o') as f:
+  with open(f'{config.objFilename}.o') as f:
     for line in f:
       data += line
 except FileNotFoundError:
   raise Exception('quack.o does not exist!')
 
 # Honk away
-honk(data, True)
+honk(data, args.vm)

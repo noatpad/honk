@@ -1,4 +1,5 @@
 
+import config
 from collections import deque
 from semanticCube import getDuoResultType, getMonoResultType
 from virtualDirectory import VirtualDirectory
@@ -11,8 +12,8 @@ class QVar:
     self.dims = dims
 
 class QuadManager:
-  def __init__(self, funcDir, debug):
-    self.debug = debug
+  def __init__(self, funcDir):
+    self.debug = config.debugParser
     self.funcDir = funcDir
     self.vDir = VirtualDirectory()
     self.quads = deque()
@@ -510,7 +511,7 @@ class QuadManager:
   ## FUNCTIONS (BUILDING)
   # Build .o file
   def build(self):
-    filename = 'quack.o'
+    filename = f'{config.objFilename}.o'
 
     if self.debug:
       print(f'> Building {filename}...')

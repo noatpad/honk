@@ -1,4 +1,5 @@
 
+import config
 from collections import defaultdict
 
 ## -- CONSTANT
@@ -20,8 +21,8 @@ class Var():
 
 ## -- FUNCTION
 class Function():
-  def __init__(self, name, returnType, debug):
-    self.debug = debug
+  def __init__(self, name, returnType):
+    self.debug = config.debugParser
     self.name = name
     self.returnType = returnType
     self.returnAddr = None
@@ -93,8 +94,8 @@ class Function():
 
 ## -- FUNCTION DIRECTORY
 class FunctionDirectory():
-  def __init__(self, debug):
-    self.debug = debug
+  def __init__(self):
+    self.debug = config.debugParser
     self.directory = dict()
     self.cteTable = dict()
     self.globalFunc = None
@@ -204,7 +205,7 @@ class FunctionDirectory():
   ## PUSH/ADD
   # Adds function to the directory
   def addFunction(self, name):
-    self.directory[name] = Function(name, self.currentType, self.debug)
+    self.directory[name] = Function(name, self.currentType)
     self.currentFunc = name
 
     if self.debug:

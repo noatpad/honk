@@ -1,0 +1,3 @@
+
+objFilename = ''
+debugParser = False

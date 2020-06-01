@@ -1,15 +1,16 @@
 
 from collections import deque
 
+import config
 from lexer import tokens
 from functionDirectory import FunctionDirectory
 from quadManager import QuadManager
 
 # For debugging purposes
-debug = True
+debug = config.debugParser
 
-funcDir = FunctionDirectory(debug)
-quads = QuadManager(funcDir, debug)
+funcDir = FunctionDirectory()
+quads = QuadManager(funcDir)
 
 # Precedence rules for arithmetic
 precedence = (
