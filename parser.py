@@ -234,7 +234,7 @@ def p_found_else(p):
 
 ## FROM
 def p_from(p):
-  "from : FROM ID found_from_iterator ':' expr found_from_start TO expr found_from_cond '{' body '}'"
+  "from : FROM ID found_from_iterator '=' expr found_from_start TO expr found_from_cond DO '{' body '}'"
   quads.addFromEndQuads()
 
 def p_found_from_iterator(p):
