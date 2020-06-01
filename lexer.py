@@ -1,26 +1,25 @@
 
 # Reserved words
 reserved = {
-  'Programa': 'PROGRAMA',
-  'principal': 'PRINCIPAL',
+  'Program': 'PROGRAM',
+  'main': 'MAIN',
   'var': 'VAR',
   'int': 'INT',
   'float': 'FLOAT',
   'char': 'CHAR',
   'bool': 'BOOL',
-  'funcion': 'FUNCION',
+  'function': 'FUNCTION',
   'void': 'VOID',
-  'regresa': 'REGRESA',
-  'lee': 'LEE',
-  'escribe': 'ESCRIBE',
-  'si': 'SI',
-  'entonces': 'ENTONCES',
-  'sino': 'SINO',
-  'mientras': 'MIENTRAS',
-  'haz': 'HAZ',
-  'desde': 'DESDE',
-  'hasta': 'HASTA',
-  'hacer': 'HACER'
+  'return': 'RETURN',
+  'read': 'READ',
+  'print': 'PRINT',
+  'if': 'IF',
+  'then': 'THEN',
+  'else': 'ELSE',
+  'while': 'WHILE',
+  'do': 'DO',
+  'from': 'FROM',
+  'to': 'TO',
 }
 
 # Token list

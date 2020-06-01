@@ -108,7 +108,7 @@ class FunctionDirectory():
   # NOTE: `currentFunc` is set in addFunction()
   # Set name for global function
   def setGlobalFunction(self):
-    self.globalFunc = 'global'
+    self.globalFunc = self.currentFunc
 
   # Set name for current function
   def setCurrentFunction(self, currentFunc):

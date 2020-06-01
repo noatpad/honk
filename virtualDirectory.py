@@ -48,7 +48,7 @@ class VirtualDirectory:
     self.totalCounter += space
 
     # Select scope (with validation checks)
-    if scope == 'global':   # Global
+    if scope == 'main':   # Global
       if self.globalRanges[v] + self.globalCounter[v] + space >= self.globalRanges[v + 1] - 1:
         raise Exception(f"Out of bounds! {vartype} in {scope}")
       self.globalCounter[v] += space

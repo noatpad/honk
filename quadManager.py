@@ -325,7 +325,7 @@ class QuadManager:
     self.completeQuad(end, self.quadCount)
 
   # Add quads for when the iterator of a 'for' loop is found
-  def addForIteratorQuads(self, var):
+  def addFromIteratorQuads(self, var):
     if not self.funcDir.varExists(var):
       self.funcDir.setCurrentType('int')
       self.funcDir.addVar(var, self.vDir.generateVirtualAddress('temp', 'int'))
@@ -337,19 +337,19 @@ class QuadManager:
       raise Exception(f'Variable "{var}" already exists!"')
 
   # Add quads for a 'for' loop's initial assignment
-  def addForStartQuad(self):
+  def addFromStartQuad(self):
     self.pushOperator('=')
     self.addAssignQuad()
     self.prepareLoop()
 
   # Add quads for a 'for' loop's condition check
-  def addForCondQuads(self):
+  def addFromCondQuads(self):
     self.pushOperator('<=')
     self.addDualOpQuad(['<='])
     self.addLoopCondQuad()
 
   # Add quads for a 'for' loop's increment
-  def addForEndQuads(self):
+  def addFromEndQuads(self):
     # Get constant of 1
     one = self.upsertCte(1, 'int')
 
@@ -531,7 +531,7 @@ class QuadManager:
     f.write('-> ERAS START\n')
     for func in self.funcDir.directory.values():
       # Skip global since it has no ERA
-      if func.name == 'global':
+      if func.name == 'main':
         continue
       era = self.funcDir.getEra(func.name)
       localCounts = '\t'.join([str(x) for x in era[0]])

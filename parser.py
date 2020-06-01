@@ -1,13 +1,9 @@
 
 from collections import deque
 
-import config
 from lexer import tokens
 from functionDirectory import FunctionDirectory
 from quadManager import QuadManager
-
-# For debugging purposes
-debug = config.debugParser
 
 funcDir = FunctionDirectory()
 quads = QuadManager(funcDir)
@@ -23,8 +19,8 @@ precedence = (
 
 # Parsing productions
 # PROGRAMA
-def p_programa(p):
-  "programa : PROGRAMA ID found_program_name ';' vars functions main '(' ')' '{' body '}'"
+def p_program(p):
+  "program : PROGRAM ID found_program_name ';' vars functions main '(' ')' '{' body '}'"
   # Finish parsing
   quads.addEndQuad()
   p[0] = quads
@@ -38,7 +34,7 @@ def p_found_program_name(p):
   if quads.debug:
       print("\n|==|==|==|==|==|==|==|==| START DEBUG LOG |==|==|==|==|==|==|==|==|\n")
 
-  funcDir.addFunction('global')
+  funcDir.addFunction('main')
   funcDir.setGlobalFunction()
   quads.addMainQuad()
 
@@ -102,7 +98,7 @@ def p_type(p):
 
 # FUNCTIONS
 def p_functions(p):
-  """functions : FUNCION func_type ID found_func_name '(' func_params ')' vars found_func_start '{' body '}' found_func_end functions
+  """functions : FUNCTION func_type ID found_func_name '(' func_params ')' vars found_func_start '{' body '}' found_func_end functions
                | empty"""
   pass
 
@@ -150,9 +146,8 @@ def p_found_func_end(p):
   funcDir.deleteVarTable()
 
 # PRINCIPAL
-# TODO: Change to main()
 def p_principal(p):
-  "main : PRINCIPAL"
+  "main : MAIN"
   quads.completeMainQuad()
 
 # BODY
@@ -168,7 +163,7 @@ def p_statement(p):
                | read
                | print
                | if
-               | for
+               | from
                | while"""
   pass
 
@@ -183,12 +178,12 @@ def p_found_assignment_end(p):
 
 ## RETURN
 def p_return(p):
-  "return : REGRESA '(' expr ')' ';'"
+  "return : RETURN '(' expr ')' ';'"
   quads.addReturnQuad()
 
 ## READ
 def p_read(p):
-  "read : LEE '(' read_params ')' ';'"
+  "read : READ '(' read_params ')' ';'"
   pass
 
 def p_read_params(p):
@@ -202,7 +197,7 @@ def p_found_read_param(p):
 
 ## PRINT
 def p_print(p):
-  "print : ESCRIBE '(' print_params ')' ';'"
+  "print : PRINT '(' print_params ')' ';'"
   pass
 
 def p_print_params(p):
@@ -220,8 +215,8 @@ def p_print_string(p):
 
 ## IF
 def p_if(p):
-  """if : SI '(' expr ')' found_if_expr ENTONCES '{' body '}'
-        | SI '(' expr ')' found_if_expr ENTONCES '{' body '}' else"""
+  """if : IF '(' expr ')' found_if_expr THEN '{' body '}'
+        | IF '(' expr ')' found_if_expr THEN '{' body '}' else"""
   quads.completeIfQuad()
 
 def p_found_if_expr(p):
@@ -230,34 +225,34 @@ def p_found_if_expr(p):
 
 ## ELSE
 def p_else(p):
-  "else : SINO found_else '{' body '}'"
+  "else : ELSE found_else '{' body '}'"
   pass
 
 def p_found_else(p):
   "found_else : empty"
   quads.addElseQuad()
 
-## FOR
-def p_for(p):
-  "for : DESDE ID found_for_iterator ':' expr found_for_start HASTA expr found_for_cond HACER '{' body '}'"
-  quads.addForEndQuads()
+## FROM
+def p_from(p):
+  "from : FROM ID found_from_iterator ':' expr found_from_start TO expr found_from_cond '{' body '}'"
+  quads.addFromEndQuads()
 
-def p_found_for_iterator(p):
-  "found_for_iterator : empty"
-  quads.addForIteratorQuads(p[-1])
+def p_found_from_iterator(p):
+  "found_from_iterator : empty"
+  quads.addFromIteratorQuads(p[-1])
 
 
-def p_found_for_start(p):
-  "found_for_start : empty"
-  quads.addForStartQuad()
+def p_found_from_start(p):
+  "found_from_start : empty"
+  quads.addFromStartQuad()
 
-def p_found_for_cond(p):
-  "found_for_cond : empty"
-  quads.addForCondQuads()
+def p_found_from_cond(p):
+  "found_from_cond : empty"
+  quads.addFromCondQuads()
 
 ## WHILE
 def p_while(p):
-  "while : MIENTRAS found_while '(' expr ')' found_while_expr HAZ '{' body '}'"
+  "while : WHILE found_while '(' expr ')' found_while_expr DO '{' body '}'"
   quads.completeLoopQuad()
 
 def p_found_while(p):
