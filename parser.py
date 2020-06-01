@@ -131,7 +131,7 @@ def p_found_func_param(p):
   "found_func_param : empty"
   param = p[-1]
   if funcDir.varAvailable(param):
-    funcDir.addVar(param[0], quads.vDir.generateVirtualAddress(funcDir.currentFunc, funcDir.currentType))
+    funcDir.addVar(param, quads.vDir.generateVirtualAddress(funcDir.currentFunc, funcDir.currentType))
     funcDir.addFuncParam()
   else:
     s_error(f'Multiple declaration of "{param}"!')
@@ -234,7 +234,7 @@ def p_found_else(p):
 
 ## FROM
 def p_from(p):
-  "from : FROM ID found_from_iterator '=' expr found_from_start TO expr found_from_cond DO '{' body '}'"
+  "from : FROM '(' ID found_from_iterator '=' expr found_from_start TO expr ')' found_from_cond DO '{' body '}'"
   quads.addFromEndQuads()
 
 def p_found_from_iterator(p):
