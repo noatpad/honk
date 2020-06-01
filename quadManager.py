@@ -234,7 +234,9 @@ class QuadManager:
     var = self.sVars.pop()
     return_type = self.funcDir.getCurrentFuncReturnType()
 
-    if return_type is "void":
+    if self.funcDir.currentFunc == self.funcDir.globalFunc:
+      raise Exception("You can't have a return statement on main()!")
+    elif return_type is "void":
       raise Exception("There can't be return statements in non-void functions!")
     elif var.vartype != return_type:
       raise Exception(f"Returned variable doesn't match return type! -> {var.vartype} != {return_type}")
