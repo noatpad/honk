@@ -36,7 +36,7 @@ t_IS_EQUAL = r'=='
 t_IS_NOT_EQUAL = r'!='
 t_LESS_THAN_OR_EQUAL = r'<='
 t_MORE_THAN_OR_EQUAL = r'>='
-t_STRING = r'\".+\"'
+t_STRING = r'\".*\"'
 
 # Function tokens
 def t_CTE_FLOAT(t):

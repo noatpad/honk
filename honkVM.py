@@ -424,7 +424,7 @@ class HonkVM:
       # Print - Batch-compatible
       elif op == 'PRINT':
         operand = quad[3]
-        if re.match(r'\".+\"', operand):
+        if re.match(r'\".*\"', operand):
           string = operand[1:-1]
           self._debugMsg(ip, f'Printing string: {string}')
           print(string)
