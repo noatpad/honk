@@ -107,6 +107,7 @@ class HonkVM:
     # Prepare for function calls & matrix operations
     self.sCalls = deque()
     self.sReturns = deque()
+    self.sParams = deque()
     self.localAux = [None]
     self.tempAux = [None]
 
@@ -204,7 +205,7 @@ class HonkVM:
 
       addr = int(addr) + matOffset
       if addr < self.globalRanges[0] or addr >= self.cteRanges[4]:
-        raise Exception(f'Getting from out of bounds! -> ({addr})')
+        raise Exception(f'Getting from out of bounds! -> ({addr}{f" + {matOffset}" if matOffset else ""})')
 
       if addr < self.globalRanges[4]:
         return self.Globals[addr - self.globalRanges[0]]
@@ -225,14 +226,14 @@ class HonkVM:
       else:
         return self.Ctes[addr - self.cteRanges[0]]
     except:
-      raise Exception(f"Var is not assigned in memory?! -> ({addr})")
+      raise Exception(f'Var is not assigned in memory?! -> ({addr}{f" + {matOffset}" if matOffset else ""})')
 
   # Get a value from an address
   def getValue(self, addr, matOffset=0):
     try:
       return self.getVar(addr, matOffset).getActualValue()
     except AttributeError:
-      raise AttributeError(f"Var is not assigned in memory?! -> ({addr})")
+      raise AttributeError(f'Var is not assigned in memory?! -> ({addr}{f" + {matOffset}" if matOffset else ""})')
 
   # Set a value and save it in memory
   def setValue(self, value, addr, matOffset=0):
@@ -242,7 +243,7 @@ class HonkVM:
     else:
       addr = int(addr) + matOffset
       if addr < self.globalRanges[0] or addr >= self.tempRanges[4]:
-        return Exception(f'Setting in invalid memory! -> ({addr})')
+        return Exception(f'Setting in invalid memory! -> ({addr}{f" + {matOffset}" if matOffset else ""})')
 
       elif addr < self.globalRanges[4]:
         rangeAddr = addr - self.globalRanges[0]
@@ -292,6 +293,8 @@ class HonkVM:
     for e in eraVals[1][:-1]:
       tempEra.append(tempEra[-1] + e)
     self.TempOffsets.append(tempEra)
+
+    self.sParams.append([])
 
   # Pop out of function and return state as previously saved
   def popOutOfFunction(self):
@@ -494,18 +497,23 @@ class HonkVM:
         self.prepareERA(quad[3])
         self._debugMsg(ip, f'Preparing ERA for function -> {quad[3]}')
 
-      # Send parameter to function call
+      # Send parameter to function call - Batch-compatible
       elif op == 'PARAM':
-        param = self.getVar(quad[1])
-        k = int(quad[3])
-        self._debugMsg(ip, f'Assigning value from ({quad[1]}) as parameter #{k}')
-        self.localAux[k] = param
+        for i in range(self.matIter()):
+          param = self.getValue(quad[1], i)
+          self.sParams[-1].append((param, quad[2], i))
+          self._debugMsg(ip, f'Assigning value from ({quad[1]}{f" + {i}" if i else ""}) as parameter #{quad[3]}')
 
       # Go to function
       elif op == 'GoSub':
         self.sCalls.append(ip)
         self.Locals.append(self.localAux)
         self.Temps.append(self.tempAux)
+
+        params = self.sParams.pop()
+        for p in params:
+          self.setValue(p[0], p[1], p[2])
+
         ip = int(quad[3])
         self._debugMsg(self.sCalls[-1], f'Jump to function: {self.sCalls[-1]} -> {ip}')
         continue

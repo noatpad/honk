@@ -88,8 +88,13 @@ class Function():
       print(f'\t\t\t\t\t> VAR: {v.name} - {v.vartype} -> {v.vAddr}')
 
   # Add parameter
-  def addParam(self, vartype):
-    self.paramTable.append(vartype)
+  def addParam(self, vartype, vAddr):
+    self.paramTable.append((vartype, vAddr, []))
+
+  # Add dimensions to latest parameter
+  def addParamDims(self, dims):
+    param = self.paramTable[-1]
+    self.paramTable[-1] = (param[0], param[1], dims)
 
   # Create var table
   def createVarTable(self):
@@ -247,8 +252,12 @@ class FunctionDirectory():
       print(f'-- {self.currentFunc} - {self.currentType}')
 
   # Add parameters to current function
-  def addFuncParam(self):
-    self.directory[self.currentFunc].addParam(self.currentType)
+  def addFuncParam(self, vAddr):
+    self.directory[self.currentFunc].addParam(self.currentType, vAddr)
+
+  # Add dimensions to parameter of a current function
+  def addFuncParamDims(self, dims):
+    self.directory[self.currentFunc].addParamDims(dims)
 
   # Add variable to the current function's var table
   def addVar(self, name, vAddr):

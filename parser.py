@@ -137,18 +137,39 @@ def p_func_params(p):
   pass
 
 def p_func_param(p):
-  """func_param : type ID found_func_param ',' func_param
-                | type ID found_func_param"""
+  """func_param : type ID found_func_param param_dims ',' func_param
+                | type ID found_func_param param_dims"""
   pass
 
 def p_found_func_param(p):
   "found_func_param : empty"
   param = p[-1]
   if funcDir.varAvailable(param):
-    funcDir.addVar(param, quads.vDir.generateVirtualAddress(funcDir.currentFunc, funcDir.currentType))
-    funcDir.addFuncParam()
+    funcDir.setVarHelper(param)
+    vAddr = quads.vDir.generateVirtualAddress(funcDir.currentFunc, funcDir.currentType)
+    funcDir.addVar(param, vAddr)
+    funcDir.addFuncParam(vAddr)
   else:
     s_error(f'Multiple declaration of "{param}"!')
+
+def p_param_no_dims(p):
+  "param_dims : empty"
+  pass
+
+def p_param_dims(p):
+  """param_dims : dim dim
+                | dim"""
+  space = None
+  if len(p) == 3:
+    p[0] = [p[1], p[2]]
+    space = p[1] * p[2]
+  else:
+    p[0] = [p[1]]
+    space = p[1]
+
+  funcDir.addFuncParamDims(p[0])
+  funcDir.setVarDims(p[0])
+  quads.vDir.makeSpaceForArray(funcDir.currentFunc, funcDir.currentType, space)
 
 def p_found_func_start(p):
   "found_func_start : empty"

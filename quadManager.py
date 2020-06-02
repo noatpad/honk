@@ -425,13 +425,15 @@ class QuadManager:
   def addParamQuad(self, target_param, k):
     param = self.sVars.pop()
 
-    if param.dims:    # NOTE: Function parameters can only be atomic values
-      raise Exception(f'Function parameters must be atomic values -> ({param.vAddr}) - {param.dims}')
+    if param.vartype != target_param[0]:
+      raise Exception(f'Wrong param type! {param.vartype} != {target_param[0]}')
 
-    if param.vartype == target_param:
-      self.addQuad(('PARAM', param.vAddr, None, k))
-    else:
-      raise Exception(f'Wrong param type! {param.vartype} {target_param}')
+    if param.dims != target_param[2]:
+      raise Exception(f'Wrong param dimensions! {param.dims} != {target_param[2]}')
+
+    if param.dims:
+      self.addMatQuad(param.dims)
+    self.addQuad(('PARAM', param.vAddr, target_param[1], k))
 
   # Append GOSUB quad
   def addGoSubQuad(self, func, qs):
