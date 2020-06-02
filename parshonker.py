@@ -230,7 +230,7 @@ def p_found_assignment_end(p):
 
 ## RETURN
 def p_return(p):
-  "return : GOT BELL OPEN GATE expr CLOSE GATE HONK"
+  "return : GOT BELL expr HONK"
   quads.addReturnQuad()
 
 ## READ
@@ -249,7 +249,7 @@ def p_found_read_param(p):
 
 ## PRINT
 def p_print(p):
-  "print : SHOW ON TV OPEN GATE print_params CLOSE GATE HONK"
+  "print : SHOW ON TV print_params HONK"
   pass
 
 def p_print_params(p):
@@ -267,8 +267,8 @@ def p_print_string(p):
 
 ## IF
 def p_if(p):
-  """if : HONK '?' OPEN GATE expr CLOSE GATE found_if_expr HONK '!' body
-        | HONK '?' OPEN GATE expr CLOSE GATE found_if_expr HONK '!' body else"""
+  """if : HONK '?' expr found_if_expr HONK '!' body
+        | HONK '?' expr found_if_expr HONK '!' body else"""
   quads.completeIfQuad()
 
 def p_found_if_expr(p):
@@ -286,7 +286,7 @@ def p_found_else(p):
 
 ## FROM
 def p_from(p):
-  "from : INHALES OPEN GATE ID found_from_iterator AM expr found_from_start HOOOONK expr CLOSE GATE found_from_cond HOONK body"
+  "from : INHALES ID found_from_iterator AM expr found_from_start HOOOONK expr found_from_cond HOONK body"
   quads.addFromEndQuads()
 
 def p_found_from_iterator(p):
@@ -304,7 +304,7 @@ def p_found_from_cond(p):
 
 ## WHILE
 def p_while(p):
-  "while : HONK HONK found_while OPEN GATE expr CLOSE GATE found_while_expr HOONK body"
+  "while : HONK HONK found_while expr found_while_expr HOONK body"
   quads.completeLoopQuad()
 
 def p_found_while(p):

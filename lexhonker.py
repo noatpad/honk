@@ -1,6 +1,6 @@
 
 ### Goose Dictionary ###
-# = -> AM GOOSE
+# = -> AM
 # + -> MORE GOOSE
 # - -> LESS GOOSE
 # * -> GOOSETIPLY
@@ -37,7 +37,7 @@
 # read(x) -> HO x ONK HONK
 # print(x) -> SHOW ON TV OPEN GATE x CLOSE GATE HONK
 # while -> HONK HONK OPEN GATE expr CLOSE GATE HOONK
-# from -> inhales ID AM GOOSE expr HOOOONK expr HOOONK
+# from -> inhales ID AM expr HOOOONK expr HOOONK
 # break -> peace was never an option
 # if -> HONK?
 # then -> HONK!
