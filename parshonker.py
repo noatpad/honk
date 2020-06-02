@@ -133,10 +133,10 @@ def p_func_dims(p):
     funcDir.setReturnDims([p[1]])
 
 def p_dim(p):
-  "dim : OPEN SQUARE GATE CTE_INT CLOSE SQUARE GATE"
-  if p[4] <= 0:
-    s_error(f'Zero or negative indexes are not allowed! [{p[4]}]')
-  p[0] = p[4]
+  "dim : OPEN BOX CTE_INT CLOSE BOX"
+  if p[3] <= 0:
+    s_error(f'Zero or negative indexes are not allowed! [{p[3]}]')
+  p[0] = p[3]
 
 def p_func_params(p):
   """func_params : func_param
@@ -217,7 +217,7 @@ def p_statement(p):
 
 ## ASSIGNMENT
 def p_assignment(p):
-  "assignment : expr_var AM GOOSE found_assignment_op found_expr_duo_op expr found_assignment_end HONK"
+  "assignment : expr_var AM found_assignment_op found_expr_duo_op expr found_assignment_end HONK"
   pass
 
 def p_found_assignment_op(p):
@@ -235,7 +235,7 @@ def p_return(p):
 
 ## READ
 def p_read(p):
-  "read : HO read_params ONK HONK"
+  "read : HO '-' read_params '-' ONK HONK"
   pass
 
 def p_read_params(p):
@@ -286,7 +286,7 @@ def p_found_else(p):
 
 ## FROM
 def p_from(p):
-  "from : INHALES OPEN GATE ID found_from_iterator AM GOOSE expr found_from_start HOOOONK expr CLOSE GATE found_from_cond HOONK body"
+  "from : INHALES OPEN GATE ID found_from_iterator AM expr found_from_start HOOOONK expr CLOSE GATE found_from_cond HOONK body"
   quads.addFromEndQuads()
 
 def p_found_from_iterator(p):
@@ -464,7 +464,7 @@ def p_expr_mono_op(p):
   pass
 
 def p_det_op(p):
-  "det_op : GOOSE DOLLARS"
+  "det_op : GOOSECOIN"
   p[0] = '$'
 
 def p_trans_op(p):
@@ -517,7 +517,7 @@ def p_found_expr_var_dims(p):
   quads.sDims.append((funcDir.varHelper, 0))
 
 def p_expr_var_dim(p):
-  "expr_var_dim : OPEN SQUARE GATE expr_var_open_dim expr CLOSE SQUARE GATE"
+  "expr_var_dim : OPEN BOX expr_var_open_dim expr CLOSE BOX"
   quads.addArrQuads()
 
 def p_expr_var_open_dim(p):

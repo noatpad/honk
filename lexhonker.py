@@ -6,7 +6,7 @@
 # * -> GOOSETIPLY
 # / -> GOOSIVIDE
 # % -> LEFTOVERS
-# $ -> GOOSE DOLLARS
+# $ -> GOOSECOIN
 # ! -> SURPRISE
 # ? -> wh
 # == -> AM GOOSE?
@@ -18,7 +18,7 @@
 # & -> TOGETHER FOREVER
 # | -> POLE
 # () -> OPEN/CLOSE GATE
-# [] -> OPEN/CLOSE SQUARE GATE
+# [] -> OPEN/CLOSE BOX
 # {} -> OPEN/CLOSE FANCY GATE
 # . -> DOOT
 # , -> MOAR
@@ -63,7 +63,7 @@ reserved = {
   'GOOSETIPLY': 'GOOSETIPLY',
   'GOOSIVIDE': 'GOOSIVIDE',
   'LEFTOVERS': 'LEFTOVERS',
-  'DOLLARS': 'DOLLARS',
+  'GOOSECOIN': 'GOOSECOIN',
   'SURPRISE': 'SURPRISE',
   'wh': 'WH',
   'NOT': 'NOT',
@@ -76,7 +76,7 @@ reserved = {
   # Brackets
   'OPEN': 'OPEN',
   'CLOSE': 'CLOSE',
-  'SQUARE': 'SQUARE',
+  'BOX': 'BOX',
   'FANCY': 'FANCY',
   'GATE': 'GATE',
   # Punctuation
@@ -116,11 +116,11 @@ reserved = {
 }
 
 # Token list
-tokens = list(reserved.values()) + [
+tokens = [
   'ID', 'CTE_INT', 'CTE_FLOAT', 'CTE_CHAR', 'CTE_BOOL', 'STRING'
-]
+] + list(reserved.values())
 
-literals = '?!'
+literals = '?!-'
 
 # String
 t_STRING = r'\".*\"'
@@ -141,8 +141,8 @@ def t_CTE_CHAR(t):
   return t
 
 def t_CTE_BOOL(t):
-  r'(true|false)'
-  t.value = (t.value == "true")
+  r'(Goose|Duck)'
+  t.value = (t.value == "Goose")
   return t
 
 def t_ID(t):
