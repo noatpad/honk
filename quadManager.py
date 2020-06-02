@@ -20,12 +20,12 @@ class QuadManager:
     self.sVars = deque()
     self.sOperators = deque()
     self.sJumps = deque()
+    self.sBreaks = deque()
     self.sFuncs = deque()
     self.sDims = deque()
     self.quadCount = 0
     self.tempCount = 0
     self.returnCount = 0
-    self.loopDepth = 0
 
   ## GETTERS
   # Get function from top of stack
@@ -321,17 +321,18 @@ class QuadManager:
   # Prepare loop block
   def prepareLoop(self):
     self.sJumps.append(self.quadCount)
-    self.loopDepth += 1
+    self.sBreaks.append([])
 
   # Complete quadruple for loop block
   def completeLoopQuad(self):
-    self.loopDepth -= 1
-    ret = self.sJumps.popleft()
+    end = self.sJumps.pop()
+    ret = self.sJumps.pop()
     self.addQuad(('GoTo', None, None, ret))
+    self.completeQuad(end, self.quadCount)
 
-    while self.sJumps:
-      end = self.sJumps.pop()
-      self.completeQuad(end, self.quadCount)
+    breaks = self.sBreaks.pop()
+    for b in breaks:
+      self.completeQuad(b, self.quadCount)
 
   # Add quads for when the iterator of a 'for' loop is found
   def addFromIteratorQuads(self, var):
@@ -371,11 +372,11 @@ class QuadManager:
 
   # Add incomplete quad to break out of loop
   def addBreakQuad(self):
-    if self.loopDepth <= 0:
+    if not self.sBreaks:
       raise Exception("Can't use BREAK outside of a loop!")
 
     self.addQuad(('GoTo', None, None, None))
-    self.sJumps.append(self.quadCount - 1)
+    self.sBreaks[-1].append(self.quadCount - 1)
 
   # Add necessary quads for array access
   def addArrQuads(self):
@@ -534,6 +535,7 @@ class QuadManager:
     print("\t  types ->", types)
     print("\t  dims ->", dims)
     print("\t sJumps ->", list(self.sJumps))
+    print("\t sBreaks ->", list(self.sBreaks))
     print("\t sFuncs ->", list(self.sJumps))
     print("\t sDims ->", list(self.sDims))
     print("\t - CTES")
