@@ -20,6 +20,8 @@ reserved = {
   'do': 'DO',
   'from': 'FROM',
   'to': 'TO',
+  'break': 'BREAK',
+  'continue': 'CONTINUE'
 }
 
 # Token list

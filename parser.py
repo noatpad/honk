@@ -256,7 +256,7 @@ def p_if(p):
 
 def p_found_if_expr(p):
   "found_if_expr : empty"
-  quads.addIfQuad()
+  quads.addGoToFQuad()
 
 ## ELSE
 def p_else(p):
@@ -296,7 +296,7 @@ def p_found_while(p):
 
 def p_found_while_expr(p):
   "found_while_expr : empty"
-  quads.addLoopCondQuad()
+  quads.addGoToFQuad()
 
 # EXPRESSION -> Order of operator precedence:
 # - Matrix operations ($, !, ?)

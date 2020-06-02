@@ -25,7 +25,7 @@ class QuadManager:
     self.quadCount = 0
     self.tempCount = 0
     self.returnCount = 0
-    self.dimCount = 0
+    self.loopDepth = 0
 
   ## GETTERS
   # Get function from top of stack
@@ -293,8 +293,8 @@ class QuadManager:
 
     self.addQuad(('PRINT', None, None, var.vAddr))
 
-  # Append quadruple for `if` statement
-  def addIfQuad(self):
+  # Append GoToF quadruple
+  def addGoToFQuad(self):
     result = self.sVars.pop()
 
     if result.dims:
@@ -322,20 +322,6 @@ class QuadManager:
   def prepareLoop(self):
     self.sJumps.append(self.quadCount)
 
-  # Append quadruple for `while` block
-  # NOTE: It's practically identical to addIfQuad()
-  def addLoopCondQuad(self):
-    result = self.sVars.pop()
-
-    if result.dims:
-      self.addMatQuad(result.dims)
-
-    if result.vartype == 'bool':
-      self.addQuad(('GoToF', result.vAddr, None, None))
-      self.sJumps.append(self.quadCount - 1)
-    else:
-      raise Exception(f'Type mismatch! {result.vartype} != bool')
-
   # Complete quadruple for `while` block
   def completeLoopQuad(self):
     end = self.sJumps.pop()
@@ -362,7 +348,7 @@ class QuadManager:
   def addFromCondQuads(self):
     self.pushOperator('<=')
     self.addDualOpQuad(['<='])
-    self.addLoopCondQuad()
+    self.addGoToFQuad()
 
   # Add quads for a 'for' loop's increment
   def addFromEndQuads(self):
@@ -482,6 +468,7 @@ class QuadManager:
   def resetFuncCounters(self):
     self.tempCount = 0
     self.returnCount = 0
+    self.loopDepth = 0
     self.vDir.resetLocalCounters()
 
   # Get a variable if it exists, otherwise create one and return it
