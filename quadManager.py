@@ -318,16 +318,20 @@ class QuadManager:
     end = self.sJumps.pop()
     self.completeQuad(end, self.quadCount)
 
-  # Prepare for/while block
+  # Prepare loop block
   def prepareLoop(self):
     self.sJumps.append(self.quadCount)
+    self.loopDepth += 1
 
-  # Complete quadruple for `while` block
+  # Complete quadruple for loop block
   def completeLoopQuad(self):
-    end = self.sJumps.pop()
-    ret = self.sJumps.pop()
+    self.loopDepth -= 1
+    ret = self.sJumps.popleft()
     self.addQuad(('GoTo', None, None, ret))
-    self.completeQuad(end, self.quadCount)
+
+    while self.sJumps:
+      end = self.sJumps.pop()
+      self.completeQuad(end, self.quadCount)
 
   # Add quads for when the iterator of a 'for' loop is found
   def addFromIteratorQuads(self, var):
@@ -364,6 +368,14 @@ class QuadManager:
     self.addAssignQuad()
     self.completeLoopQuad()
     self.sVars.pop()
+
+  # Add incomplete quad to break out of loop
+  def addBreakQuad(self):
+    if self.loopDepth <= 0:
+      raise Exception("Can't use BREAK outside of a loop!")
+
+    self.addQuad(('GoTo', None, None, None))
+    self.sJumps.append(self.quadCount - 1)
 
   # Add necessary quads for array access
   def addArrQuads(self):

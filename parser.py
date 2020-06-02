@@ -199,7 +199,8 @@ def p_statement(p):
                | print
                | if
                | from
-               | while"""
+               | while
+               | break"""
   pass
 
 ## ASSIGNMENT
@@ -297,6 +298,11 @@ def p_found_while(p):
 def p_found_while_expr(p):
   "found_while_expr : empty"
   quads.addGoToFQuad()
+
+## BREAK
+def p_break(p):
+  "break : BREAK ';'"
+  quads.addBreakQuad()
 
 # EXPRESSION -> Order of operator precedence:
 # - Matrix operations ($, !, ?)
