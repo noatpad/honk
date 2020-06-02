@@ -14,11 +14,16 @@ cli.add_argument('file', help='Specify a file to run through')
 args = cli.parse_args()
 
 # Set configuration before importing lexer and parser
-config.objFilename = path.splitext(args.file)[0]
+filepath = path.splitext(args.file)
+config.objFilename = filepath[0]
 config.debugParser = args.parser
 
 # Import the brains and machines
-import lexer, parser
+if filepath[1] == '.honk':
+  import lexhonker as lexer, parser
+else:
+  import lexer, parser
+
 from honkVM import honk
 
 # Read file
