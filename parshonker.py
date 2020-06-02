@@ -1,5 +1,5 @@
 
-from lexer import tokens
+from lexhonker import tokens
 from functionDirectory import FunctionDirectory
 from quadManager import QuadManager
 
@@ -7,9 +7,9 @@ funcDir = FunctionDirectory()
 quads = QuadManager(funcDir)
 
 # Parsing productions
-# PROGRAM
+# PROGRAMA
 def p_program(p):
-  "program : PROGRAM ID found_program_name ';' vars functions main body"
+  "program : UNTITLED ID GAME found_program_name HONK vars functions main body"
   # Finish parsing
   quads.addEndQuad()
   p[0] = quads
@@ -29,7 +29,7 @@ def p_found_program_name(p):
 
 # VARS
 def p_vars(p):
-  """vars : VAR found_var var_declare
+  """vars : POND found_var var_declare
           | empty"""
   pass
 
@@ -38,12 +38,12 @@ def p_found_var(p):
   funcDir.createVarTable()
 
 def p_var_declare(p):
-  """var_declare : type var_name ';' var_declare
-                 | type var_name ';'"""
+  """var_declare : type var_name HONK var_declare
+                 | type var_name HONK"""
   pass
 
 def p_var_name(p):
-  """var_name : variable_declare var_dims ',' var_name
+  """var_name : variable_declare var_dims MOAR var_name
               | variable_declare var_dims"""
   pass
 
@@ -74,24 +74,42 @@ def p_var_dims(p):
 
 # TYPE
 def p_type(p):
-  """type : INT
-          | FLOAT
-          | CHAR
-          | BOOL"""
-  funcDir.setCurrentType(p[1])
+  """type : type_int
+          | type_float
+          | type_char
+          | type_bool"""
   p[0] = p[1]
+  funcDir.setCurrentType(p[0])
+
+def p_type_int(p):
+  "type_int : WHOLE GOOSE"
+  p[0] = 'int'
+
+def p_type_float(p):
+  "type_float : PART GOOSE"
+  p[0] = 'float'
+
+def p_type_char(p):
+  "type_char : LETTER GOOSE"
+  p[0] = 'char'
+
+def p_type_bool(p):
+  "type_bool : DUCK OR GOOSE"
+  p[0] = 'bool'
 
 # FUNCTIONS
 def p_functions(p):
-  """functions : FUNCTION func_type ID found_func_name func_dims '(' func_params ')' vars found_func_start body found_func_end functions
+  """functions : TASK func_type ID found_func_name func_dims HONK func_params HONK vars found_func_start body found_func_end functions
                | empty"""
   pass
 
 def p_func_type(p):
-  """func_type : type
-               | VOID"""
-  if p[1] == 'void':
-    funcDir.setCurrentType('void')
+  "func_type : type"
+  pass
+
+def p_func_void(p):
+  "func_type : MY SOUL"
+  funcDir.setCurrentType('void')
 
 def p_found_func_name(p):
   "found_func_name : empty"
@@ -115,10 +133,10 @@ def p_func_dims(p):
     funcDir.setReturnDims([p[1]])
 
 def p_dim(p):
-  "dim : '[' CTE_INT ']'"
-  if p[2] <= 0:
-    s_error(f'Zero or negative indexes are not allowed! [{p[0]}]')
-  p[0] = p[2]
+  "dim : OPEN SQUARE GATE CTE_INT CLOSE SQUARE GATE"
+  if p[4] <= 0:
+    s_error(f'Zero or negative indexes are not allowed! [{p[4]}]')
+  p[0] = p[4]
 
 def p_func_params(p):
   """func_params : func_param
@@ -126,7 +144,7 @@ def p_func_params(p):
   pass
 
 def p_func_param(p):
-  """func_param : type ID found_func_param param_dims ',' func_param
+  """func_param : type ID found_func_param param_dims MOAR func_param
                 | type ID found_func_param param_dims"""
   pass
 
@@ -171,12 +189,12 @@ def p_found_func_end(p):
 
 # MAIN
 def p_main(p):
-  "main : MAIN '(' ')'"
+  "main : PRESS Y TO HONK_LOWERCASE"
   quads.completeMainQuad()
 
 # BODY
 def p_body(p):
-  "body : '{' statements '}'"
+  "body : OPEN FANCY GATE statements CLOSE FANCY GATE"
   pass
 
 def p_statements(p):
@@ -199,8 +217,12 @@ def p_statement(p):
 
 ## ASSIGNMENT
 def p_assignment(p):
-  "assignment : expr_var '=' found_expr_duo_op expr found_assignment_end ';'"
+  "assignment : expr_var AM GOOSE found_assignment_op found_expr_duo_op expr found_assignment_end HONK"
   pass
+
+def p_found_assignment_op(p):
+  "found_assignment_op : empty"
+  p[0] = '='
 
 def p_found_assignment_end(p):
   "found_assignment_end : empty"
@@ -208,16 +230,16 @@ def p_found_assignment_end(p):
 
 ## RETURN
 def p_return(p):
-  "return : RETURN '(' expr ')' ';'"
+  "return : GOT BELL OPEN GATE expr CLOSE GATE HONK"
   quads.addReturnQuad()
 
 ## READ
 def p_read(p):
-  "read : READ '(' read_params ')' ';'"
+  "read : HO read_params ONK HONK"
   pass
 
 def p_read_params(p):
-  """read_params : expr_var found_read_param ',' read_params
+  """read_params : expr_var found_read_param MOAR read_params
                  | expr_var found_read_param"""
   pass
 
@@ -227,11 +249,11 @@ def p_found_read_param(p):
 
 ## PRINT
 def p_print(p):
-  "print : PRINT '(' print_params ')' ';'"
+  "print : SHOW ON TV OPEN GATE print_params CLOSE GATE HONK"
   pass
 
 def p_print_params(p):
-  """print_params : print_param ',' print_params
+  """print_params : print_param MOAR print_params
                   | print_param"""
   pass
 
@@ -245,8 +267,8 @@ def p_print_string(p):
 
 ## IF
 def p_if(p):
-  """if : IF '(' expr ')' found_if_expr THEN body
-        | IF '(' expr ')' found_if_expr THEN body else"""
+  """if : HONK '?' OPEN GATE expr CLOSE GATE found_if_expr HONK '!' body
+        | HONK '?' OPEN GATE expr CLOSE GATE found_if_expr HONK '!' body else"""
   quads.completeIfQuad()
 
 def p_found_if_expr(p):
@@ -255,7 +277,7 @@ def p_found_if_expr(p):
 
 ## ELSE
 def p_else(p):
-  "else : ELSE found_else body"
+  "else : BONK found_else body"
   pass
 
 def p_found_else(p):
@@ -264,7 +286,7 @@ def p_found_else(p):
 
 ## FROM
 def p_from(p):
-  "from : FROM '(' ID found_from_iterator '=' expr found_from_start TO expr ')' found_from_cond DO body"
+  "from : INHALES OPEN GATE ID found_from_iterator AM GOOSE expr found_from_start HOOOONK expr CLOSE GATE found_from_cond HOONK body"
   quads.addFromEndQuads()
 
 def p_found_from_iterator(p):
@@ -282,7 +304,7 @@ def p_found_from_cond(p):
 
 ## WHILE
 def p_while(p):
-  "while : WHILE found_while '(' expr ')' found_while_expr DO body"
+  "while : HONK HONK found_while OPEN GATE expr CLOSE GATE found_while_expr HOONK body"
   quads.completeLoopQuad()
 
 def p_found_while(p):
@@ -295,7 +317,7 @@ def p_found_while_expr(p):
 
 ## BREAK
 def p_break(p):
-  "break : BREAK ';'"
+  "break : PEACE WAS NEVER AN OPTION HONK"
   quads.addBreakQuad()
 
 # EXPRESSION -> Order of operator precedence:
@@ -317,10 +339,18 @@ def p_found_expr_logic(p):
   quads.addDualOpQuad(['&', '|'])
 
 def p_expr_logic2(p):
-  """expr_logic2 : '&' found_expr_duo_op expr_logic
-                 | '|' found_expr_duo_op expr_logic
+  """expr_logic2 : and_op found_expr_duo_op expr_logic
+                 | or_op found_expr_duo_op expr_logic
                  | empty"""
   pass
+
+def p_and_op(p):
+  "and_op : TOGETHER FOREVER"
+  p[0] = '&'
+
+def p_or_op(p):
+  "or_op : POLE"
+  p[0] = '|'
 
 def p_expr_compare(p):
   "expr_compare : expr_arith found_expr_compare expr_compare2"
@@ -331,14 +361,38 @@ def p_found_expr_compare(p):
   quads.addDualOpQuad(['==', '!=', '<', '<=', '>', '>='])
 
 def p_expr_compare2(p):
-  """expr_compare2 : IS_EQUAL found_expr_duo_op expr_compare
-                   | IS_NOT_EQUAL found_expr_duo_op expr_compare
-                   | '<' found_expr_duo_op expr_compare
-                   | LESS_THAN_OR_EQUAL found_expr_duo_op expr_compare
-                   | '>' found_expr_duo_op expr_compare
-                   | MORE_THAN_OR_EQUAL found_expr_duo_op expr_compare
+  """expr_compare2 : eq_op found_expr_duo_op expr_compare
+                   | noeq_op found_expr_duo_op expr_compare
+                   | less_op found_expr_duo_op expr_compare
+                   | lesseq_op found_expr_duo_op expr_compare
+                   | more_op found_expr_duo_op expr_compare
+                   | moreeq_op found_expr_duo_op expr_compare
                    | empty"""
   pass
+
+def p_eq_op(p):
+  "eq_op : AM GOOSE '?'"
+  p[0] = '=='
+
+def p_noeq_op(p):
+  "noeq_op : NOT GOOSE '?' '!'"
+  p[0] = '!='
+
+def p_less_op(p):
+  "less_op : INFERIOR"
+  p[0] = '<'
+
+def p_lesseq_op(p):
+  "lesseq_op : INFERIOR MAYBE"
+  p[0] = '<='
+
+def p_more_op(p):
+  "more_op : SUPERIOR"
+  p[0] = '>'
+
+def p_moreeq_op(p):
+  "moreeq_op : SUPERIOR MAYBE"
+  p[0] = '>='
 
 def p_expr_arith(p):
   "expr_arith : expr_factor found_expr_arith expr_arith2"
@@ -349,10 +403,18 @@ def p_found_expr_arith(p):
   quads.addDualOpQuad(['+', '-'])
 
 def p_expr_arith2(p):
-  """expr_arith2 : '+' found_expr_duo_op expr_arith
-                 | '-' found_expr_duo_op expr_arith
+  """expr_arith2 : plus_op found_expr_duo_op expr_arith
+                 | minus_op found_expr_duo_op expr_arith
                  | empty"""
   pass
+
+def p_plus_op(p):
+  "plus_op : MORE GOOSE"
+  p[0] = '+'
+
+def p_minus_op(p):
+  "minus_op : LESS GOOSE"
+  p[0] = '-'
 
 def p_expr_factor(p):
   "expr_factor : expr_mono found_expr_factor expr_factor2"
@@ -363,12 +425,28 @@ def p_found_expr_factor(p):
   quads.addDualOpQuad(['*', '/', '%', '.'])
 
 def p_expr_factor2(p):
-  """expr_factor2 : '*' found_expr_duo_op expr_factor
-                  | '/' found_expr_duo_op expr_factor
-                  | '%' found_expr_duo_op expr_factor
-                  | '.' found_expr_duo_op expr_factor
+  """expr_factor2 : mul_op found_expr_duo_op expr_factor
+                  | div_op found_expr_duo_op expr_factor
+                  | mod_op found_expr_duo_op expr_factor
+                  | dot_op found_expr_duo_op expr_factor
                   | empty"""
   pass
+
+def p_mul_op(p):
+  "mul_op : GOOSETIPLY"
+  p[0] = '*'
+
+def p_div_op(p):
+  "div_op : GOOSIVIDE"
+  p[0] = '/'
+
+def p_mod_op(p):
+  "mod_op : LEFTOVERS"
+  p[0] = '%'
+
+def p_dot_op(p):
+  "dot_op : DOOT"
+  p[0] = '.'
 
 def p_found_expr_duo_op(p):
   "found_expr_duo_op : empty"
@@ -379,11 +457,23 @@ def p_expr_mono(p):
   pass
 
 def p_expr_mono_op(p):
-  """expr_mono_op : '!' found_expr_mono_op expr_mono_op
-                  | '$' found_expr_mono_op expr_mono_op
-                  | '?' found_expr_mono_op expr_mono_op
+  """expr_mono_op : det_op found_expr_mono_op expr_mono_op
+                  | trans_op found_expr_mono_op expr_mono_op
+                  | inv_op found_expr_mono_op expr_mono_op
                   | empty"""
   pass
+
+def p_det_op(p):
+  "det_op : GOOSE DOLLARS"
+  p[0] = '$'
+
+def p_trans_op(p):
+  "trans_op : SURPRISE"
+  p[0] = '!'
+
+def p_inv_op(p):
+  "inv_op : WH"
+  p[0] = '?'
 
 def p_found_expr_mono_op(p):
   "found_expr_mono_op : empty"
@@ -396,8 +486,12 @@ def p_expr_atom(p):
   pass
 
 def p_expr_group(p):
-  "expr_group : '(' found_expr_duo_op expr ')'"
+  "expr_group : OPEN GATE found_expr_group found_expr_duo_op expr CLOSE GATE"
   quads.popOperator()
+
+def p_found_expr_group(p):
+  "found_expr_group : empty"
+  p[0] = '('
 
 def p_expr_var(p):
   "expr_var : expr_var_name expr_var_dims"
@@ -423,7 +517,7 @@ def p_found_expr_var_dims(p):
   quads.sDims.append((funcDir.varHelper, 0))
 
 def p_expr_var_dim(p):
-  "expr_var_dim : '[' expr_var_open_dim expr ']'"
+  "expr_var_dim : OPEN SQUARE GATE expr_var_open_dim expr CLOSE SQUARE GATE"
   quads.addArrQuads()
 
 def p_expr_var_open_dim(p):
@@ -454,12 +548,12 @@ def p_cte(p):
   quads.pushCte(cte)
 
 def p_expr_call_func(p):
-  "expr_call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end"
+  "expr_call_func : HOOONK ID found_call_func_name OPEN GATE call_func_params CLOSE GATE found_call_func_end"
   quads.addAssignFuncQuad()
 
 ## CALL_FUNCTION
 def p_call_func(p):
-  "call_func : ID found_call_func_name '(' call_func_params ')' found_call_func_end ';'"
+  "call_func : HOOONK ID found_call_func_name OPEN GATE call_func_params CLOSE GATE found_call_func_end HONK"
   func = quads.popFunction()
   if quads.funcDir.getReturnTypeOfFunc(func) != 'void':
     raise Exception(f"This function is non-void, therefore it can't be used as an expression! -> {func}")
@@ -480,7 +574,7 @@ def p_call_func_params(p):
   pass
 
 def p_call_func_param(p):
-  """call_func_param : expr func_single_step ',' call_func_param
+  """call_func_param : expr func_single_step MOAR call_func_param
                      | expr func_single_step"""
   pass
 

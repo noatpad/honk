@@ -20,7 +20,7 @@ config.debugParser = args.parser
 
 # Import the brains and machines
 if filepath[1] == '.honk':
-  import lexhonker as lexer, parser
+  import lexhonker as lexer, parshonker as parser
 else:
   import lexer, parser
 
@@ -59,7 +59,7 @@ try:
     for line in f:
       data += line
 except FileNotFoundError:
-  raise Exception('quack.o does not exist!')
+  raise Exception(f'{config.objFilename}.o does not exist!')
 
 # Honk away
 honk(data, args.vm)

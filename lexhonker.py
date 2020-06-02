@@ -1,92 +1,129 @@
 
+### Goose Dictionary ###
+# = -> AM GOOSE
+# + -> MORE GOOSE
+# - -> LESS GOOSE
+# * -> GOOSETIPLY
+# / -> GOOSIVIDE
+# % -> LEFTOVERS
+# $ -> GOOSE DOLLARS
+# ! -> SURPRISE
+# ? -> wh
+# == -> AM GOOSE?
+# != -> NOT GOOSE?!
+# < -> INFERIOR
+# <= -> INFERIOR maybe
+# > -> SUPERIOR SPECIMEN
+# >= -> SUPERIOR maybe
+# & -> TOGETHER FOREVER
+# | -> POLE
+# () -> OPEN/CLOSE GATE
+# [] -> OPEN/CLOSE SQUARE GATE
+# {} -> OPEN/CLOSE FANCY GATE
+# . -> DOOT
+# , -> MOAR
+# ; -> HONK
+
+# Program _____ -> Untitled _____ game
+# var -> pond
+# int -> WHOLE GOOSE
+# float -> PART GOOSE
+# char -> LETTER GOOSE
+# bool -> DUCK OR GOOSE
+# void -> my soul
+# function -> task
+# return -> GOT BELL
+# main() -> Press y to honk
+# read(x) -> HO x ONK HONK
+# print(x) -> SHOW ON TV OPEN GATE x CLOSE GATE HONK
+# while -> HONK HONK OPEN GATE expr CLOSE GATE HOONK
+# from -> inhales ID AM GOOSE expr HOOOONK expr HOOONK
+# break -> peace was never an option
+# if -> HONK?
+# then -> HONK!
+# else -> BONK!
+# Function call -> HOOONK func OPEN GATE params CLOSE GATE HONK
+### H o n k ###
+
 # Reserved words
 reserved = {
+  # Common
+  'GOOSE': 'GOOSE',
+  'HONK': 'HONK',
+  'HOONK': 'HOONK',
+  'HOOONK': 'HOOONK',
+  'HOOOONK': 'HOOOONK',
+  'HO': 'HO',
+  'ONK': 'ONK',
+  'BONK': 'BONK',
+  # Operators
+  'AM': 'AM',
+  'MORE': 'MORE',
+  'LESS': 'LESS',
+  'GOOSETIPLY': 'GOOSETIPLY',
+  'GOOSIVIDE': 'GOOSIVIDE',
+  'LEFTOVERS': 'LEFTOVERS',
+  'DOLLARS': 'DOLLARS',
+  'SURPRISE': 'SURPRISE',
+  'wh': 'WH',
+  'NOT': 'NOT',
+  'INFERIOR': 'INFERIOR',
+  'SUPERIOR': 'SUPERIOR',
+  'maybe': 'MAYBE',
+  'TOGETHER': 'TOGETHER',
+  'FOREVER': 'FOREVER',
+  'POLE': 'POLE',
+  # Brackets
+  'OPEN': 'OPEN',
+  'CLOSE': 'CLOSE',
+  'SQUARE': 'SQUARE',
+  'FANCY': 'FANCY',
+  'GATE': 'GATE',
+  # Punctuation
+  'doot': 'DOOT',
+  'MOAR': 'MOAR',
+
   # Untitled _____ game
   'Untitled': 'UNTITLED',
   'game': 'GAME',
-  # Program
-  'Press y to honk': 'PRESS_Y',
-  # Var, int, float, char, bool
-  'Shop': 'SHOP',
-  'WHOLE GOOSE': 'WHOLE_GOOSE',
-  'PART GOOSE': 'PART_GOOSE',
-  'LETTER GOOSE': 'LETTER_GOOSE',
-  'GOOSE OR DUCK': 'GOOSE_OR_DUCK',
-  # Function, void
+  # Main
+  'Press': 'PRESS',
+  'y': 'Y',
+  'to': 'TO',
+  'honk': 'HONK_LOWERCASE',
+  # Vars
+  'pond': 'POND',
+  'WHOLE': 'WHOLE',
+  'PART': 'PART',
+  'LETTER': 'LETTER',
+  'DUCK': 'DUCK',
+  'OR': 'OR',
+  # Functions
+  'my': 'MY',
+  'soul': 'SOUL',
   'task': 'TASK',
-  'my soul': 'MY_SOUL',
-  # Return
-  'GOT BELL': 'GOT_BELL',
-  # User input
-  'HO-': 'HO',
-  '-ONK': 'ONK',
-  # Print
-  'SHOW ON TV': 'SHOW_ON_TV',
-  # While, do
-  'HONK HONK': 'HONK_HONK',
-  'HOONK': 'HOONK',
-  # From, to
-  'inhales...': 'INHALES',
-  'HOOOONK': 'HOOOONK',
-  # Break
-  'peace was never an option': 'NO_PEACE',
-  # . , ;
-  'doot': 'doot',
-  'MOAR': 'MOAR',
-  'HONK': 'HONK',
+  'GOT': 'GOT',
+  'BELL': 'BELL',
+  'SHOW': 'SHOW',
+  'ON': 'ON',
+  'TV': 'TV',
+  'inhales': 'INHALES',
+  'peace': 'PEACE',
+  'was': 'WAS',
+  'never': 'NEVER',
+  'an': 'AN',
+  'option': 'OPTION'
 }
 
 # Token list
 tokens = list(reserved.values()) + [
-  'UNTITLED_GAME',
-  'GOOSE_DOLLARS', 'SURPRISE', 'wh',
-  'WE_GOOSE', 'MAYBE_GOOSE',
-  'OPEN_GATE', 'CLOSE_GATE', 'OPEN_SQUARE_GATE', 'CLOSE_SQUARE_GATE', 'OPEN_FANCY_GATE', 'CLOSE_FANCY_GATE',
-  'AM_GOOSE_QUESTION', 'AM_NOT_GOOSE', 'INFERIOR', 'INFERIOR_MAYBE', 'SUPERIOR', 'SUPERIOR_MAYBE',
-  'AM_GOOSE', 'ADD_GOOSE', 'LESS_GOOSE', 'GOOSE_ARMY', 'GOOSE_PARTS', 'GOOSE_LEFTOVERS',
-  'HONK_IF', 'HONK_THEN', 'BONK',
   'ID', 'CTE_INT', 'CTE_FLOAT', 'CTE_CHAR', 'CTE_BOOL', 'STRING'
 ]
 
-# Simple tokens
-# $!?
-t_GOOSE_DOLLARS = r'GOOSE DOLLARS'
-t_SURPRISE = r'SURPRISE'
-t_wh = r'wh'
+literals = '?!'
 
-# &|
-t_WE_GOOSE = r'WE GOOSE'
-t_MAYBE_GOOSE = r'MAYBE GOOSE'
-
-# ()[]{}
-t_OPEN_GATE = r'OPEN GATE'
-t_CLOSE_GATE = r'CLOSE GATE'
-t_OPEN_SQUARE_GATE = r'OPEN SQUARE GATE'
-t_CLOSE_SQUARE_GATE = r'CLOSE SQUARE GATE'
-t_OPEN_FANCY_GATE = r'OPEN FANCY GATE'
-t_CLOSE_FANCY_GATE = r'CLOSE FANCY GATE'
-
-# == != < <= > >=
-t_AM_GOOSE_QUESTION = r'AM GOOSE\?'
-t_AM_NOT_GOOSE = r'AM NOT GOOSE\?!'
-t_INFERIOR = r'INFERIOR'
-t_INFERIOR_MAYBE = r'INFERIOR\.\.\.maybe'
-t_SUPERIOR = r'SUPERIOR SPECIMEN'
-t_SUPERIOR_MAYBE = r'SUPERIOR SPECIMEN\.\.\.maybe'
+# String
 t_STRING = r'\".*\"'
-
-# =+-*/%
-t_AM_GOOSE = r'AM GOOSE'
-t_ADD_GOOSE = r'ADD GOOSE'
-t_LESS_GOOSE = r'LESS GOOSE'
-t_GOOSE_ARMY = r'GOOSE ARMY'
-t_GOOSE_PARTS = r'GOOSE PARTS'
-t_GOOSE_LEFTOVERS = r'GOOSE LEFTOVERS'
-
-# If, then, else
-t_HONK_IF = r'HONK\?'
-t_HONK_THEN = r'HONK!'
-t_BONK = r'BONK!'
 
 def t_CTE_FLOAT(t):
   r'\-?\d+\.\d+'

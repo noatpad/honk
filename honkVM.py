@@ -314,7 +314,7 @@ class HonkVM:
 
       ## - Let it begin. The super-switch case
       # Dual-op operation - Batch-compatible
-      if op in ['+', '-', '/', '*', '==', '!=', '<', '<=', '>', '>=', '&', '|']:
+      if op in ['+', '-', '/', '*', '%', '==', '!=', '<', '<=', '>', '>=', '&', '|']:
         for i in range(self.matIter()):
           left = self.getValue(quad[1], i)
           right = self.getValue(quad[2], i)

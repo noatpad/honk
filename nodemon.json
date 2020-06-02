@@ -9,5 +9,5 @@
   "execMap": {
     "py": "python3"
   },
-  "ext": "py,txt"
+  "ext": "py,txt,honk"
 }
