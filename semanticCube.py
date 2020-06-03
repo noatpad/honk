@@ -94,10 +94,10 @@ mono_table = {
     '?': 'float'
   },
   'char': {
-    '?': 'char'
+    '!': 'char'
   },
   'bool': {
-    '?': 'bool'
+    '!': 'bool'
   }
 }
 
