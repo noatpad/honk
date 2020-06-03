@@ -34,9 +34,9 @@
 # function -> task
 # return -> GOT BELL
 # main() -> Press y to honk
-# read(x) -> HO x ONK HONK
-# print(x) -> SHOW ON TV OPEN GATE x CLOSE GATE HONK
-# while -> HONK HONK OPEN GATE expr CLOSE GATE HOONK
+# read(x) -> HO- x -ONK HONK
+# print(x) -> SHOW ON TV x HONK
+# while -> HONK HONK expr HOONK
 # from -> inhales ID AM expr HOOOONK expr HOOONK
 # break -> peace was never an option
 # if -> HONK?
