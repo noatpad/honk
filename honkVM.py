@@ -41,9 +41,6 @@ class HonkVM:
     if lines.popleft() != '->| RANGES END':
       self._ded()
 
-    # Prepare memory
-    self.memory = dict()
-
     # NOTE: Locals and temps are in their own "stacks" for function calls
     self.Globals = [None] * (self.globalRanges[4] - self.globalRanges[0])
     self.Locals = [[None] * (self.localRanges[4] - self.localRanges[0])]

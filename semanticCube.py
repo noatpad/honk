@@ -84,13 +84,11 @@ dual_cube = {
 # Single-operand type matching table
 mono_table = {
   'int': {
-    '-': 'int',
     '$': 'int',
     '!': 'int',
     '?': 'float'
   },
   'float': {
-    '-': 'float',
     '$': 'float',
     '!': 'float',
     '?': 'float'

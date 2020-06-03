@@ -28,6 +28,7 @@ def p_found_program_name(p):
   quads.addMainQuad()
 
 # VARS
+# Variable declaration
 def p_vars(p):
   """vars : POND found_var var_declare
           | empty"""
@@ -47,6 +48,7 @@ def p_var_name(p):
               | variable_declare var_dims"""
   pass
 
+# Create var upon finding its ID
 def p_variable_declare(p):
   "variable_declare : ID"
   var = p[1]
@@ -60,6 +62,7 @@ def p_var_no_dims(p):
   "var_dims : empty"
   pass
 
+# Make space for variable array/matrix
 def p_var_dims(p):
   """var_dims : dim dim
               | dim"""
@@ -103,14 +106,17 @@ def p_functions(p):
                | empty"""
   pass
 
+# Set function type
 def p_func_type(p):
   "func_type : type"
   pass
 
+# Set function type
 def p_func_void(p):
   "func_type : MY SOUL"
   funcDir.setCurrentType('void')
 
+# Create function
 def p_found_func_name(p):
   "found_func_name : empty"
   func = p[-1]
@@ -124,6 +130,7 @@ def p_func_no_dims(p):
   "func_dims : empty"
   pass
 
+# Set return dimensions
 def p_func_dims(p):
   """func_dims : dim dim
                | dim"""
@@ -148,6 +155,7 @@ def p_func_param(p):
                 | type ID found_func_param param_dims"""
   pass
 
+# Add function parameter
 def p_found_func_param(p):
   "found_func_param : empty"
   param = p[-1]
@@ -163,6 +171,7 @@ def p_param_no_dims(p):
   "param_dims : empty"
   pass
 
+# Add dimensions to function parameter
 def p_param_dims(p):
   """param_dims : dim dim
                 | dim"""
@@ -178,10 +187,12 @@ def p_param_dims(p):
   funcDir.setVarDims(p[0])
   quads.vDir.makeSpaceForArray(funcDir.currentFunc, funcDir.currentType, space)
 
+# Set quad start for start of function
 def p_found_func_start(p):
   "found_func_start : empty"
   funcDir.setQuadStart(quads.getQuadCount())
 
+# Prepare end of function
 def p_found_func_end(p):
   "found_func_end : empty"
   quads.addEndFuncQuad()
@@ -224,6 +235,7 @@ def p_found_assignment_op(p):
   "found_assignment_op : empty"
   p[0] = '='
 
+# Add assignment quadruple
 def p_found_assignment_end(p):
   "found_assignment_end : empty"
   quads.addAssignQuad()
@@ -243,6 +255,7 @@ def p_read_params(p):
                  | expr_var found_read_param"""
   pass
 
+# Add read quadruple
 def p_found_read_param(p):
   "found_read_param : empty"
   quads.addReadQuad()
@@ -257,10 +270,12 @@ def p_print_params(p):
                   | print_param"""
   pass
 
+# Add print quadruple
 def p_print_param(p):
   "print_param : expr"
   quads.addPrintQuad(False)
 
+# Add print quadruple
 def p_print_string(p):
   "print_param : STRING"
   quads.addPrintQuad(p[1])

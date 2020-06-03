@@ -13,7 +13,7 @@
 # != -> NOT GOOSE?!
 # < -> INFERIOR
 # <= -> INFERIOR maybe
-# > -> SUPERIOR SPECIMEN
+# > -> SUPERIOR
 # >= -> SUPERIOR maybe
 # & -> TOGETHER FOREVER
 # | -> POLE
