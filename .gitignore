@@ -7,3 +7,9 @@ __pycache__/
 *.txt
 *.honk
 *.o
+
+# Sass
+.sass-cache/
+
+# Bulma
+bulma-0.9.0/

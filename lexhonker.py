@@ -20,7 +20,7 @@
 # () -> OPEN/CLOSE GATE
 # [] -> OPEN/CLOSE BOX
 # {} -> OPEN/CLOSE FANCY GATE
-# . -> DOOT
+# . -> doot
 # , -> MOAR
 # ; -> HONK
 

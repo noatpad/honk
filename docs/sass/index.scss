@@ -1,0 +1,99 @@
+
+@charset "utf-8";
+@import url('https://fonts.googleapis.com/css2?family=Fira+Mono&display=swap');
+
+// Site colors
+$blue: #3865d6;
+$light-blue: #cdd9f7;
+$light-purple: #decef9;
+$dark-purple: #2b1a46;
+
+// Update Bulma global vars
+$code-family: "Fira Mono", "Roboto Mono", monospace;
+$primary: $blue;
+
+// Import Bulma
+@import "../bulma-0.9.0/bulma.sass";
+
+.github-corner svg {
+  fill: $white;
+  color: $primary;
+}
+
+.code-row {
+  &, > .column {
+    margin: 1rem 0;
+  }
+}
+
+.code-snippet {
+  position: relative;
+  padding: 0;
+  border-radius: .5rem;
+
+  pre {
+    border-radius: .5rem;
+    background: #282a36;
+    color: $white;
+  }
+
+  &.code-normal, &.code-goose {
+    &::before {
+      position: absolute;
+      bottom: calc(100% - 1px);
+      left: .5rem;
+      padding: 0 .4rem;
+      border: 1px solid;
+      font-family: $code-family;
+      text-transform: uppercase;
+      z-index: -1;
+    }
+  }
+
+  &.code-normal {
+    &::before {
+      content: "Normal";
+      border-color: $dark-purple;
+    }
+
+    pre {
+      background: $dark-purple;
+      color: $white;
+    }
+  }
+
+  &.code-goose {
+    &::before {
+      content: "Goose";
+      border-color: $primary;
+    }
+
+    pre {
+      background: $primary;
+      color: $white;
+    }
+  }
+}
+
+code {
+  &.normal {
+    background: $light-purple;
+  }
+
+  &.goose {
+    background: $light-blue;
+  }
+}
+
+.icon {
+  color: inherit;
+  transition: color .25s ease-in-out;
+
+  &.icon-twitter:hover {
+    color: #1da1f2;
+  }
+
+  &.icon-github:hover {
+    color: #6e5494;
+  }
+}

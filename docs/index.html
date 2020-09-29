@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Honk</title>
+    <link rel="icon" href="images/favicon.png">
+    <link rel="stylesheet" href="css/index.css">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="js/prefixer.js"></script>
+  </head>
+  <body>
+  <header class="hero is-medium is-primary">
+    <!-- GitHub corner -->
+    <a href="https://github.com/aCluelessDanny/honk" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <div class="hero-body">
+      <div class="container is-fluid has-text-centered">
+        <div class="block" style="margin: 0 auto 1.5rem; max-width: 200px;">
+          <div class="box" style="width: 100%; padding: 1rem">
+            <img src="images/honk.png" style="width: 100%;">
+          </div>
+        </div>
+        <h1 class="title is-1">Honk</h1>
+        <p class="subtitle">A barebones programming language of a college final.<br/>It's also pretty dumb.</p>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="section">
+      <div class="container">
+        <div class="columns is-centered">
+          <div class="column is-half-tablet is-two-fifths-widescreen content">
+            <h3 class="title is-4 has-text-centered">The heck is this?</h3>
+            <p>
+              On my second-to-last semester, I took a compilers class, & it was hands down the hardest thing I've ever endured throughout my entire time in college. It was fascinating to see what goes on behind them, but I can confirm to you that it was <em>very</em> painful.
+            </p>
+            <p>
+              The class involved us making a project: a psuedo-compiler with specific requirements (you'll soon see how it has a bit of weirdness to it). And after all the turmoil and sleepless nights, <b>Honk</b> came to be.
+            </p>
+            <p>
+              <b>Honk</b> is essentially a barebones programming language developed by myself that can achieve basic tasks & has a few peculiar traits. <em>It also can be pretty obnoxious and dumb to write, trust me.</em>
+            </p>
+          </div>
+          <div class="column is-half-tablet is-two-fifths-widescreen content">
+            <h3 class="title is-4 has-text-centered">What can it do?</h3>
+            <p>
+              For a barebones language, quite a few things. Its structure is comparable to something like C++, but with a few tricks up its sleeve:
+            </p>
+            <ul>
+              <li>Allow local and global variables</li>
+              <li>Variables can be <em>atomic</em>, <em>arrays</em>, or <em>matrixes</em>, & they can be of type <em>integer</em>, <em>float</em>, <em>char</em>, or <em>boolean</em></li>
+              <li>Allow function declaration and calling, as well as recursion</li>
+              <li>Functions can return value of any of the mentioned types or be of type <em>void</em></li>
+              <li>Allow assignments, arithmetic operations, & comparison expressions</li>
+              <li>Built-in read/write functions</li>
+              <li>Conditionals and loops</li>
+              <li>Special <em>matrix operations</em></li>
+              <li>Special <em>batch processes</em></li>
+              <li><b>Two</b> different syntaxes: a normal one and a <span style="text-decoration: line-through;">stupid</span> vastly superior one</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <section class="section">
+      <div class="container">
+        <div class="columns is-centered">
+          <div class="column is-full-tablet is-two-thirds-widescreen">
+            <div class="content">
+              <h2 class="title is-3 has-text-centered">How do I run it?</h2>
+              <p>
+                The only requirements to using Honk is to run it through Python 3.6+ and have <code>numpy</code> installed. Once you have those, <a href="https://github.com/aCluelessDanny/honk" target="_blank" rel="noopener noreferrer">clone the repo</a> and prepare to honk.
+              </p>
+              <p>
+                When you have a file ready to run through the compiler, run it through the command line:
+              </p>
+            </div>
+            <div class="box code-snippet">
+              <pre><code>
+                python3 honk.py &lt;your file&gt;
+              </code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <div class="columns is-centered">
+          <div class="column is-full-tablet is-two-thirds-widescreen">
+            <div class="content">
+              <h2 class="title is-3 has-text-centered">How do I write in Honk?</h2>
+              <p>
+                Let's get this out of the way first. Honk comes with <b>two</b> syntaxes: a regular syntax and a <em>goose</em> syntax. By default, running the command will run the compiler through the regular syntax. <em>But</em> if the input file is a <code>.honk</code> file, then it will use the goose syntax instead. <em>You've been warned.</em>
+              </p>
+              <p>
+                Keep this in mind when glancing at the references below.
+              </p>
+            </div>
+
+            <h3 class="title is-4 has-text-centered">General structure</h3>
+            <p>
+              To write a file in Honk, it will have to follow this general structure:
+            </p>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-half-tablet is-two-fifths-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                Program &#x3C;program_name&#x3E;;
+                [&#x3C;global variable declarations&#x3E;]
+                [&#x3C;function declarations&#x3E;]
+
+                %% Comments
+                main() {
+                  &#x3C;statements&#x3E;
+                }
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-half-tablet is-two-fifths-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                Untitled &#x3C;program_name&#x3E; game HONK
+                [&#x3C;global variable declarations&#x3E;]
+                [&#x3C;function declarations&#x3E;]
+
+                %% Comments
+                Press y to honk
+                OPEN FANCY GATE
+                  &#x3C;statements&#x3E;
+                CLOSE FANCY GATE
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered">
+          <div class="column is-full-tablet is-two-thirds-widescreen">
+            <div class="content">
+              <p>
+                At the start of each program, you must declare the name of the program with <code class="normal">Program &lt;program_name&gt;</code><code class="goose">Untitled &lt;program_name&gt; game</code>. Following that, you can optionally declare global variables & then after, functions declarations. A main function must be declared at the end with <code class="normal">main()</code><code class="goose">Press y to honk</code>.
+              </p>
+
+              <div class="notification is-info is-light">
+                <p>
+                  <b>Note:</b> Semicolons (or <code class="goose">HONK</code>) are used to terminate lines of code and are required. Comments can be declared using <code>%%</code> at the start of your comment.
+                </p>
+              </div>
+
+              <h3 class="title is-4 has-text-centered">Variables</h3>
+              <p>
+                For both global and local variable declarations (the latter will be explained in a bit), they must be written in the following format:
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-half-tablet is-two-fifths-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                var
+                  int a, b[2], c[7][4];
+                  float f;
+                  char ch;
+                  bool bb, b[10][10];
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-half-tablet is-two-fifths-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                pond
+                  WHOLE GOOSE a MOAR b OPEN BOX 2 CLOSE BOX 2 MOAR c OPEN BOX 7 CLOSE BOX OPEN BOX 4 CLOSE BOX HONK
+                  PART GOOSE f HONK
+                  LETTER GOOSE ch HONK
+                  DUCK OR GOOSE bb OPEN BOX 10 CLOSE BOX OPEN BOX 10 CLOSE BOX HONK
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered">
+          <div class="column is-full-tablet is-two-thirds-widescreen">
+            <div class="content">
+              <p>
+                Variables can be declared in two scopes: <em>global</em> (can be accessed in any context) or <em>local</em> (can only be accessed in a function's context). Global variables must be declared at the start of the program, while local variables are declared before a function's declaration. In both cases, variable declaration starts with <code class="normal">var</code><code class="goose">pond</code>.
+              </p>
+              <p>
+                Variables can be of 4 types: integer numbers (<code class="normal">int</code><code class="goose">WHOLE GOOSE</code>), floating type numbers (<code class="normal">float</code><code class="goose">PART GOOSE</code>), characters (<code class="normal">char</code><code class="goose">LETTER GOOSE</code>), or booleans (<code class="normal">bool</code><code class="goose">DUCK OR GOOSE</code>). Variables can also be either an atomic value, an array of values, or a matrix of values. Arrays and matrixes must define their dimensions in the declaration, using the appropriate notation: <code class="normal">[&lt;dimension&gt;]</code><code class="goose">OPEN BOX &lt;dimension&gt; CLOSE BOX</code>.
+              </p>
+
+              <div class="notification is-info is-light">
+                <p>
+                  <b>Note:</b> You can define multiple variables of the same type in the same line using <code class="normal">,</code><code class="goose">MOAR</code>.
+                </p>
+              </div>
+
+              <h3 class="title is-4 has-text-centered">Functions</h3>
+              <p>
+                Functions are allowed and can be called from any context (including itself for recursive operations). To declare a function, it follows this format:
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-half-tablet is-two-fifths-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                function &#x3C;type&#x3E; &#x3C;name&#x3E;([&#x3C;parameters&#x3E;])
+                [&#x3C;local variable declarations&#x3E;]
+                {
+                  &#x3C;statements&#x3E;
+                }
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-half-tablet is-two-fifths-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                task &#x3C;type&#x3E; &#x3C;name&#x3E; HONK [&#x3C;parameters&#x3E;] HONK
+                &#x3C;local variable declarations&#x3E;
+                OPEN FANCY GATE
+                  &#x3C;statements&#x3E;
+                CLOSE FANCY GATE
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered">
+          <div class="column is-full-tablet is-two-thirds-widescreen">
+            <div class="content">
+              <p>
+                Functions can be of any of the mentioned types above (and also any dimension, so it can return a matrix, for example), so the function must return a value. You can also make a function of type <code class="normal">void</code><code class="goose">my soul</code> that doesn't return anything.
+              </p>
+              <p>
+                Functions can also have an optional number of parameters, each of which can be defined in the specified area and separated with <code class="normal">,</code><code class="goose">MOAR</code>.
+              </p>
+
+              <h3 class="title is-4 has-text-centered">Statements</h3>
+              <p>
+                Functions, of course, have statements within them. And Honk has the following statements you can use:
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-one-fifth">
+            <h5 class="subtitle has-text-centered">Assignment</h5>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                &#x3C;var&#x3E; = &#x3C;expression&#x3E;;
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                &#x3C;var&#x3E; AM &#x3C;expression&#x3E; HONK
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-one-fifth">
+            <h5 class="subtitle has-text-centered">Void function call</h5>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                func(&#x3C;params&#x3E;);
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                HOOONK func OPEN GATE &#x3C;params&#x3E; CLOSE GATE HONK
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-one-fifth">
+            <h5 class="subtitle has-text-centered">User input</h5>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                read(&#x3C;var&#x3E;, ...);
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                HO- x -ONK HONK
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-one-fifth">
+            <h5 class="subtitle has-text-centered">Print</h5>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                print(&#x3C;var&#x3E;, ...);
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                SHOW ON TV &#x3C;var&#x3E; HONK
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-one-fifth">
+            <h5 class="subtitle has-text-centered">Conditional</h5>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                if (expression) then { &#x3C;statements&#x3E; } [else { &#x3C;statements&#x3E; }]
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                HONK? expression HONK! OPEN FANCY GATE &#x3C;statements&#x3E; CLOSE FANCY GATE [BONK OPEN FANCY GATE &#x3C;statements&#x3E; CLOSE FANCY GATE]
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-one-fifth">
+            <h5 class="subtitle has-text-centered">Return</h5>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                return(&#x3C;var&#x3E;);
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                GOT BELL &#x3C;var&#x3E; HONK
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-one-fifth">
+            <h5 class="subtitle has-text-centered">While loop</h5>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                while (expression) do { &#x3C;statements&#x3E; }
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                HONK HONK expression HOONK OPEN FANCY GATE &#x3C;statements&#x3E; CLOSE FANCY GATE
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-one-fifth">
+            <h5 class="subtitle has-text-centered">From loop</h5>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                from (var = &#x3C;x&#x3E; to &#x3C;y&#x3E;) do { &#x3C;statements&#x3E; }
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                inhales var AM &#x3C;x&#x3E; HOOOONK &#x3C;y&#x3E;) HOOONK OPEN FANCY GATE &#x3C;statements&#x3E; CLOSE FANCY GATE
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-one-fifth">
+            <h5 class="subtitle has-text-centered">Break</h5>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                break;
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                peace was never an option HONK
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered">
+          <div class="column is-full-tablet is-two-thirds-widescreen">
+            <h3 class="title is-4 has-text-centered">Expressions</h3>
+            <p>
+              An expression is basically a result from something. This can be simply a variable or a function call, but it can also be the result of the following operations:
+            </p>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-one-fifth">
+            <h5 class="subtitle has-text-centered">Arithmetic</h5>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                %% Addition
+                expr1 + expr2
+
+                %% Substraction
+                expr1 - expr2
+
+                %% Multiplication
+                expr1 * expr2
+
+                %% Division
+                expr1 / expr2
+
+                %% Modulo
+                expr1 % expr2
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                %% Addition
+                expr1 MORE GOOSE expr2
+
+                %% Substraction
+                expr1 LESS GOOSE expr2
+
+                %% Multiplication
+                expr1 GOOSETIPLY expr2
+
+                %% Division
+                expr1 GOOSIVIDE expr2
+
+                %% Modulo
+                expr1 LEFTOVERS expr2
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-one-fifth">
+            <h5 class="subtitle has-text-centered">Comparison</h5>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                %% Equal to
+                expr1 == expr2
+
+                %% Not equal to
+                expr1 != expr2
+
+                %% Less than
+                expr1 < expr2
+
+                %% Less than or equal to
+                expr1 <= expr2
+
+                %% More than
+                expr1 > expr2
+
+                %% More than or equal to
+                expr1 >= expr2
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                %% Equal to
+                expr1 AM GOOSE? expr2
+
+                %% Not equal to
+                expr1 NOT GOOSE?! expr2
+
+                %% Less than
+                expr1 INFERIOR expr2
+
+                %% Less than or equal to
+                expr1 INFERIOR maybe expr2
+
+                %% More than
+                expr1 SUPERIOR expr2
+
+                %% More than or equal to
+                expr1 SUPERIOR maybe expr2
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-one-fifth">
+            <h5 class="subtitle has-text-centered">Logic</h5>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                %% AND
+                expr1 & expr2
+
+                %% OR
+                expr1 | expr2
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                %% AND
+                expr1 TOGETHER FOREVER expr2
+
+                %% OR
+                expr1 POLE expr2
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered is-vcentered code-row">
+          <div class="column is-one-fifth">
+            <h5 class="subtitle has-text-centered">Matrix operations</h5>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-normal">
+              <pre><code>
+                %% Determinant of a matrix
+                expr$
+
+                %% Transpose matrix
+                expr!
+
+                %% Inverse of a matrix
+                expr?
+
+                %% Dot product of a matrix
+                expr1 . expr2
+              </code></pre>
+            </div>
+          </div>
+          <div class="column is-two-fifths-tablet is-one-third-widescreen">
+            <div class="box code-snippet code-goose">
+              <pre><code>
+                %% Determinant of a matrix
+                expr GOOSECOIN
+
+                %% Transpose matrix
+                expr SURPRISE
+
+                %% Inverse of a matrix
+                expr wh
+
+                %% Dot product of a matrix
+                expr1 doot expr2
+              </code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-centered">
+          <div class="column is-full-tablet is-two-thirds-widescreen">
+            <div class="notification is-primary is-light">
+              <div class="content">
+                <p>
+                  <b>Note:</b> Matrix operations are a special set of operations that only work with matrixes. Bare in mind the restrictions when using them:
+                </p>
+                <ul>
+                  <li><em>Determinant:</em> Must be a square matrix</li>
+                  <li><em>Transpose:</em> The result of this operation will "flip" its dimensions</li>
+                  <li><em>Inverse:</em> Must be a square matrix</li>
+                  <li><em>Dot product:</em> Both matrixes must be compatible (the number of columns of the first matrix must equal the number of rows of the second matrix). The result will have different dimensions than the operands (same number of rows as the first matrix and same number of columns as the second matrix).</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="content">
+              <h4 class="subtitle is-4 has-text-centered">Batch operations</h4>
+              <p>
+                Another special characteristic of Honk is the usage of <b>batch operations</b>. What this means is that you can use regular operators with arrays and matrixes, allowing you to do "batch" statements without the need of a loop. The following functions/operations are batch-compatible:
+              </p>
+              <ul>
+                <li>Every operation that requires 2 operands, such as addition, multiplication, equality, AND gates, etc. (with the except of the dot product operator)</li>
+                <li>Assigning one array to another</li>
+                <li>Conditionals (they will act as AND gates, using every value in the array/matrix)</li>
+                <li>Print (print a whole collection without a loop)</li>
+                <li>User input (read input for a whole collection without a loop)</li>
+              </ul>
+            </div>
+            <div class="box code-snippet code-normal" style="margin-top: 2.5rem">
+              <pre><code>
+                Program matrix_stuff;
+                int a[2][2], b[2][2], c[2][2];
+
+                main() {
+                  read(a);    %% Set a = [[1, 2], [3, 4]]
+                  read(b);    %% Set b = [[2, 3], [4, 5]]
+
+                  c = a + b   %% [[1, 2], [3, 4]] + [[2, 3], [4, 5]] = [[3, 5], [7, 9]]
+                  print(c);   %% Print '[[3, 5], [7, 9]]'
+                }
+              </code></pre>
+            </div>
+            <div class="notification is-primary is-light">
+              <p><b>Note:</b> For operations of 2 operands and assignments, the only restriction is that both matrixes in question have the <em>same</em> dimensions.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <div class="columns is-centered">
+          <div class="column is-half-tablet is-two-fifths-widescreen">
+            <h2 class="title is-3 has-text-centered">Now some questions...</h2>
+          </div>
+        </div>
+        <div class="columns is-centered is-multiline ">
+          <div class="column is-half-tablet is-two-fifths-widescreen content">
+            <h3 class="title is-4 has-text-centered">Any caveats?</h3>
+            <p>
+              There are a few to mention here that should be taken into consideration:
+            </p>
+            <ul>
+              <li>Variables can live in only two scopes: global or local, which are defined at the start of the program or before a function's declaration, respectively. Variables in loops or conditionals do <em>not</em> give a higher scope, and variables can only be defined in those mentioned areas.</li>
+              <li>Every argument in a conditional are always evaluated. This usually isn't a problem, but in certain situations, it can cause issues. For example, short-circuiting doesn't exist with AND or OR expressions. So be mindful how you build your conditionals.</li>
+              <li>There <em>will</em> be bugs. It was a first attempt at creating a language and it was delivered only hours before the due date. Something's bound to happen.</li>
+            </ul>
+          </div>
+          <div class="column is-half-tablet is-two-fifths-widescreen content">
+            <h3 class="title is-4 has-text-centered">Can I debug in this?</h3>
+            <p>
+              You can! During its development, I basically created my own debugging views to help me out, and I've made them available to use from the command line. You can see the available options with:
+            </p>
+            <div class="box code-snippet">
+              <pre><code>
+                python3 honk.py -h
+              </code></pre>
+            </div>
+            <p>
+              Though in a nutshell these are the available arguments, all of which are optional:
+            </p>
+            <ul>
+              <li>
+                <code>-t</code> / <code>--tokens</code>: Print all tokens found
+              </li>
+              <li>
+                <code>-p</code> / <code>--parser</code>: Enable debug info for parsing
+              </li>
+              <li>
+                <code>-v</code> / <code>--vm</code>: Enable debug info for virtual machine execution
+              </li>
+            </ul>
+          </div>
+          <div class="column is-half-tablet is-two-fifths-widescreen content">
+            <h3 class="title is-4 has-text-centered">Why call it a psuedo-compiler?</h3>
+            <p>
+              So the thing is that it does <em>not</em> directly translate the written code into machine code, rather it runs it through a <em>virtual machine</em> in Python. This virtual machine has restrictions and limitations to emulate the code being run through machine code, such as memory restrictions and usage of quads.
+            </p>
+            <p>
+              So you could say it <em>is</em> trying to act like a compiler, but it only emulates the behavior.
+            </p>
+          </div>
+          <div class="column is-half-tablet is-two-fifths-widescreen content">
+            <h3 class="title is-4 has-text-centered">Why make the honk syntax, and who hurt you?</h3>
+            <p>
+              It was a challenge I gave and imposed on myself. <em>And it was a pain, yes.</em>
+            </p>
+            <p>
+              I was actually somewhat interested in joke languages, like <a href="http://www.lolcode.org/" target="_blank" rel="noopener noreferrer">LOLCODE</a> and <a href="https://esolangs.org/wiki/Whitespace" target="_blank" rel="noopener noreferrer">Whitespace</a>. And I thought, after getting <a href="https://twitter.com/pengu1231/status/1264836067208953856?s=21" target="_blank" rel="noopener noreferrer">this tweet</a> & that I will likely never do another one of these again:
+            </p>
+            <p class="has-text-centered">
+              <em>Screw it, why the heck not?</em>
+            </p>
+            <p>
+              I will warn you though: <em>This is a very rushed and haphazardly put-together syntax</em>. I literally designed the syntax a week before the deadline and implemented it 24 hours prior to delivery. And with a bunch of projects at the time, it isn't the best implementation by a long shot.
+            </p>
+            <p>
+              But I achieved out what I wanted to do, <em>create a stupid language</em>.
+            </p>
+          </div>
+          <div class="column is-half-tablet is-two-fifths-widescreen content">
+            <h3 class="title is-4 has-text-centered">Did you pass the class?</h3>
+            <p>
+              <em>BOY, I ACED IT.</em> After the delivery of the project, it was required to spend like half an hour getting interogated by the professor about the language, and I'm pretty sure I got through that pretty well and got a laugh out of her when she found out the stupidity I had smeared onto the language with the goose syntax.
+            </p>
+            <p>
+              I popped off that day. I didn't know it was possible to pop off over code until that fated event.
+            </p>
+          </div>
+          <div class="column is-half-tablet is-two-fifths-widescreen content">
+            <h3 class="title is-4 has-text-centered">Are you gonna keep working on it?</h3>
+            <p>
+              <b><em>No</em></b>. Listen I did actually learn a lot from that class, and it gives me a newfound appreciation for the internals of a programming language and its compiler.
+            </p>
+            <p>
+              <em>BUT HOO, WAS IT PAINFUL</em>. The reason I'm making this write-up is because I told myself I would, & I know I worked way too hard to get this done throughout that barrage of projects I had that semester. I don't think I'd be interested in maintaining this whatsoever.
+            </p>
+            <p>
+              Just maybe it'll be of use to other people (or maybe as a funny joke, which honestly is a goal I had for this), but for now, Honk will be here for the sake of nostaligia or archival reasoning.
+            </p>
+          </div>
+          <div class="column is-two-thirds-tablet is-three-fifths-widescreen content">
+            <h3 class="title is-4 has-text-centered">I wanna learn more about it!</h3>
+            <p>
+              Okay, first I'm surprised, but if you really wanna dive deep into it, you can <a href="https://github.com/aCluelessDanny/honk" target="_blank" rel="noopener noreferrer">clone the repo</a> and check the source code out. I did my best to comment and explain as much as possible in the code. And here's the <a href="#">60+ page document</a> that I used to deliver it with. Fair warning though: while it has a lot of insightful information, I quite literally did almost all of it on the last day, so chances are it's got the occasional error.
+            </p>
+            <p>
+              Honestly, I'm <em>genuinely</em> curious as to why you wanna check it. Chances are that you bumped into the repo by luck, or you're a college friend of mine who's <em>also suffering that class right now</em>.
+            </p>
+            <p>
+              And if you're the latter, I send my condolences and the best of luck to ya.
+              <br/>
+              <span style="font-size: .75rem;">also you can totally check the code out if you're stuck. Trust me I know it's difficult.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer class="footer">
+      <div class="content has-text-centered">
+        <p>
+          developed by <b>a clueless danny</b>
+        </p>
+        <div style="margin-bottom: 1rem;">
+          <a class="icon is-large icon-twitter" href="https://twitter.com/aCluelessDanny" target="_blank" rel="noopener noreferrer">
+            <i data-feather="twitter" width="28" height="28"></i>
+          </a>
+          <a class="icon is-large icon-github" href="https://github.com/aCluelessDanny/honk" target="_blank" rel="noopener noreferrer">
+            <i data-feather="github" width="28" height="28"></i>
+          </a>
+        </div>
+        <p class="has-text-grey" style="font-size: .7rem; font-style: italic;">
+          the physical pain I endured, man...
+        </p>
+      </div>
+    </footer>
+  </main>
+  <script>
+    prefix();
+    feather.replace();
+  </script>
+  </body>
+</html>
