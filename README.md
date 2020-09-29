@@ -1,8 +1,11 @@
 
-# Honk
-> A barebones programming language of a college final. It can also honk.
+<div align="center">
+  <h1>Honk</h1>
+  <p>A barebones programming language of a college final. It can also honk.</p>
+  <img height="200" src="docs/images/honk.png">
+</div>
 
-![honk](docs/images/honk.png)
+---
 
 **Honk** is a rather peculiar language that can do most basic things you'd expect, plus a few extra tricks up his sleeve and an extra, second syntax...which is far superior than anything mankind has ever known.
 
