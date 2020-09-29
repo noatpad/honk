@@ -145,7 +145,7 @@
 
               <div class="notification is-info is-light">
                 <p>
-                  <b>Note:</b> Semicolons (or <code class="goose">HONK</code>) are used to terminate lines of code and are required. Comments can be declared using <code>%%</code> at the start of your comment.
+                  <b>Note:</b> Most statements are required to be terminated with <code class="normal">;</code><code class="goose">HONK</code>. Comments can be declared using <code>%%</code> at the start of your comment.
                 </p>
               </div>
 
@@ -184,10 +184,19 @@
           <div class="column is-full-tablet is-two-thirds-widescreen">
             <div class="content">
               <p>
-                Variables can be declared in two scopes: <em>global</em> (can be accessed in any context) or <em>local</em> (can only be accessed in a function's context). Global variables must be declared at the start of the program, while local variables are declared before a function's declaration. In both cases, variable declaration starts with <code class="normal">var</code><code class="goose">pond</code>.
+                Variables can be declared in two scopes: <em>global</em> (can be accessed in any context) or <em>local</em> (can only be accessed in a function's context). Global variables must be declared at the start of the program, while local variables are declared before a function's statements (before the <code class="normal">{...}</code><code class="goose">OPEN FANCY GATE ... CLOSE FANCY GATE</code>). In both cases, variable declaration starts with <code class="normal">var</code><code class="goose">pond</code>.
               </p>
               <p>
-                Variables can be of 4 types: integer numbers (<code class="normal">int</code><code class="goose">WHOLE GOOSE</code>), floating type numbers (<code class="normal">float</code><code class="goose">PART GOOSE</code>), characters (<code class="normal">char</code><code class="goose">LETTER GOOSE</code>), or booleans (<code class="normal">bool</code><code class="goose">DUCK OR GOOSE</code>). Variables can also be either an atomic value, an array of values, or a matrix of values. Arrays and matrixes must define their dimensions in the declaration, using the appropriate notation: <code class="normal">[&lt;dimension&gt;]</code><code class="goose">OPEN BOX &lt;dimension&gt; CLOSE BOX</code>.
+                Variables can be of 4 types:
+              </p>
+              <ul>
+                <li>integer numbers (<code class="normal">int</code><code class="goose">WHOLE GOOSE</code>)</li>
+                <li>floating type numbers (<code class="normal">float</code><code class="goose">PART GOOSE</code>)</li>
+                <li>characters (<code class="normal">char</code><code class="goose">LETTER GOOSE</code>)</li>
+                <li>booleans (<code class="normal">bool</code><code class="goose">DUCK OR GOOSE</code>)</li>
+              </ul>
+              <p>
+                Variables can also be either an atomic value, an array of values, or a matrix of values. Arrays and matrixes must define their dimensions in their declaration, using the appropriate notation: <code class="normal">[&lt;dimension&gt;]</code><code class="goose">OPEN BOX &lt;dimension&gt; CLOSE BOX</code>
               </p>
 
               <div class="notification is-info is-light">
@@ -198,7 +207,7 @@
 
               <h3 class="title is-4 has-text-centered">Functions</h3>
               <p>
-                Functions are allowed and can be called from any context (including itself for recursive operations). To declare a function, it follows this format:
+                Functions can be called from any context (including itself for recursive operations), & they follow this format:
               </p>
             </div>
           </div>
@@ -231,10 +240,10 @@
           <div class="column is-full-tablet is-two-thirds-widescreen">
             <div class="content">
               <p>
-                Functions can be of any of the mentioned types above (and also any dimension, so it can return a matrix, for example), so the function must return a value. You can also make a function of type <code class="normal">void</code><code class="goose">my soul</code> that doesn't return anything.
+                Functions can be of any of the mentioned types above (and also any dimension, so it can return a matrix, for example); these functions must return a value. On the contrary, you can also make a function of type <code class="normal">void</code><code class="goose">my soul</code>, & these must not return anything.
               </p>
               <p>
-                Functions can also have an optional number of parameters, each of which can be defined in the specified area and separated with <code class="normal">,</code><code class="goose">MOAR</code>.
+                Functions can also have an optional number of <code>&#x3C;parameters&#x3E;</code>, each of which can be defined in the specified area and separated with <code class="normal">,</code><code class="goose">MOAR</code>.
               </p>
 
               <h3 class="title is-4 has-text-centered">Statements</h3>
@@ -604,12 +613,12 @@
             <div class="content">
               <h4 class="subtitle is-4 has-text-centered">Batch operations</h4>
               <p>
-                Another special characteristic of Honk is the usage of <b>batch operations</b>. What this means is that you can use regular operators with arrays and matrixes, allowing you to do "batch" statements without the need of a loop. The following functions/operations are batch-compatible:
+                Another special characteristic of Honk are <b>batch operations</b>. They allow you to use regular operators with arrays and matrixes, allowing you to do "batch" statements without the need of a loop. The following functions/operations are batch-compatible:
               </p>
               <ul>
-                <li>Every operation that requires 2 operands, such as addition, multiplication, equality, AND gates, etc. (with the except of the dot product operator)</li>
+                <li>Every operation that requires 2 operands, such as addition, multiplication, equality, logic gates, etc. (with the except of the dot product operator)</li>
                 <li>Assigning one array to another</li>
-                <li>Conditionals (they will act as AND gates, using every value in the array/matrix)</li>
+                <li>Conditionals (they will act as <em>AND</em> gates, using every value in the array/matrix)</li>
                 <li>Print (print a whole collection without a loop)</li>
                 <li>User input (read input for a whole collection without a loop)</li>
               </ul>
@@ -712,7 +721,7 @@
               <em>BOY, I ACED IT.</em> After the delivery of the project, it was required to spend like half an hour getting interogated by the professor about the language, and I'm pretty sure I got through that pretty well and got a laugh out of her when she found out the stupidity I had smeared onto the language with the goose syntax.
             </p>
             <p>
-              I popped off that day. I didn't know it was possible to pop off over code until that fated event.
+              I popped off that day. I didn't know it was possible to pop off over code.
             </p>
           </div>
           <div class="column is-half-tablet is-two-fifths-widescreen content">
