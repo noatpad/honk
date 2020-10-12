@@ -7332,6 +7332,12 @@ a.has-text-danger-dark:hover, a.has-text-danger-dark:focus {
   fill: white;
   color: #3865d6; }
 
+.above-hero {
+  margin-top: -9rem; }
+  @media screen and (max-width: 768px) {
+    .above-hero {
+      margin-top: 0; } }
+
 .code-row, .code-row > .column {
   margin: 1rem 0; }
 
@@ -7364,6 +7370,10 @@ a.has-text-danger-dark:hover, a.has-text-danger-dark:focus {
   .code-snippet.code-goose pre {
     background: #3865d6;
     color: white; }
+  .code-snippet.hero-code {
+    box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.25), 0 0px 0 1px rgba(10, 10, 10, 0.02); }
+    .code-snippet.hero-code::before {
+      display: none; }
 
 code.normal {
   background: #decef9; }

@@ -20,6 +20,14 @@ $primary: $blue;
   color: $primary;
 }
 
+.above-hero {
+  margin-top: -9rem;
+
+  @media screen and (max-width: 768px) {
+    margin-top: 0;
+  }
+}
+
 .code-row {
   &, > .column {
     margin: 1rem 0;
@@ -71,6 +79,14 @@ $primary: $blue;
     pre {
       background: $primary;
       color: $white;
+    }
+  }
+
+  &.hero-code {
+    box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.25), 0 0px 0 1px rgba(10, 10, 10, 0.02);
+
+    &::before {
+      display: none;
     }
   }
 }
